@@ -199,9 +199,7 @@ function PermissoesApp() {
             <div className="mb-3 flex items-center justify-between gap-2">
               <h2 className="text-[14px] font-bold">Aplicativos</h2>
               <div className="flex gap-1.5">
-                <Button variant="outline" size="sm" className="h-7 px-2" onClick={() => setAdicionando(true)}>
-                  <Plus className="mr-1 h-3.5 w-3.5" /> Adicionar
-                </Button>
+                {/* Na Central do ikvj cada app se cadastra pela própria migração: sem "Adicionar" aqui. */}
                 <Button
                   variant="outline"
                   size="sm"
@@ -224,7 +222,7 @@ function PermissoesApp() {
                     app.schema === atual?.schema && "border-primary bg-primary-soft/50",
                   )}
                 >
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sidebar text-xs font-bold text-white">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-foreground text-xs font-bold text-background">
                     {SIGLAS_APP[app.schema] ?? iniciais(app.name)}
                   </span>
                   <span className="flex min-w-0 flex-1 flex-col gap-0.5">
@@ -381,7 +379,7 @@ function Detalhe({ app, aoMudar, avisar }: { app: AppAcesso; aoMudar: () => Prom
           <Rotulo>Endereço (URL)</Rotulo>
           <Input
             className="font-mono text-xs"
-            placeholder="ex.: disparo.calperservicos.com.br"
+            placeholder="ex.: enviomassa.imobsystems.com.br"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
           />
@@ -451,7 +449,7 @@ function Detalhe({ app, aoMudar, avisar }: { app: AppAcesso; aoMudar: () => Prom
 
       <Faixa tom="info" icon={<UserPlus className="h-4 w-4" />}>
         {app.defaultProfile
-          ? `Ao liberar, quem ainda não tem cadastro no ${app.name} é cadastrado como ${app.defaultProfile}. Só logins @calper.com.br sem sufixo.`
+          ? `Ao liberar, quem ainda não tem cadastro no ${app.name} é cadastrado como ${app.defaultProfile}. Quem não tiver imobiliária precisa ser cadastrado em Usuários.`
           : `O ${app.name} não tem cadastro próprio: liberar só abre a porta.`}
       </Faixa>
       {app.controlActive && !verificacaoInstalada(app) && (
@@ -694,7 +692,7 @@ function AdicionarApp({ onFechar, onAdicionado }: { onFechar: () => void; onAdic
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="flex flex-col gap-1.5">
             <Rotulo>Chave</Rotulo>
-            <Input className="font-mono text-xs" placeholder="ex.: disparo_massa" value={chave} onChange={(e) => setChave(e.target.value)} />
+            <Input className="font-mono text-xs" placeholder="ex.: imobenviomassa" value={chave} onChange={(e) => setChave(e.target.value)} />
           </label>
           <label className="flex flex-col gap-1.5">
             <Rotulo>Nome</Rotulo>

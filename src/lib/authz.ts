@@ -1,12 +1,14 @@
-// Checagem de papel nas server functions (RPC has_role, com o token do usuário).
-// O contexto vem do middleware requireSupabaseAuth.
+// Checagem de acesso nas server functions, com o token do usuário (contexto do middleware requireSupabaseAuth).
 //
-// Mesmo modelo do Portal DP / Gestão de Contratos: conta inativa ou com troca de senha pendente não
-// tem nenhum papel — só consegue trocar a senha.
+// Fonte: imobenviomassa.meu_acesso(), que só devolve linha se o usuário estiver ativo, numa imobiliária ativa e
+// liberado na Central de acessos do ikvj. Conta com troca de senha pendente não tem papel nenhum — só troca a senha.
+// Os papéis antigos continuam valendo nas chamadas: "super_admin" e "admin" são os perfis de mesmo nome;
+// "operadora" é qualquer usuário com acesso (Analista ou perfis criados na tela Perfis e permissões).
 
-import { APP_KEY } from "@/lib/app-key";
+import type { PermissionId } from "@/config/menu-registry";
+import { computePermissions, type Regras } from "@/lib/acesso/policy";
 
-export type Papel = "super_admin" | "admin" | "operadora" | "cliente";
+export type Papel = "super_admin" | "admin" | "operadora";
 
 export type ContextoAutenticado = {
   supabase: any;
@@ -15,52 +17,57 @@ export type ContextoAutenticado = {
   claims?: Record<string, unknown> & { aal?: string };
 };
 
-/**
- * Conta ativa no projeto e sem troca de senha pendente. Todo usuário do portal tem linha em
- * wa_project_users: sem linha, sem acesso; erro na consulta, sem acesso (fail closed).
- */
-async function contaLiberada(context: ContextoAutenticado): Promise<boolean> {
-  const { data, error } = await context.supabase
-    .from("wa_project_users")
-    .select("ativo, trocar_senha")
-    .eq("user_id", context.userId)
-    .maybeSingle();
-  if (error) {
-    // Detalhe do PostgREST só no log (erros.server é *.server.ts: import dinâmico, pois este
-    // módulo é importado estaticamente pelos *.functions.ts, que vão para o bundle do navegador).
-    const { erroGenerico } = await import("@/lib/erros.server");
-    throw erroGenerico("authz.contaLiberada", error, "Falha ao validar o acesso.");
+export type AcessoDoUsuario = {
+  imobiliariaId: string;
+  imobiliariaNome: string;
+  perfil: string;
+  perfilNome: string;
+  trocarSenha: boolean;
+  regras: Regras;
+};
+
+const cache = new WeakMap<ContextoAutenticado, Promise<AcessoDoUsuario | null>>();
+
+/** Acesso do usuário logado; null = sem cadastro, inativo, imobiliária inativa ou bloqueado na Central. */
+export function acessoDoUsuario(context: ContextoAutenticado): Promise<AcessoDoUsuario | null> {
+  let p = cache.get(context);
+  if (!p) {
+    p = (async () => {
+      const { data, error } = await context.supabase.rpc("meu_acesso");
+      if (error) {
+        // Detalhe do PostgREST só no log (erros.server é *.server.ts: import dinâmico, pois este módulo é
+        // importado estaticamente pelos *.functions.ts, que vão para o bundle do navegador).
+        const { erroGenerico } = await import("@/lib/erros.server");
+        throw erroGenerico("authz.acessoDoUsuario", error, "Falha ao validar o acesso.");
+      }
+      const linha = Array.isArray(data) ? data[0] : data;
+      if (!linha || linha.ativo === false) return null;
+      return {
+        imobiliariaId: linha.imobiliaria_id,
+        imobiliariaNome: linha.imobiliaria_nome,
+        perfil: linha.perfil,
+        perfilNome: linha.perfil_nome,
+        trocarSenha: linha.trocar_senha === true,
+        regras: (linha.regras ?? {}) as Regras,
+      };
+    })();
+    cache.set(context, p);
   }
-  if (!data) return false;
-  if (data.ativo === false || data.trocar_senha === true) return false;
-  return appLiberadoNaCentral(context);
+  return p;
 }
 
-/**
- * Central de acessos Calper (Permissões por aplicativo): só um `false` explícito bloqueia — função
- * inexistente ou falha não barram, como no Gestão de Contratos. A chave está em src/lib/app-access.ts.
- */
-async function appLiberadoNaCentral(context: ContextoAutenticado): Promise<boolean> {
-  try {
-    const { data, error } = await context.supabase.rpc("pode_acessar_app", { p_app: APP_KEY });
-    if (error) return true;
-    return data !== false;
-  } catch {
-    return true;
-  }
+/** Imobiliária do usuário (tenant) para filtrar as consultas feitas com a service_role. Lança se não houver. */
+export async function imobiliariaDoContexto(context: ContextoAutenticado): Promise<string> {
+  const acesso = await acessoDoUsuario(context);
+  if (!acesso || acesso.trocarSenha) throw new Error("Seu acesso não está liberado.");
+  return acesso.imobiliariaId;
 }
 
 export async function temPapel(context: ContextoAutenticado, papeis: Papel[]): Promise<boolean> {
-  const [liberada, ...resultados] = await Promise.all([
-    contaLiberada(context),
-    ...papeis.map((p) => context.supabase.rpc("has_role", { _user_id: context.userId, _role: p })),
-  ]);
-  const erro = resultados.find((r: any) => r.error)?.error;
-  if (erro) {
-    const { erroGenerico } = await import("@/lib/erros.server");
-    throw erroGenerico("authz.temPapel", erro, "Falha ao validar permissão.");
-  }
-  return liberada && resultados.some((r: any) => r.data === true);
+  const acesso = await acessoDoUsuario(context);
+  if (!acesso || acesso.trocarSenha) return false;
+  if (papeis.includes("operadora")) return true;
+  return papeis.includes(acesso.perfil as Papel);
 }
 
 /** Lança erro se o usuário não tiver nenhum dos papéis. */
@@ -70,6 +77,21 @@ export async function exigirPapel(
   mensagem = "Seu perfil não tem acesso a esta operação.",
 ): Promise<void> {
   if (!(await temPapel(context, papeis))) throw new Error(mensagem);
+}
+
+/** Permissão do menu-registry (mesma regra do front: src/lib/acesso/policy.ts). */
+export async function temPermissao(context: ContextoAutenticado, id: PermissionId): Promise<boolean> {
+  const acesso = await acessoDoUsuario(context);
+  if (!acesso || acesso.trocarSenha) return false;
+  return computePermissions(acesso.perfil, acesso.regras, false)[id] === true;
+}
+
+export async function exigirPermissao(
+  context: ContextoAutenticado,
+  id: PermissionId,
+  mensagem = "Seu perfil não tem acesso a esta operação.",
+): Promise<void> {
+  if (!(await temPermissao(context, id))) throw new Error(mensagem);
 }
 
 export const MSG_EXIGE_MFA =
@@ -83,7 +105,7 @@ export async function exigirAal2(context: ContextoAutenticado, mensagem = MSG_EX
   if (context.claims?.aal !== "aal2") throw new Error(mensagem);
 }
 
-/** Super Admin com MFA: papel super_admin + sessão em aal2 (operações sensíveis: credenciais e usuários). */
+/** Super Admin com MFA: perfil super_admin + sessão em aal2 (operações sensíveis: credenciais e usuários). */
 export async function exigirSuperAdminComMfa(context: ContextoAutenticado): Promise<void> {
   await exigirPapel(context, ["super_admin"]);
   await exigirAal2(context);

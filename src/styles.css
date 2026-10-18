@@ -5,19 +5,21 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Design system — mesmo padrão visual do Portal DP (Gestão de Pessoas · Calper)
- * Vermelho Calper (#d6293b) + neutros, sidebar grafite (#17181c)
- * Tipografia: Inter + IBM Plex Mono (números/códigos)
+ * Design system
+ * - Cores: paleta clara do ImobDoces (imobdocerias/src/styles.css): creme, framboesa e chocolate.
+ *   Os estados (success, warning, info) e primary-dark/soft não existem lá: foram criados na mesma paleta.
+ * - Fonte: a do Portal_Atendimento, Inter 400–800 + IBM Plex Mono, base 16px (@fontsource, por causa da CSP).
+ * - Ícones: coloridos do Portal_Atendimento (src/components/icones).
  */
 
 @theme inline {
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 2px);
-  --radius-2xl: calc(var(--radius) + 4px);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -50,6 +52,11 @@
   --color-border-strong: var(--border-strong);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -64,66 +71,67 @@
   --radius: 0.75rem;
   color-scheme: light;
 
-  /* Fundo e superfícies */
-  --background: #f5f6f8;
-  --foreground: #17181c;
-  --card: #ffffff;
-  --card-foreground: #17181c;
-  --popover: #ffffff;
-  --popover-foreground: #17181c;
+  /* Fundo e superfícies (creme do ImobDoces) */
+  --background: oklch(0.99 0.005 60);
+  --foreground: oklch(0.22 0.02 20);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.22 0.02 20);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.22 0.02 20);
 
-  /* Primária — vermelho Calper */
-  --primary: #d6293b;
-  --primary-foreground: #ffffff;
-  --primary-dark: #a91d2c;
-  --primary-soft: #fdecee;
+  /* Primária — framboesa */
+  --primary: oklch(0.55 0.19 5);
+  --primary-foreground: oklch(0.99 0.01 60);
+  --primary-dark: oklch(0.45 0.17 5);
+  --primary-soft: oklch(0.95 0.03 5);
 
-  --secondary: #f1f2f5;
-  --secondary-foreground: #17181c;
+  --secondary: oklch(0.96 0.012 60);
+  --secondary-foreground: oklch(0.28 0.03 20);
 
-  --muted: #f1f2f5;
-  --muted-foreground: #6b7280;
-  --dimmer: #9ca3af;
+  --muted: oklch(0.96 0.012 60);
+  --muted-foreground: oklch(0.5 0.02 30);
+  --dimmer: oklch(0.65 0.02 40);
 
-  --accent: #f1f2f5;
-  --accent-foreground: #17181c;
+  --accent: oklch(0.94 0.02 20);
+  --accent-foreground: oklch(0.28 0.03 20);
 
-  --destructive: #d6293b;
-  --destructive-foreground: #ffffff;
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.99 0.01 60);
 
-  /* Estados (badges, KPIs, alertas) */
-  --success: #2f7d4f;
-  --success-foreground: #ffffff;
-  --success-soft: #e2f3e8;
-  --warning: #a9741e;
-  --warning-foreground: #ffffff;
-  --warning-soft: #fbf0dc;
-  --info: #2c4a77;
-  --info-foreground: #ffffff;
-  --info-soft: #e8eef7;
+  /* Estados (selos, KPIs, alertas) */
+  --success: oklch(0.52 0.12 150);
+  --success-foreground: oklch(0.99 0.01 60);
+  --success-soft: oklch(0.95 0.04 150);
+  --warning: oklch(0.58 0.13 65);
+  --warning-foreground: oklch(0.99 0.01 60);
+  --warning-soft: oklch(0.96 0.05 80);
+  --info: oklch(0.5 0.1 250);
+  --info-foreground: oklch(0.99 0.01 60);
+  --info-soft: oklch(0.95 0.025 250);
 
-  --border: #e9eaee;
-  --border-strong: #d5d7dd;
-  --input: #d5d7dd;
-  --ring: #d6293b;
+  --border: oklch(0.9 0.012 40);
+  --border-strong: oklch(0.84 0.015 40);
+  --input: oklch(0.84 0.015 40);
+  --ring: oklch(0.55 0.19 5);
 
-  /* Sidebar grafite */
-  --sidebar: #17181c;
-  --sidebar-foreground: #9a9ba3;
-  --sidebar-primary: #d6293b;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #232429;
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #232429;
-  --sidebar-ring: #d6293b;
+  --chart-1: oklch(0.55 0.19 5);
+  --chart-2: oklch(0.7 0.12 45);
+  --chart-3: oklch(0.62 0.09 80);
+  --chart-4: oklch(0.45 0.08 20);
+  --chart-5: oklch(0.75 0.1 340);
+
+  /* Sidebar clara (padrão Doce LTV); item ativo em framboesa */
+  --sidebar: oklch(0.97 0.01 50);
+  --sidebar-foreground: oklch(0.5 0.02 30);
+  --sidebar-primary: oklch(0.55 0.19 5);
+  --sidebar-primary-foreground: oklch(0.99 0.01 60);
+  --sidebar-accent: oklch(0.94 0.02 20);
+  --sidebar-accent-foreground: oklch(0.22 0.02 20);
+  --sidebar-border: oklch(0.9 0.012 40);
+  --sidebar-ring: oklch(0.55 0.19 5);
 }
 
 @layer base {
-  /* Escala compacta (padrão DP / Gestão de Contratos): 1rem = 15px, texto base dos componentes ≈ 13px. */
-  html {
-    font-size: 15px;
-  }
-
   * {
     border-color: var(--color-border);
   }
@@ -134,4 +142,15 @@
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
   }
+}
+
+/* Sombra padrão dos cartões (tingida de chocolate, não cinza). */
+@utility shadow-card {
+  box-shadow:
+    0 1px 2px oklch(0.3 0.04 20 / 0.05),
+    0 8px 24px -14px oklch(0.3 0.05 20 / 0.14);
+}
+
+@utility shadow-brand {
+  box-shadow: 0 6px 16px -6px oklch(0.55 0.19 5 / 0.55);
 }

@@ -3,7 +3,7 @@
 // soap_envelope_templates, monta envelope, chama TOTVS, parseia XML e devolve JSON.
 //
 // Segurança (auditoria 2026-10-01, Fase 3):
-// - Só Admin/Super Admin com conta ativa executam (JWT verificado + user_roles + wa_project_users).
+// - Só Admin/Super Admin com cadastro ativo executam (JWT verificado + imobenviomassa.usuarios + Central de acessos).
 // - Credenciais do RM vivem só no escopo da requisição (nunca em variável de módulo).
 // - Resposta: só `data` (+ `error`/`fault` curtos em erro) com código HTTP real. O XML completo (`raw`)
 //   só volta com `debug: true` E chamador super_admin.
@@ -53,6 +53,7 @@ const MAX_ERROR_LEN = 300;
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
 const TOTVS_SOAP_8051 = Deno.env.get("TOTVS_SOAP_8051") ?? "";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -70,13 +71,33 @@ class HttpError extends Error {
   }
 }
 
-// Conta liberada no portal: ativa e sem troca de senha pendente (mesma regra de src/lib/authz.ts).
-// Sem linha de membro ou erro na consulta = sem acesso (fail closed).
-async function contaLiberada(admin: ReturnType<typeof createClient>, userId: string): Promise<boolean> {
-  const r = await admin.from("wa_project_users").select("ativo, trocar_senha").eq("user_id", userId).maybeSingle();
-  if (r.error || !r.data) return false;
-  const m = r.data as { ativo?: boolean; trocar_senha?: boolean };
-  return m.ativo !== false && m.trocar_senha !== true;
+// Cadastro do usuário no app (schema imobenviomassa): ativo, sem troca de senha pendente e numa imobiliária ativa
+// (mesma regra de src/lib/authz.ts). Sem cadastro ou erro na consulta = sem acesso (fail closed).
+type Cadastro = { imobiliaria_id: string; perfil: string };
+async function cadastroLiberado(admin: ReturnType<typeof createClient>, userId: string): Promise<Cadastro | null> {
+  const r = await admin
+    .from("usuarios")
+    .select("imobiliaria_id, perfil, ativo, trocar_senha, imobiliaria:imobiliarias(ativo)")
+    .eq("id", userId)
+    .maybeSingle();
+  if (r.error || !r.data) return null;
+  const m = r.data as { imobiliaria_id: string; perfil: string; ativo?: boolean; trocar_senha?: boolean; imobiliaria?: { ativo?: boolean } | null };
+  if (m.ativo === false || m.trocar_senha === true || m.imobiliaria?.ativo === false) return null;
+  return { imobiliaria_id: m.imobiliaria_id, perfil: m.perfil };
+}
+
+// Central de acessos do ikvj (public.pode_acessar_app), com o token do próprio usuário. Só um false explícito bloqueia.
+async function liberadoNaCentral(supabaseUrl: string, chave: string, authHeader: string): Promise<boolean> {
+  try {
+    const c = createClient(supabaseUrl, chave, {
+      global: { headers: { Authorization: authHeader } },
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
+    const { data, error } = await c.rpc("pode_acessar_app", { p_app: "imobenviomassa" });
+    return error ? true : data !== false;
+  } catch {
+    return true;
+  }
 }
 
 const SERVICE_ENDPOINTS: Record<string, string> = {
@@ -216,20 +237,19 @@ Deno.serve(async (req) => {
       debug?: unknown;
     };
 
-    const adm = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    const adm = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, { db: { schema: "imobenviomassa" } });
 
-    // Autenticação obrigatória (além do verify_jwt do Supabase) e papel administrativo:
-    // esta função executa SOAP no RM com as credenciais da integração.
+    // Autenticação obrigatória (além do verify_jwt do Supabase) e perfil administrativo:
+    // esta função executa SOAP no RM com as credenciais da integração da imobiliária.
     if (!userId) throw new HttpError("Sessão inválida. Entre novamente.", 401);
 
-    const { data: callerRoles } = await adm.from("user_roles").select("role").eq("user_id", userId);
-    const roles = (callerRoles ?? []).map((r: { role: string }) => r.role);
-    const isGatewayAdmin = roles.includes("admin") || roles.includes("super_admin");
-    const isSuperAdmin = roles.includes("super_admin");
-    if (!isGatewayAdmin) throw new HttpError("Apenas administradores executam APIs pelo gateway", 403);
-    if (!(await contaLiberada(adm, userId))) {
+    const cadastro = await cadastroLiberado(adm, userId);
+    if (!cadastro || !(await liberadoNaCentral(SUPABASE_URL, SUPABASE_ANON_KEY, auth))) {
       throw new HttpError("Seu acesso ao portal está desativado ou há troca de senha pendente", 403);
     }
+    const isGatewayAdmin = cadastro.perfil === "admin" || cadastro.perfil === "super_admin";
+    const isSuperAdmin = cadastro.perfil === "super_admin";
+    if (!isGatewayAdmin) throw new HttpError("Apenas administradores executam APIs pelo gateway", 403);
 
     // Validação da entrada do chamador.
     const apiId = typeof body.apiId === "string" && body.apiId ? body.apiId : null;
@@ -243,7 +263,10 @@ Deno.serve(async (req) => {
         : {};
     const debug = body.debug === true && isSuperAdmin;
 
-    const { data: credRows, error: credErr } = await adm.rpc("rm_credenciais", { p_recurso: "empreendimentos" });
+    const { data: credRows, error: credErr } = await adm.rpc("rm_credenciais", {
+      p_imobiliaria: cadastro.imobiliaria_id,
+      p_recurso: "empreendimentos",
+    });
     const c = (credRows as { endpoint: string; usuario: string; senha: string }[] | null)?.[0];
     if (credErr || !c?.usuario || !c?.senha) {
       throw new HttpError(
@@ -269,7 +292,7 @@ Deno.serve(async (req) => {
     }
     if (!rmOrigin) throw new HttpError("Endpoint do TOTVS RM não cadastrado em Integrações TOTVS RM.", 500);
 
-    let q = adm.from("api_registry").select("*");
+    let q = adm.from("api_registry").select("*").eq("imobiliaria_id", cadastro.imobiliaria_id);
     if (apiId) q = q.eq("id", apiId);
     else q = q.eq("name", apiName!);
 
@@ -401,6 +424,7 @@ Deno.serve(async (req) => {
     // os parâmetros da consulta — nenhum dos dois é persistido (auditoria de segurança 2026-10-01).
     try {
       await adm.from("gateway_call_log").insert({
+        imobiliaria_id: cadastro.imobiliaria_id,
         user_id: userId,
         api_id: api.id,
         api_name: api.name,

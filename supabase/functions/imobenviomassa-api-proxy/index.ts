@@ -4,7 +4,7 @@
 // placeholders {nome} no endpoint.
 //
 // Segurança (auditoria 2026-10-01, Fase 3):
-// - Só Admin/Super Admin com conta ativa executam (JWT verificado + user_roles + wa_project_users).
+// - Só Admin/Super Admin com cadastro ativo executam (JWT verificado + imobenviomassa.usuarios + Central de acessos).
 // - Destino: apenas hosts cadastrados em api_registry.base_url (Super Admin) ou a origem do TOTVS RM
 //   (Integrações TOTVS RM). Exige https://; http:// só para host de intranet (IP privado, `.local`
 //   ou nome sem ponto, caso do RM interno). localhost/127.*/169.254.*/metadata/*.supabase.co nunca.
@@ -185,21 +185,40 @@ function validarDestino(base: string, rotulo: string): string {
 // ---------------------------------------------------------------------------
 // Autorização / credenciais
 // ---------------------------------------------------------------------------
-// Conta liberada no portal: ativa e sem troca de senha pendente (mesma regra de src/lib/authz.ts).
-// Sem linha de membro ou erro na consulta = sem acesso (fail closed).
-async function contaLiberada(admin: ReturnType<typeof createClient>, userId: string): Promise<boolean> {
-  const r = await admin.from("wa_project_users").select("ativo, trocar_senha").eq("user_id", userId).maybeSingle();
-  if (r.error || !r.data) return false;
-  const m = r.data as { ativo?: boolean; trocar_senha?: boolean };
-  return m.ativo !== false && m.trocar_senha !== true;
+// Cadastro do usuário no app (schema imobenviomassa): ativo, sem troca de senha pendente e numa imobiliária ativa
+// (mesma regra de src/lib/authz.ts). Sem cadastro ou erro na consulta = sem acesso (fail closed).
+type Cadastro = { imobiliaria_id: string; perfil: string };
+async function cadastroLiberado(admin: ReturnType<typeof createClient>, userId: string): Promise<Cadastro | null> {
+  const r = await admin
+    .from("usuarios")
+    .select("imobiliaria_id, perfil, ativo, trocar_senha, imobiliaria:imobiliarias(ativo)")
+    .eq("id", userId)
+    .maybeSingle();
+  if (r.error || !r.data) return null;
+  const m = r.data as { imobiliaria_id: string; perfil: string; ativo?: boolean; trocar_senha?: boolean; imobiliaria?: { ativo?: boolean } | null };
+  if (m.ativo === false || m.trocar_senha === true || m.imobiliaria?.ativo === false) return null;
+  return { imobiliaria_id: m.imobiliaria_id, perfil: m.perfil };
 }
 
-// Credenciais do TOTVS RM no mesmo modelo do Portal DP: usuário/senha comuns no schema privado
-// envio_privado, lidos só com a service_role via public.rm_credenciais. A base (origem) vem do endpoint
-// cadastrado para empreendimentos.
-async function loadTotvsConfig(admin: ReturnType<typeof createClient>) {
+// Central de acessos do ikvj (public.pode_acessar_app), com o token do próprio usuário. Só um false explícito bloqueia.
+async function liberadoNaCentral(supabaseUrl: string, chave: string, authHeader: string): Promise<boolean> {
   try {
-    const { data } = await admin.rpc("rm_credenciais", { p_recurso: "empreendimentos" });
+    const c = createClient(supabaseUrl, chave, {
+      global: { headers: { Authorization: authHeader } },
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
+    const { data, error } = await c.rpc("pode_acessar_app", { p_app: "imobenviomassa" });
+    return error ? true : data !== false;
+  } catch {
+    return true;
+  }
+}
+
+// Credenciais do TOTVS RM da imobiliária, lidas só com a service_role via imobenviomassa.rm_credenciais. A base
+// (origem) vem do endpoint cadastrado para empreendimentos.
+async function loadTotvsConfig(admin: ReturnType<typeof createClient>, imobiliariaId: string) {
+  try {
+    const { data } = await admin.rpc("rm_credenciais", { p_imobiliaria: imobiliariaId, p_recurso: "empreendimentos" });
     const c = (data as { endpoint: string; usuario: string; senha: string }[] | null)?.[0];
     if (!c) return null;
     let base_url: string | null = null;
@@ -410,25 +429,20 @@ Deno.serve(async (req) => {
       return jsonResponse({ ok: false, status: 400, error: "apiId (uuid) é obrigatório", errorCode: "BAD_REQUEST" }, 400);
     }
 
-    const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
+    const admin = createClient(SUPABASE_URL, SERVICE_ROLE, { db: { schema: "imobenviomassa" } });
 
-    // O gateway é ferramenta administrativa: só Admin e Super Admin executam APIs por aqui.
-    const { data: callerRoles } = await admin
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userData.user.id);
-    const isGatewayAdmin = (callerRoles ?? []).some(
-      (r: { role: string }) => r.role === "admin" || r.role === "super_admin",
-    );
-    if (!isGatewayAdmin) {
+    // Cadastro ativo numa imobiliária ativa e liberado na Central de acessos.
+    const cadastro = await cadastroLiberado(admin, userData.user.id);
+    if (!cadastro || !(await liberadoNaCentral(SUPABASE_URL, ANON, authHeader!))) {
       return jsonResponse(
-        { ok: false, status: 403, error: "Apenas administradores executam APIs pelo gateway", errorCode: "FORBIDDEN" },
+        { ok: false, status: 403, error: "Seu acesso ao portal está desativado ou há troca de senha pendente", errorCode: "FORBIDDEN" },
         403,
       );
     }
-    if (!(await contaLiberada(admin, userData.user.id))) {
+    // O gateway é ferramenta administrativa: só Admin e Super Admin executam APIs por aqui.
+    if (cadastro.perfil !== "admin" && cadastro.perfil !== "super_admin") {
       return jsonResponse(
-        { ok: false, status: 403, error: "Seu acesso ao portal está desativado ou há troca de senha pendente", errorCode: "FORBIDDEN" },
+        { ok: false, status: 403, error: "Apenas administradores executam APIs pelo gateway", errorCode: "FORBIDDEN" },
         403,
       );
     }
@@ -437,6 +451,7 @@ Deno.serve(async (req) => {
       .from("api_registry")
       .select("*")
       .eq("id", payload.apiId)
+      .eq("imobiliaria_id", cadastro.imobiliaria_id)
       .single();
 
     if (apiErr || !api) {
@@ -448,8 +463,8 @@ Deno.serve(async (req) => {
     const params = validarParams(payload.params);
     const extraHeaders = sanitizeExtraHeaders(payload.extraHeaders);
 
-    // Credenciais TOTVS RM (schema privado, via rm_credenciais)
-    const totvsCfg = await loadTotvsConfig(admin);
+    // Credenciais TOTVS RM da imobiliária (via rm_credenciais)
+    const totvsCfg = await loadTotvsConfig(admin, cadastro.imobiliaria_id);
 
     // Se a API cadastrada usa TOTVS (basic + secret 'totvs'/vazio, ou base_url TOTVS),
     // usamos a origem do endpoint cadastrado em Integrações → TOTVS RM.

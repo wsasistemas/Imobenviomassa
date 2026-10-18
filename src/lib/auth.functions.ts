@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import type { ContextoAutenticado } from "@/lib/authz";
+import { imobiliariaDoContexto, type ContextoAutenticado } from "@/lib/authz";
 import { exigirAdminEVerSePrivilegiado, mascararEmailLog, mascararIp } from "@/lib/logs.functions";
 
 // Login pelo servidor (auditoria de segurança 2026-10-01, item C4).
@@ -96,14 +96,14 @@ export const login = createServerFn({ method: "POST" })
 
     const userId = sessao.user.id;
 
-    // 3) Conta do portal: sem linha de membro ou desativada não recebe sessão (a conta de login é
-    //    compartilhada com outros sistemas Calper; aqui só entra quem foi cadastrado em Usuários).
+    // 3) Cadastro no app: sem cadastro, desativado ou de imobiliária inativa não recebe sessão (a conta de login
+    //    é compartilhada com ImobSystem, Imobsuprimentos e ImobDoces; aqui só entra quem está em Usuários).
     const { data: membro } = await supabaseAdmin
-      .from("wa_project_users")
-      .select("ativo, trocar_senha")
-      .eq("user_id", userId)
+      .from("usuarios")
+      .select("ativo, trocar_senha, imobiliaria:imobiliarias(ativo)")
+      .eq("id", userId)
       .maybeSingle();
-    if (!membro || membro.ativo === false) {
+    if (!membro || membro.ativo === false || membro.imobiliaria?.ativo === false) {
       await supabaseAdmin.rpc("auth_registrar_resultado", {
         p_email: data.email,
         p_ip: ip,
@@ -155,10 +155,16 @@ export const listarTentativasLogin = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<TentativasLoginResultado> => {
     const verTudo = await exigirAdminEVerSePrivilegiado(context as ContextoAutenticado);
+    const imob = await imobiliariaDoContexto(context as ContextoAutenticado);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    // O login é compartilhado entre as imobiliárias: só as tentativas dos e-mails cadastrados nesta.
+    const { data: membros } = await supabaseAdmin.from("usuarios").select("email").eq("imobiliaria_id", imob);
+    const emails = (membros ?? []).map((m) => m.email);
+    if (!emails.length) return { linhas: [], mascarado: !verTudo };
     const { data, error } = await supabaseAdmin
       .from("auth_login_log")
       .select("id, created_at, email_norm, ip, origem, resultado")
+      .in("email_norm", emails)
       .order("created_at", { ascending: false })
       .limit(1000);
     if (error) {

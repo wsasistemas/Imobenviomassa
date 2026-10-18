@@ -1,13 +1,10 @@
 // Acesso ao TOTVS RM — só no servidor (Vercel), nunca no navegador. Mesmo modelo do Portal DP:
 //
-//   · usuário e senha do RM são comuns; cada integração tem o seu endpoint (URL completa);
-//   · as credenciais ficam no schema privado envio_privado, fora da Data API. Só a chave service_role
-//     lê (public.rm_credenciais). A senha nunca volta para a tela nem aparece em log;
-//   · a SENHA fica criptografada no Supabase Vault (secret rm_senha) quando a migração
-//     20261001170000_vault_segredos.sql está aplicada e o Vault ativo (auditoria, Fase 4 / M3). Tudo isso
-//     acontece DENTRO das funções SQL (rm_credenciais, rm_credenciais_salvar, rm_status), que mantêm a
-//     mesma assinatura: este módulo e as Edge Functions não mudam. Sem o Vault a senha continua na coluna
-//     envio_privado.integracao_rm.senha (fallback) e tudo funciona como antes;
+//   · cada imobiliária tem o seu usuário/senha do RM; cada integração tem o seu endpoint (URL completa);
+//   · as credenciais ficam em imobenviomassa.integracao_rm*, sem acesso pela Data API: só a service_role lê
+//     (rm_credenciais). A senha nunca volta para a tela nem aparece em log;
+//   · a SENHA fica criptografada no Supabase Vault (secret imobenviomassa_rm_senha_<imobiliária>) quando o
+//     Vault está ativo — tudo DENTRO das funções SQL. Sem o Vault a senha fica na coluna (fallback);
 //   · a chamada ao RM é direta (fetch com Basic Auth), sem Edge Function no meio.
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { erroGenerico, logErro } from "@/lib/erros.server";
@@ -35,16 +32,16 @@ export interface StatusRm {
   ultimaConsulta: string | null;
 }
 
-/** Erro de banco que indica que a migração 20260929120000_rm_credenciais_privado.sql ainda não rodou. */
+/** Erro de banco que indica que a migração 02 (estrutura) ainda não rodou. */
 const semMigracao = (msg: string) => /does not exist|schema cache|could not find the function/i.test(msg);
 
-export async function credencialRm(recurso: RecursoRm): Promise<CredencialRm | null> {
-  const { data, error } = await supabaseAdmin.rpc("rm_credenciais", { p_recurso: recurso });
+export async function credencialRm(imobiliariaId: string, recurso: RecursoRm): Promise<CredencialRm | null> {
+  const { data, error } = await supabaseAdmin.rpc("rm_credenciais", { p_imobiliaria: imobiliariaId, p_recurso: recurso });
   if (error) {
     // "Migração não aplicada" é uma mensagem fixa (sem dado do banco); o resto fica só no log.
     if (semMigracao(error.message)) {
       throw new Error(
-        "Integração TOTVS RM ainda não disponível no banco. Rode a migração 20260929120000_rm_credenciais_privado.sql no Supabase.",
+        "Integração TOTVS RM ainda não disponível no banco. Rode a migração 02 do imobenviomassa no Supabase.",
       );
     }
     throw erroGenerico("rm.credencialRm", error, "Não foi possível ler as credenciais do TOTVS RM.");
@@ -54,8 +51,8 @@ export async function credencialRm(recurso: RecursoRm): Promise<CredencialRm | n
   return c;
 }
 
-export async function statusRm(): Promise<StatusRm[] | null> {
-  const { data, error } = await supabaseAdmin.rpc("rm_status");
+export async function statusRm(imobiliariaId: string): Promise<StatusRm[] | null> {
+  const { data, error } = await supabaseAdmin.rpc("rm_status", { p_imobiliaria: imobiliariaId });
   if (error) {
     if (semMigracao(error.message)) return null;
     throw erroGenerico("rm.statusRm", error, "Não foi possível ler as integrações do TOTVS RM.");
@@ -75,6 +72,7 @@ export async function statusRm(): Promise<StatusRm[] | null> {
 }
 
 export async function salvarCredencialRm(input: {
+  imobiliariaId: string;
   recurso: RecursoRm;
   endpoint: string;
   usuario: string;
@@ -82,6 +80,7 @@ export async function salvarCredencialRm(input: {
   autor: string;
 }): Promise<void> {
   const { error } = await supabaseAdmin.rpc("rm_credenciais_salvar", {
+    p_imobiliaria: input.imobiliariaId,
     p_recurso: input.recurso,
     p_endpoint: input.endpoint,
     p_usuario: input.usuario,
@@ -91,8 +90,8 @@ export async function salvarCredencialRm(input: {
   if (error) throw erroGenerico("rm.salvarCredencialRm", error, "Não foi possível gravar as credenciais.");
 }
 
-export async function registrarConsultaRm(recurso: RecursoRm): Promise<void> {
-  await supabaseAdmin.rpc("rm_consulta_registrar", { p_recurso: recurso });
+export async function registrarConsultaRm(imobiliariaId: string, recurso: RecursoRm): Promise<void> {
+  await supabaseAdmin.rpc("rm_consulta_registrar", { p_imobiliaria: imobiliariaId, p_recurso: recurso });
 }
 
 /** GET no RM (B6: com tempo limite). Erros de rede/credencial viram mensagem do que fazer, sem expor a senha nem a URL. */

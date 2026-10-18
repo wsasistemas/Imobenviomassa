@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
+import { DB_SCHEMA } from './schema';
 
 function isNewSupabaseApiKey(value: string): boolean {
   return value.startsWith('sb_publishable_') || value.startsWith('sb_secret_');
@@ -42,7 +43,8 @@ function createSupabaseClient() {
     throw new Error(`Configuração do Supabase indisponível (${missing.join(', ')}).`);
   }
 
-  return createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+  return createClient<Database, typeof DB_SCHEMA>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+    db: { schema: DB_SCHEMA },
     global: {
       fetch: createSupabaseFetch(SUPABASE_PUBLISHABLE_KEY),
     },

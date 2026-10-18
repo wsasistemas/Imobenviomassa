@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { exigirAal2, exigirPapel, type ContextoAutenticado } from "@/lib/authz";
+import { exigirAal2, exigirPapel, imobiliariaDoContexto, type ContextoAutenticado } from "@/lib/authz";
 import { mascararDocumento } from "@/lib/csv";
 import { mascararEmail, mascararTelefone } from "@/lib/mascaras";
 import { ROTULO_TIPO_OPT_OUT, TIPOS_OPT_OUT, normalizarOptOut, type TipoOptOut } from "@/lib/optout";
@@ -46,6 +46,8 @@ async function gravarAuditoria(
   await auditar({ userId: (context as ContextoAutenticado).userId, acao, entidade, entidadeId, detalhes });
 }
 
+const imobDe = (context: unknown) => imobiliariaDoContexto(context as ContextoAutenticado);
+
 async function exigirAdmin(context: unknown) {
   await exigirPapel(context as ContextoAutenticado, ["admin", "super_admin"], "Seu perfil não tem acesso à área de Privacidade.");
 }
@@ -88,7 +90,8 @@ function normalizarIdentificadores(d: { cpf?: string | null; email?: string | nu
 
 const tiposDe = (ids: Identificadores): TipoOptOut[] => TIPOS_OPT_OUT.filter((t) => ids[t]);
 
-const paramsRpc = (ids: Identificadores) => ({
+const paramsRpc = (imobiliariaId: string, ids: Identificadores) => ({
+  p_imobiliaria: imobiliariaId,
   p_cpf: ids.cpf ?? null,
   p_email: ids.email ?? null,
   p_telefone: ids.telefone ?? null,
@@ -100,9 +103,23 @@ function mascarar(tipo: TipoOptOut, valor: string): string {
   return mascararTelefone(valor);
 }
 
-async function gravarOptOuts(sb: SupabaseAdmin, ids: Identificadores, origem: string, motivo: string | null, userId: string) {
-  const linhas = tiposDe(ids).map((tipo) => ({ tipo, valor: ids[tipo]!, motivo, origem, criado_por: userId }));
-  return sb.from("wa_opt_outs").upsert(linhas, { onConflict: "tipo,valor", ignoreDuplicates: true });
+async function gravarOptOuts(
+  sb: SupabaseAdmin,
+  imobiliariaId: string,
+  ids: Identificadores,
+  origem: string,
+  motivo: string | null,
+  userId: string,
+) {
+  const linhas = tiposDe(ids).map((tipo) => ({
+    imobiliaria_id: imobiliariaId,
+    tipo,
+    valor: ids[tipo]!,
+    motivo,
+    origem,
+    criado_por: userId,
+  }));
+  return sb.from("wa_opt_outs").upsert(linhas, { onConflict: "imobiliaria_id,tipo,valor", ignoreDuplicates: true });
 }
 
 // ---------- Lista de descadastro (opt-out) ----------
@@ -121,10 +138,12 @@ export const listarOptOuts = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<OptOutLinha[]> => {
     await exigirAdmin(context);
+    const imob = await imobDe(context);
     const sb = await admin();
     const { data, error } = await sb
       .from("wa_opt_outs")
       .select("id, tipo, valor, motivo, origem, created_at")
+      .eq("imobiliaria_id", imob)
       .order("created_at", { ascending: false })
       .limit(500);
     if (error) throw await erroGenerico("privacidade.listarOptOuts", error, "Não foi possível carregar a lista de descadastro.");
@@ -155,14 +174,15 @@ export const registrarOptOut = createServerFn({ method: "POST" })
     const valor = normalizarOptOut(data.tipo, data.valor);
     if (!valor) throw new Error("Valor inválido para o tipo escolhido.");
     const userId = (context as unknown as ContextoAutenticado).userId;
+    const imob = await imobDe(context);
     const sb = await admin();
 
     // ON CONFLICT DO NOTHING: se já estava na lista, não devolve linha (e não é erro).
     const { data: inseridas, error } = await sb
       .from("wa_opt_outs")
       .upsert(
-        { tipo: data.tipo, valor, motivo: data.motivo?.trim() || null, origem: "manual", criado_por: userId },
-        { onConflict: "tipo,valor", ignoreDuplicates: true },
+        { imobiliaria_id: imob, tipo: data.tipo, valor, motivo: data.motivo?.trim() || null, origem: "manual", criado_por: userId },
+        { onConflict: "imobiliaria_id,tipo,valor", ignoreDuplicates: true },
       )
       .select("id");
     if (error) throw await erroGenerico("privacidade.registrarOptOut", error, "Não foi possível registrar o descadastro.");
@@ -178,8 +198,14 @@ export const removerOptOut = createServerFn({ method: "POST" })
   .inputValidator(validar(z.object({ id: z.string({ required_error: "Registro inválido." }).uuid("Registro inválido.") })))
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
     await exigirAdmin(context);
+    const imob = await imobDe(context);
     const sb = await admin();
-    const { data: removidos, error } = await sb.from("wa_opt_outs").delete().eq("id", data.id).select("tipo");
+    const { data: removidos, error } = await sb
+      .from("wa_opt_outs")
+      .delete()
+      .eq("id", data.id)
+      .eq("imobiliaria_id", imob)
+      .select("tipo");
     if (error) throw await erroGenerico("privacidade.removerOptOut", error, "Não foi possível remover o descadastro.");
     if (!removidos?.length) throw new Error("Registro de descadastro não encontrado.");
     await gravarAuditoria(context, "optout_removido", "optout", data.id, { tipo: removidos[0].tipo });
@@ -206,12 +232,20 @@ export const consultarTitular = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<{ ocorrencias: OcorrenciaTitular[]; emOptOut: boolean }> => {
     await exigirAdmin(context);
     const ids = normalizarIdentificadores(data);
+    const imob = await imobDe(context);
     const sb = await admin();
     const tipos = tiposDe(ids);
 
     const [oc, ...optouts] = await Promise.all([
-      sb.rpc("wa_titular_ocorrencias", paramsRpc(ids)),
-      ...tipos.map((tipo) => sb.from("wa_opt_outs").select("id", { count: "exact", head: true }).eq("tipo", tipo).eq("valor", ids[tipo]!)),
+      sb.rpc("wa_titular_ocorrencias", paramsRpc(imob, ids)),
+      ...tipos.map((tipo) =>
+        sb
+          .from("wa_opt_outs")
+          .select("id", { count: "exact", head: true })
+          .eq("imobiliaria_id", imob)
+          .eq("tipo", tipo)
+          .eq("valor", ids[tipo]!),
+      ),
     ]);
     if (oc.error) throw await erroGenerico("privacidade.consultarTitular", oc.error, "Não foi possível consultar o titular.");
     const erroOpt = optouts.find((r) => r.error)?.error;
@@ -240,16 +274,17 @@ export const anonimizarTitular = createServerFn({ method: "POST" })
     await exigirSuperAdminComMfa(context);
     const ids = normalizarIdentificadores(data);
     const userId = (context as unknown as ContextoAutenticado).userId;
+    const imob = await imobDe(context);
     const sb = await admin();
 
-    const { data: n, error } = await sb.rpc("wa_anonimizar_titular", paramsRpc(ids));
+    const { data: n, error } = await sb.rpc("wa_anonimizar_titular", paramsRpc(imob, ids));
     if (error) throw await erroGenerico("privacidade.anonimizarTitular", error, "Não foi possível anonimizar o titular.");
 
     // O pedido de eliminação já foi atendido; se o descadastro falhar, avisa sem desfazer nada.
     let optout = false;
     let optoutFalhou = false;
     if (data.registrarOptOut === true) {
-      const r = await gravarOptOuts(sb, ids, "titular", "Pedido de eliminação de dados do titular", userId);
+      const r = await gravarOptOuts(sb, imob, ids, "titular", "Pedido de eliminação de dados do titular", userId);
       if (r.error) {
         optoutFalhou = true;
         (await import("@/lib/erros.server")).logErro("privacidade.anonimizarTitular.optout", r.error);
@@ -286,12 +321,14 @@ export const listarCampanhasParaAnonimizar = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<CampanhaParaAnonimizar[]> => {
     await exigirSuperAdmin(context);
+    const imob = await imobDe(context);
     const sb = await admin();
 
-    // 1) Campanhas + total de destinatários de cada uma (contagem embutida, sem N+1).
+    // 1) Campanhas da imobiliária + total de destinatários de cada uma (contagem embutida, sem N+1).
     const { data: campanhas, error } = await sb
       .from("wa_campanhas")
       .select("id, nome, status, created_at, criado_por, destinatarios:wa_campanha_destinatarios(count)")
+      .eq("imobiliaria_id", imob)
       .order("created_at", { ascending: false })
       .limit(200);
     if (error) throw await erroGenerico("privacidade.listarCampanhas", error, "Não foi possível carregar as campanhas.");
@@ -318,8 +355,8 @@ export const listarCampanhasParaAnonimizar = createServerFn({ method: "GET" })
     const criadores = [...new Set(lista.map((c) => c.criado_por).filter((v): v is string => !!v))];
     const nomes = new Map<string, string>();
     if (criadores.length) {
-      const { data: perfis } = await sb.from("profiles").select("id, full_name, email").in("id", criadores);
-      for (const p of perfis ?? []) nomes.set(p.id, p.full_name || p.email || "");
+      const { data: perfis } = await sb.from("usuarios").select("id, nome, email").in("id", criadores);
+      for (const p of perfis ?? []) nomes.set(p.id, p.nome || p.email || "");
     }
 
     return lista.map((c) => {
@@ -341,13 +378,19 @@ export const anonimizarCampanha = createServerFn({ method: "POST" })
   .inputValidator(validar(z.object({ campanhaId: z.string({ required_error: "Campanha inválida." }).uuid("Campanha inválida.") })))
   .handler(async ({ data, context }): Promise<{ anonimizados: number }> => {
     await exigirSuperAdminComMfa(context);
+    const imob = await imobDe(context);
     const sb = await admin();
 
-    const { data: camp, error: e1 } = await sb.from("wa_campanhas").select("id").eq("id", data.campanhaId).maybeSingle();
+    const { data: camp, error: e1 } = await sb
+      .from("wa_campanhas")
+      .select("id")
+      .eq("id", data.campanhaId)
+      .eq("imobiliaria_id", imob)
+      .maybeSingle();
     if (e1) throw await erroGenerico("privacidade.anonimizarCampanha.busca", e1, "Não foi possível anonimizar a campanha.");
     if (!camp) throw new Error("Campanha não encontrada.");
 
-    const { data: n, error } = await sb.rpc("wa_anonimizar_campanha", { p_campanha_id: data.campanhaId });
+    const { data: n, error } = await sb.rpc("wa_anonimizar_campanha", { p_imobiliaria: imob, p_campanha_id: data.campanhaId });
     if (error) throw await erroGenerico("privacidade.anonimizarCampanha", error, "Não foi possível anonimizar a campanha.");
 
     const anonimizados = typeof n === "number" ? n : 0;
@@ -361,11 +404,11 @@ export type RetencaoConfig = { destinatarios_meses: number; campanhas_abertas_me
 
 const PADRAO_RETENCAO: RetencaoConfig = { destinatarios_meses: 12, campanhas_abertas_meses: 18 };
 
-async function lerRetencao(sb: SupabaseAdmin): Promise<RetencaoConfig> {
+async function lerRetencao(sb: SupabaseAdmin, imobiliariaId: string): Promise<RetencaoConfig> {
   const { data, error } = await sb
     .from("wa_retencao_config")
     .select("destinatarios_meses, campanhas_abertas_meses")
-    .eq("id", true)
+    .eq("imobiliaria_id", imobiliariaId)
     .maybeSingle();
   if (error) throw await erroGenerico("privacidade.lerRetencao", error, "Não foi possível carregar a retenção.");
   return data ?? PADRAO_RETENCAO;
@@ -375,7 +418,7 @@ export const obterRetencao = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<RetencaoConfig> => {
     await exigirAdmin(context);
-    return lerRetencao(await admin());
+    return lerRetencao(await admin(), await imobDe(context));
   });
 
 const meses = (rotulo: string) =>
@@ -392,15 +435,20 @@ export const salvarRetencao = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }): Promise<RetencaoConfig> => {
     await exigirSuperAdminComMfa(context);
+    const imob = await imobDe(context);
     const sb = await admin();
-    const anterior = await lerRetencao(sb);
+    const anterior = await lerRetencao(sb, imob);
 
-    // Linha única (id = true); upsert cobre o caso de a linha inicial ter sido apagada.
+    // Uma linha por imobiliária; upsert cobre o caso de a linha inicial ter sido apagada.
     const { error } = await sb
       .from("wa_retencao_config")
       .upsert(
-        { id: true, destinatarios_meses: data.destinatarios_meses, campanhas_abertas_meses: data.campanhas_abertas_meses },
-        { onConflict: "id" },
+        {
+          imobiliaria_id: imob,
+          destinatarios_meses: data.destinatarios_meses,
+          campanhas_abertas_meses: data.campanhas_abertas_meses,
+        },
+        { onConflict: "imobiliaria_id" },
       );
     if (error) throw await erroGenerico("privacidade.salvarRetencao", error, "Não foi possível salvar a retenção.");
 

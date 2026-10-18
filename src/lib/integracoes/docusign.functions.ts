@@ -126,6 +126,7 @@ export type DocusignConfigPublic = {
 
 type DocusignConfigRow = {
   id?: string;
+  imobiliaria_id: string;
   ambiente: "demo" | "producao";
   base_url: string;
   auth_url: string;
@@ -174,14 +175,26 @@ export async function assertOperacao(ctx: DsCtx) {
   );
 }
 
-// Campanha só pode ser consultada/reenviada por quem a criou ou por Admin/Super Admin.
+// Campanha só pode ser consultada/reenviada por quem a criou ou por Admin/Super Admin — sempre da mesma imobiliária.
 export async function assertCampanhaDoUsuario(ctx: DsCtx, campanhaId: string | null | undefined) {
   if (!campanhaId) throw new Error("Campanha não informada.");
-  const { temPapel } = await import("@/lib/authz");
-  if (await temPapel(ctx, ["admin", "super_admin"])) return;
+  const { temPapel, imobiliariaDoContexto } = await import("@/lib/authz");
+  const imob = await imobiliariaDoContexto(ctx);
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data } = await supabaseAdmin.from("wa_campanhas").select("criado_por").eq("id", campanhaId).maybeSingle();
-  if (!data || data.criado_por !== ctx.userId) throw new Error("Você não tem acesso a esta campanha.");
+  const { data } = await supabaseAdmin
+    .from("wa_campanhas")
+    .select("criado_por, imobiliaria_id")
+    .eq("id", campanhaId)
+    .maybeSingle();
+  if (!data || data.imobiliaria_id !== imob) throw new Error("Você não tem acesso a esta campanha.");
+  if (await temPapel(ctx, ["admin", "super_admin"])) return;
+  if (data.criado_por !== ctx.userId) throw new Error("Você não tem acesso a esta campanha.");
+}
+
+/** Imobiliária do usuário logado (a configuração do DocuSign é de cada imobiliária). */
+async function imobDe(ctx: DsCtx): Promise<string> {
+  const { imobiliariaDoContexto } = await import("@/lib/authz");
+  return imobiliariaDoContexto(ctx);
 }
 
 // Envelope só pode ser consultado por quem tem acesso à campanha a que ele pertence. Envelopes sem
@@ -218,16 +231,14 @@ function normalizeBaseUrl(url: string | null | undefined): string {
   return raw;
 }
 
-async function loadConfig(_supabase?: any): Promise<DocusignConfigRow | null> {
-  // Configuração de integração é compartilhada entre todos os perfis autenticados.
-  // Lemos via service role (bypass RLS) para que qualquer usuário do wizard consuma
-  // a configuração padrão salva pelos admins. Escritas continuam gated por assertAdmin.
+async function loadConfig(imobiliariaId: string): Promise<DocusignConfigRow | null> {
+  // Uma configuração por imobiliária, compartilhada pelos perfis dela. Lida com a service role (a tabela não tem
+  // acesso pela Data API) para que qualquer usuário do wizard use a conta salva pelos admins da imobiliária.
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data, error } = await supabaseAdmin
     .from("docusign_config")
     .select("*")
-    .order("updated_at", { ascending: false })
-    .limit(1)
+    .eq("imobiliaria_id", imobiliariaId)
     .maybeSingle();
   if (error) throw await erroGenerico("docusign.loadConfig", error, "Não foi possível ler a configuração do DocuSign.");
   if (!data) return null;
@@ -247,8 +258,9 @@ async function loadConfig(_supabase?: any): Promise<DocusignConfigRow | null> {
 //      só tem a existência consultada (nada no app o usa para validar assinatura).
 // Nenhuma função daqui loga ou devolve o valor de um segredo; erros vão ao log só com o código/mensagem
 // do banco (que não contém o valor).
-const SEGREDO_RSA = "docusign_rsa_private_key";
-const SEGREDO_WEBHOOK = "docusign_webhook_secret";
+// Um par de segredos por imobiliária (no Vault: imobenviomassa_docusign_*_<imobiliária sem hífens>).
+const segredoRsa = (imob: string) => `docusign_rsa_private_key_${imob.replace(/-/g, "")}`;
+const segredoWebhook = (imob: string) => `docusign_webhook_secret_${imob.replace(/-/g, "")}`;
 
 /** A RPC não existe (migração não aplicada) ou o Vault não está ativo: segue em texto claro. */
 function vaultIndisponivel(e: { message?: string; code?: string } | null | undefined): boolean {
@@ -292,10 +304,10 @@ async function segredoExisteVault(nome: string): Promise<boolean> {
 }
 
 /** Chave RSA e webhook secret estão configurados? Coluna OU Vault (consulta o Vault só se a coluna estiver vazia). */
-async function segredosConfigurados(row: DocusignConfigRow | null): Promise<{ rsa: boolean; webhook: boolean }> {
+async function segredosConfigurados(imob: string, row: DocusignConfigRow | null): Promise<{ rsa: boolean; webhook: boolean }> {
   const [rsa, webhook] = await Promise.all([
-    row?.rsa_private_key ? true : segredoExisteVault(SEGREDO_RSA),
-    row?.webhook_secret ? true : segredoExisteVault(SEGREDO_WEBHOOK),
+    row?.rsa_private_key ? true : segredoExisteVault(segredoRsa(imob)),
+    row?.webhook_secret ? true : segredoExisteVault(segredoWebhook(imob)),
   ]);
   return { rsa, webhook };
 }
@@ -524,7 +536,7 @@ type TokenCache = { token: string; expiresAt: number };
 const tokenMem = new Map<string, TokenCache>();
 
 async function getAccessToken(cfg: DocusignConfigRow): Promise<{ token: string; expiresIn: number }> {
-  const cacheKey = `${cfg.auth_url}|${cfg.integration_key}|${cfg.impersonated_user_id}`;
+  const cacheKey = `${cfg.imobiliaria_id}|${cfg.auth_url}|${cfg.integration_key}|${cfg.impersonated_user_id}`;
   const now = Date.now();
   const cached = tokenMem.get(cacheKey);
   if (cached && cached.expiresAt > now + 30_000) {
@@ -532,7 +544,7 @@ async function getAccessToken(cfg: DocusignConfigRow): Promise<{ token: string; 
   }
 
   // Coluna primeiro (fallback / valor mais recente); coluna vazia → Vault.
-  const chaveRsa = cfg.rsa_private_key || (await lerSegredoVault(SEGREDO_RSA));
+  const chaveRsa = cfg.rsa_private_key || (await lerSegredoVault(segredoRsa(cfg.imobiliaria_id)));
   if (!chaveRsa) throw new Error("Chave RSA privada não configurada.");
   if (!cfg.integration_key) throw new Error("Integration Key não configurada.");
   if (!cfg.impersonated_user_id) throw new Error("Impersonated User ID não configurado.");
@@ -653,8 +665,9 @@ export const carregarConfigDocusign = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<DocusignConfigPublic> => {
     await assertAdmin(context as unknown as DsCtx);
-    const row = await loadConfig(context.supabase);
-    return toPublic(row, await segredosConfigurados(row));
+    const imob = await imobDe(context as unknown as DsCtx);
+    const row = await loadConfig(imob);
+    return toPublic(row, await segredosConfigurados(imob, row));
   });
 
 export const salvarConfigDocusign = createServerFn({ method: "POST" })
@@ -663,7 +676,8 @@ export const salvarConfigDocusign = createServerFn({ method: "POST" })
   .inputValidator(validar(salvarConfigSchema, "Dados da configuração DocuSign inválidos."))
   .handler(async ({ data, context }): Promise<DocusignConfigPublic> => {
     await assertSuperAdmin(context as unknown as DsCtx);
-    const stored = await loadConfig(context.supabase);
+    const imob = await imobDe(context as unknown as DsCtx);
+    const stored = await loadConfig(imob);
     const ambiente = data.ambiente ?? stored?.ambiente ?? "demo";
     const defaults = ambiente === "producao"
       ? { base_url: PROD_BASE, auth_url: PROD_AUTH }
@@ -675,10 +689,11 @@ export const salvarConfigDocusign = createServerFn({ method: "POST" })
 
     // Segredo novo vai para o Vault (coluna null). Sem Vault (migração não aplicada, extensão inativa ou
     // falha ao gravar) cai para a coluna, como antes.
-    const rsaNoVault = novaRsa !== null && (await gravarSegredoVault(SEGREDO_RSA, novaRsa, "Chave RSA privada do DocuSign (JWT)"));
-    const whNoVault = novoWh !== null && (await gravarSegredoVault(SEGREDO_WEBHOOK, novoWh, "Webhook secret do DocuSign"));
+    const rsaNoVault = novaRsa !== null && (await gravarSegredoVault(segredoRsa(imob), novaRsa, "Chave RSA privada do DocuSign (JWT)"));
+    const whNoVault = novoWh !== null && (await gravarSegredoVault(segredoWebhook(imob), novoWh, "Webhook secret do DocuSign"));
 
     const payload = {
+      imobiliaria_id: imob,
       ambiente,
       base_url: data.base_url || defaults.base_url,
       auth_url: data.auth_url || defaults.auth_url,
@@ -724,7 +739,7 @@ export const salvarConfigDocusign = createServerFn({ method: "POST" })
     });
 
     const salvo = saved as DocusignConfigRow | null;
-    return toPublic(salvo, await segredosConfigurados(salvo));
+    return toPublic(salvo, await segredosConfigurados(imob, salvo));
   });
 
 export type TestarConexaoDocusignResult = {
@@ -742,7 +757,7 @@ export const testarConexaoDocusign = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<TestarConexaoDocusignResult> => {
     await assertAdmin(context as unknown as DsCtx);
-    const cfg = await loadConfig(context.supabase);
+    const cfg = await loadConfig(await imobDe(context as unknown as DsCtx));
     if (!cfg) return { ok: false, msg: "DocuSign não configurado. Preencha e salve as credenciais primeiro." };
     try {
       const { token, expiresIn } = await getAccessToken(cfg);
@@ -790,7 +805,7 @@ export const obterUrlConsentimentoDocusign = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<{ url: string | null }> => {
     await assertAdmin(context as unknown as DsCtx);
-    const cfg = await loadConfig(context.supabase);
+    const cfg = await loadConfig(await imobDe(context as unknown as DsCtx));
     if (!cfg?.integration_key || !cfg?.auth_url) return { url: null };
     const url =
       `${cfg.auth_url.replace(/\/+$/, "")}/oauth/auth?response_type=code&scope=signature%20impersonation` +
@@ -813,7 +828,7 @@ export const listarTemplatesDocusign = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<{ templates: TemplateDocusign[]; error?: string }> => {
     await assertOperacao(context as unknown as DsCtx);
-    const cfg = await loadConfig(context.supabase);
+    const cfg = await loadConfig(await imobDe(context as unknown as DsCtx));
     if (!cfg?.account_id) return { templates: [], error: "DocuSign não configurado." };
     try {
       const { data } = await docusignFetch<{ envelopeTemplates?: TemplateDocusign[] }>(
@@ -831,7 +846,7 @@ export const obterTemplateDocusign = createServerFn({ method: "POST" })
   .inputValidator(validar(z.object({ templateId: templateIdSchema })))
   .handler(async ({ data, context }) => {
     await assertOperacao(context as unknown as DsCtx);
-    const cfg = await loadConfig(context.supabase);
+    const cfg = await loadConfig(await imobDe(context as unknown as DsCtx));
     if (!cfg?.account_id) throw new Error("DocuSign não configurado.");
     const acc = encodeURIComponent(cfg.account_id);
     const tpl = encodeURIComponent(data.templateId);
@@ -982,7 +997,7 @@ export const gerarPreviewTemplateDocusign = createServerFn({ method: "POST" })
     error?: string;
   }> => {
     await assertOperacao(context as unknown as DsCtx);
-    const cfg = await loadConfig(context.supabase);
+    const cfg = await loadConfig(await imobDe(context as unknown as DsCtx));
     if (!cfg?.account_id) return { url: null, error: "DocuSign não configurado." };
     if (!cfg.integration_key) return { url: null, error: "Integration Key DocuSign não configurada." };
 
@@ -1147,7 +1162,7 @@ export const obterTemplatePdfDocusign = createServerFn({ method: "POST" })
   .inputValidator(validar(z.object({ templateId: templateIdSchema })))
   .handler(async ({ data, context }): Promise<{ pdfBase64: string | null; error?: string }> => {
     await assertOperacao(context as unknown as DsCtx);
-    const cfg = await loadConfig(context.supabase);
+    const cfg = await loadConfig(await imobDe(context as unknown as DsCtx));
     if (!cfg?.account_id) return { pdfBase64: null, error: "DocuSign não configurado." };
     try {
       const { token } = await getAccessToken(cfg);
@@ -1218,13 +1233,15 @@ export type EnvioEnvelopeInput = {
   viaWhatsapp?: boolean;
   campanhaId: string;
   destinatarioId: string;
+  /** Imobiliária da campanha: escolhe a conta DocuSign e marca o envelope. */
+  imobiliariaId: string;
 };
 
 export type EnvioEnvelopeResultado = { envelopeId: string | null; status?: string; error?: string; warning?: string };
 
 /** O template existe na conta DocuSign configurada? (evita enviar um templateId de outra conta) */
-export async function templateExisteDocusign(templateId: string): Promise<boolean> {
-  const cfg = await loadConfig();
+export async function templateExisteDocusign(imobiliariaId: string, templateId: string): Promise<boolean> {
+  const cfg = await loadConfig(imobiliariaId);
   if (!cfg?.account_id) throw new Error("DocuSign não configurado.");
   try {
     await docusignFetch<{ templateId?: string }>(
@@ -1242,7 +1259,7 @@ export async function templateExisteDocusign(templateId: string): Promise<boolea
 // depois de validar destinatário, modelo e dono da campanha). O navegador não monta mais
 // signatários nem escolhe o template — auditoria de segurança 2026-10-01, item C2.
 export async function enviarEnvelopeCore(data: EnvioEnvelopeInput): Promise<EnvioEnvelopeResultado> {
-    const cfg = await loadConfig();
+    const cfg = await loadConfig(data.imobiliariaId);
     if (!cfg?.account_id) return { envelopeId: null, error: "DocuSign não configurado." };
     const supportedLanguage = toDocusignSupportedLanguage(data.idioma);
     const customSubject = data.emailSubject;
@@ -1364,6 +1381,7 @@ export async function enviarEnvelopeCore(data: EnvioEnvelopeInput): Promise<Envi
       // uma Analista, o insert falhava em silêncio (envelope enviado sem rastro).
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       const { error: regErr } = await supabaseAdmin.from("docusign_envelopes").insert({
+        imobiliaria_id: data.imobiliariaId,
         campanha_id: data.campanhaId,
         destinatario_id: data.destinatarioId,
         envelope_id: env.envelopeId,
@@ -1442,7 +1460,7 @@ export const consultarStatusEnvelopeDocusign = createServerFn({ method: "POST" }
   .handler(async ({ data, context }) => {
     await assertOperacao(context as unknown as DsCtx);
     await assertEnvelopeDoUsuario(context as unknown as DsCtx, data.envelopeId);
-    const cfg = await loadConfig(context.supabase);
+    const cfg = await loadConfig(await imobDe(context as unknown as DsCtx));
     if (!cfg?.account_id) throw new Error("DocuSign não configurado.");
     const { data: env } = await docusignFetch<any>(
       cfg,
@@ -1461,7 +1479,7 @@ export const refreshEnvelopesCampanha = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<{ atualizados: number; erros: number; total: number }> => {
     await assertOperacao(context as unknown as DsCtx);
     await assertCampanhaDoUsuario(context as unknown as DsCtx, data.campanhaId);
-    const cfg = await loadConfig();
+    const cfg = await loadConfig(await imobDe(context as unknown as DsCtx));
     if (!cfg?.account_id) return { atualizados: 0, erros: 0, total: 0 };
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -1498,6 +1516,7 @@ export const refreshEnvelopesCampanha = createServerFn({ method: "POST" })
       envelopeIds.add(envId);
       if (!envStatusMap.has(envId)) {
         await supabaseAdmin.from("docusign_envelopes").insert({
+          imobiliaria_id: cfg.imobiliaria_id,
           campanha_id: data.campanhaId,
           destinatario_id: d.id,
           envelope_id: envId,
@@ -1537,7 +1556,7 @@ export const listarDestinatariosEnvelopeDocusign = createServerFn({ method: "POS
   .handler(async ({ data, context }) => {
     await assertOperacao(context as unknown as DsCtx);
     await assertEnvelopeDoUsuario(context as unknown as DsCtx, data.envelopeId);
-    const cfg = await loadConfig(context.supabase);
+    const cfg = await loadConfig(await imobDe(context as unknown as DsCtx));
     if (!cfg?.account_id) throw new Error("DocuSign não configurado.");
     const { data: rec } = await docusignFetch<{ signers?: any[]; carbonCopies?: any[] }>(
       cfg,
@@ -1552,11 +1571,11 @@ export const listarModelosDocusign = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<{ modelos: ModeloDocusign[]; error?: string; stub?: boolean }> => {
     await assertOperacao(context as unknown as DsCtx);
-    const cfg = await loadConfig(context.supabase);
+    const cfg = await loadConfig(await imobDe(context as unknown as DsCtx));
     if (
       !cfg?.account_id ||
       !cfg?.integration_key ||
-      !(cfg.rsa_private_key || (await segredoExisteVault(SEGREDO_RSA)))
+      !(cfg.rsa_private_key || (await segredoExisteVault(segredoRsa(cfg.imobiliaria_id))))
     ) {
       return { modelos: [], error: "DocuSign não configurado. Preencha em Configurações → Integração DocuSign.", stub: true };
     }
@@ -1593,7 +1612,7 @@ export const obterModeloDocusign = createServerFn({ method: "POST" })
   .inputValidator(validar(z.object({ id: templateIdSchema })))
   .handler(async ({ data, context }): Promise<{ modelo: ModeloDocusign | null; error?: string }> => {
     await assertOperacao(context as unknown as DsCtx);
-    const cfg = await loadConfig(context.supabase);
+    const cfg = await loadConfig(await imobDe(context as unknown as DsCtx));
     if (!cfg?.account_id) return { modelo: null, error: "DocuSign não configurado." };
     try {
       const acc = encodeURIComponent(cfg.account_id);
@@ -1633,7 +1652,7 @@ export const reenviarEnvelopeDocusign = createServerFn({ method: "POST" })
     if (!dest.envelope_docusign_id) throw new Error("Destinatário não possui envelope para reenviar");
     await assertCampanhaDoUsuario(context as unknown as DsCtx, dest.campanha_id);
 
-    const cfg = await loadConfig();
+    const cfg = await loadConfig(await imobDe(context as unknown as DsCtx));
     if (!cfg?.account_id) throw new Error("DocuSign não configurado.");
 
     const acc = encodeURIComponent(cfg.account_id);

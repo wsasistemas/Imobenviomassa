@@ -16,6 +16,7 @@ import { Route as TrocarSenhaRouteImport } from './routes/trocar-senha'
 import { Route as AuthenticatedCampanhasRouteImport } from './routes/_authenticated/campanhas'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
+import { Route as AuthenticatedReguaCobrancaRouteImport } from './routes/_authenticated/regua-cobranca'
 import { Route as AuthenticatedAdminSplatRouteImport } from './routes/_authenticated/admin.$'
 import { Route as AuthenticatedAdministracaoLogsRouteImport } from './routes/_authenticated/administracao/logs'
 import { Route as AuthenticatedAdministracaoPerfisRouteImport } from './routes/_authenticated/administracao/perfis'
@@ -73,6 +74,12 @@ const AuthenticatedHomeRoute = AuthenticatedHomeRouteImport.update({
   path: '/home',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedReguaCobrancaRoute =
+  AuthenticatedReguaCobrancaRouteImport.update({
+    id: '/regua-cobranca',
+    path: '/regua-cobranca',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminSplatRoute = AuthenticatedAdminSplatRouteImport.update({
   id: '/admin/$',
   path: '/admin/$',
@@ -212,6 +219,7 @@ export interface FileRoutesByFullPath {
   '/campanhas': typeof AuthenticatedCampanhasRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/home': typeof AuthenticatedHomeRoute
+  '/regua-cobranca': typeof AuthenticatedReguaCobrancaRoute
   '/admin/$': typeof AuthenticatedAdminSplatRoute
   '/administracao/logs': typeof AuthenticatedAdministracaoLogsRoute
   '/administracao/perfis': typeof AuthenticatedAdministracaoPerfisRoute
@@ -242,6 +250,7 @@ export interface FileRoutesByTo {
   '/campanhas': typeof AuthenticatedCampanhasRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/home': typeof AuthenticatedHomeRoute
+  '/regua-cobranca': typeof AuthenticatedReguaCobrancaRoute
   '/admin/$': typeof AuthenticatedAdminSplatRoute
   '/administracao/logs': typeof AuthenticatedAdministracaoLogsRoute
   '/administracao/perfis': typeof AuthenticatedAdministracaoPerfisRoute
@@ -273,6 +282,7 @@ export interface FileRoutesById {
   '/_authenticated/campanhas': typeof AuthenticatedCampanhasRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
+  '/_authenticated/regua-cobranca': typeof AuthenticatedReguaCobrancaRoute
   '/_authenticated/admin/$': typeof AuthenticatedAdminSplatRoute
   '/_authenticated/administracao/logs': typeof AuthenticatedAdministracaoLogsRoute
   '/_authenticated/administracao/perfis': typeof AuthenticatedAdministracaoPerfisRoute
@@ -305,6 +315,7 @@ export interface FileRouteTypes {
     | '/campanhas'
     | '/dashboard'
     | '/home'
+    | '/regua-cobranca'
     | '/admin/$'
     | '/administracao/logs'
     | '/administracao/perfis'
@@ -335,6 +346,7 @@ export interface FileRouteTypes {
     | '/campanhas'
     | '/dashboard'
     | '/home'
+    | '/regua-cobranca'
     | '/admin/$'
     | '/administracao/logs'
     | '/administracao/perfis'
@@ -365,6 +377,7 @@ export interface FileRouteTypes {
     | '/_authenticated/campanhas'
     | '/_authenticated/dashboard'
     | '/_authenticated/home'
+    | '/_authenticated/regua-cobranca'
     | '/_authenticated/admin/$'
     | '/_authenticated/administracao/logs'
     | '/_authenticated/administracao/perfis'
@@ -445,6 +458,13 @@ declare module '@tanstack/react-router' {
       path: '/home'
       fullPath: '/home'
       preLoaderRoute: typeof AuthenticatedHomeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/regua-cobranca': {
+      id: '/_authenticated/regua-cobranca'
+      path: '/regua-cobranca'
+      fullPath: '/regua-cobranca'
+      preLoaderRoute: typeof AuthenticatedReguaCobrancaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/admin/$': {
@@ -637,6 +657,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCampanhasRoute: typeof AuthenticatedCampanhasRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
+  AuthenticatedReguaCobrancaRoute: typeof AuthenticatedReguaCobrancaRoute
   AuthenticatedAdminSplatRoute: typeof AuthenticatedAdminSplatRoute
   AuthenticatedAdministracaoLogsRoute: typeof AuthenticatedAdministracaoLogsRoute
   AuthenticatedAdministracaoPerfisRoute: typeof AuthenticatedAdministracaoPerfisRoute
@@ -658,6 +679,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCampanhasRoute: AuthenticatedCampanhasRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
+  AuthenticatedReguaCobrancaRoute: AuthenticatedReguaCobrancaRoute,
   AuthenticatedAdminSplatRoute: AuthenticatedAdminSplatRoute,
   AuthenticatedAdministracaoLogsRoute: AuthenticatedAdministracaoLogsRoute,
   AuthenticatedAdministracaoPerfisRoute: AuthenticatedAdministracaoPerfisRoute,

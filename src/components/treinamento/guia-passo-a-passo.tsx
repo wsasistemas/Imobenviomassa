@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { baixarGuiaHtml } from "@/lib/treinamento/guia-html";
 import { ROTULO_ALERTA, urlDoPrint, type Alerta, type Exemplo, type Guia, type Passo, type Print } from "@/lib/treinamento/tipos";
 import { cn } from "@/lib/utils";
-import calperLogo from "@/assets/calper-logo.png";
+import wsaLogo from "@/assets/wsa-logo.png";
 
 export function GuiaPassoAPasso({ guia }: { guia: Guia }) {
   const [gerando, setGerando] = useState(false);
@@ -16,7 +16,7 @@ export function GuiaPassoAPasso({ guia }: { guia: Guia }) {
   async function baixar() {
     setGerando(true);
     try {
-      const { semPrint } = await baixarGuiaHtml(guia, calperLogo);
+      const { semPrint } = await baixarGuiaHtml(guia, wsaLogo);
       if (semPrint > 0) {
         toast.warning("Guia baixado, mas alguns prints ainda não foram adicionados.", {
           description: `${semPrint} imagem(ns) aparecem como espaço reservado no arquivo.`,

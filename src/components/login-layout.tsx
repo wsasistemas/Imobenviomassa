@@ -1,6 +1,6 @@
 import { useState, type FormEvent, type ReactNode } from "react";
 import { BarChart3, Eye, EyeOff, Lock, Send, ShieldCheck } from "lucide-react";
-import calperLogo from "@/assets/calper-logo.png";
+import wsaLogo from "@/assets/wsa-logo.png";
 
 // Layout e campos da tela de entrada — padrão do Portal DP e do Gestão de Contratos.
 
@@ -12,28 +12,29 @@ const RECURSOS = [
   { icon: ShieldCheck, texto: "Controle de acesso por perfil" },
 ];
 
-/** Tela de entrada (login e troca de senha): painel grafite à esquerda, cartão à direita. */
+/** Tela de entrada (login e troca de senha): painel framboesa à esquerda, cartão à direita. */
 export function LoginLayout({ children }: { children: ReactNode }) {
   return (
     <div className="grid min-h-screen grid-cols-1 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
       {/* ===== Painel escuro (esquerda) ===== */}
-      <aside className="flex flex-col bg-[#171717] px-4 py-6 text-white md:px-[clamp(20px,3vw,40px)] md:pb-4">
-        {/* a logo oficial tem fundo branco: fica num cartão branco sobre o painel escuro */}
-        <div className="inline-flex items-center self-start rounded-[10px] bg-white px-3.5 py-2">
-          <img src={calperLogo} alt="Calper — gestão compartilhada" className="block h-auto w-[130px] md:w-[150px]" />
-        </div>
+      <aside className="flex flex-col bg-[radial-gradient(120%_140%_at_100%_0%,oklch(0.62_0.19_3)_0%,oklch(0.42_0.15_5)_60%,oklch(0.3_0.08_15)_100%)] px-4 py-6 text-white md:px-[clamp(20px,3vw,40px)] md:pb-4">
+        <img
+          src={wsaLogo}
+          alt="WSA Sistemas IA"
+          className="block h-16 w-16 self-start rounded-full shadow-[0_8px_24px_-8px_rgba(0,0,0,0.45)] md:h-20 md:w-20"
+        />
 
         <div className="flex max-w-[440px] flex-1 flex-col justify-center pt-6 md:py-8">
-          <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.18em] text-[#9a9ba3]">Calper</p>
-          <h1 className="mb-2.5 text-[clamp(24px,2.4vw,30px)] font-bold tracking-[-0.02em]">Disparo em Massa</h1>
-          <p className="text-sm leading-relaxed text-[#b4b5bb] md:border-b md:border-white/10 md:pb-5 md:text-[13.5px]">
+          <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white/70">WSA Sistemas</p>
+          <h1 className="mb-2.5 text-[clamp(26px,2.6vw,34px)] font-extrabold tracking-[-0.02em]">Disparo em Massa</h1>
+          <p className="text-sm leading-relaxed text-white/80 md:border-b md:border-white/15 md:pb-5 md:text-[13.5px]">
             Plataforma corporativa para envio de documentos para assinatura via DocuSign, com gestão centralizada das
             campanhas.
           </p>
-          <ul className="mt-5 hidden flex-col gap-2.5 text-[13px] text-[#e6e6e8] md:flex">
+          <ul className="mt-5 hidden flex-col gap-2.5 text-[13px] text-white/90 md:flex">
             {RECURSOS.map(({ icon: Icon, texto }) => (
               <li key={texto} className="flex items-center gap-2.5">
-                <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[7px] border border-white/10 text-[#d9d9dc]">
+                <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[9px] border border-white/20 bg-white/10 text-white">
                   <Icon className="h-[15px] w-[15px]" />
                 </span>
                 {texto}
@@ -42,13 +43,13 @@ export function LoginLayout({ children }: { children: ReactNode }) {
           </ul>
         </div>
 
-        <p className="hidden text-[11.5px] text-[#7c7d84] md:block">© {ANO} Calper</p>
+        <p className="hidden text-[11.5px] text-white/60 md:block">© {ANO} WSA Sistemas</p>
       </aside>
 
       {/* ===== Formulário (direita) ===== */}
-      <main className="flex flex-col items-center justify-center gap-4 bg-[#f8f7f5] px-4 pb-8 pt-6 md:px-5 md:py-8">
+      <main className="flex flex-col items-center justify-center gap-4 bg-background px-4 pb-8 pt-6 md:px-5 md:py-8">
         {children}
-        <p className="text-center text-[11.5px] text-dimmer">© {ANO} Calper. Todos os direitos reservados.</p>
+        <p className="text-center text-[11.5px] text-dimmer">© {ANO} WSA Sistemas. Todos os direitos reservados.</p>
       </main>
     </div>
   );
@@ -57,7 +58,7 @@ export function LoginLayout({ children }: { children: ReactNode }) {
 export const inputCls =
   "h-full min-w-0 flex-1 border-none bg-transparent text-[13.5px] text-foreground outline-none placeholder:text-dimmer";
 export const submitCls =
-  "inline-flex h-[38px] items-center justify-center gap-2 rounded-[3px] bg-[#b3262e] text-[13.5px] font-semibold text-white hover:bg-[#951f26] disabled:opacity-55";
+  "inline-flex h-[38px] items-center justify-center gap-2 rounded-[9px] bg-primary text-[13.5px] font-semibold text-primary-foreground shadow-brand hover:bg-primary-dark disabled:opacity-55";
 
 export function LoginCard({
   titulo,
@@ -74,10 +75,10 @@ export function LoginCard({
     <form
       onSubmit={onSubmit}
       noValidate
-      className="flex w-full max-w-[340px] flex-col gap-3.5 rounded-[4px] border bg-white px-5 py-6 md:px-6 md:py-[26px]"
+      className="flex w-full max-w-[360px] flex-col gap-3.5 rounded-2xl border bg-card px-5 py-6 shadow-card md:px-7 md:py-7"
     >
       <div>
-        <h2 className="mb-1 text-[17px] font-bold">{titulo}</h2>
+        <h2 className="mb-1 text-[20px] font-extrabold tracking-[-0.01em]">{titulo}</h2>
         <p className="text-[13px] text-muted-foreground">{sub}</p>
       </div>
       {children}
@@ -88,10 +89,10 @@ export function LoginCard({
 export function Campo({ id, label, icon, children }: { id: string; label: string; icon: ReactNode; children: ReactNode }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#4b4d55]">
+      <label htmlFor={id} className="text-[12.5px] font-semibold text-foreground">
         {label}
       </label>
-      <div className="flex h-[38px] items-center gap-2 rounded-[3px] border border-border-strong bg-white px-[11px] text-muted-foreground focus-within:border-primary focus-within:outline-2 focus-within:outline-primary-soft">
+      <div className="flex h-[38px] items-center gap-2 rounded-[7px] border border-border-strong bg-card px-[11px] text-muted-foreground focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/20">
         {icon}
         {children}
       </div>

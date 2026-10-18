@@ -13,10 +13,11 @@ import {
   criarUsuario,
   definirSenhaUsuario,
   desbloquearUsuario,
+  listarPerfisAtribuiveis,
   listarUsuarios,
+  type PerfilAtribuivel,
   type UsuarioPortal,
 } from "@/lib/admin/users.functions";
-import { DESCRICAO_NIVEL, NIVEIS, NIVEL_LABEL, type Nivel } from "@/lib/permissoes";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/administracao/usuarios")({
@@ -29,7 +30,7 @@ type Form = {
   id?: string;
   nome: string;
   email: string;
-  nivel: Nivel;
+  perfil: string;
   ativo: boolean;
   trocar_senha: boolean;
 };
@@ -37,7 +38,7 @@ type Form = {
 /** Senha inicial gerada pelo servidor — aparece uma única vez, nunca é gravada. */
 type SenhaGerada = { nome: string; email: string; senha: string };
 
-const NOVO: Form = { nome: "", email: "", nivel: "analista", ativo: true, trocar_senha: true };
+const NOVO: Form = { nome: "", email: "", perfil: "analista", ativo: true, trocar_senha: true };
 
 function UsuariosPage() {
   const { pode, loading } = useCurrentUser();
@@ -46,13 +47,13 @@ function UsuariosPage() {
   return <Usuarios />;
 }
 
-function IconeNivel({ nivel }: { nivel: Nivel | null }) {
-  const Icone = nivel === "superadmin" ? Crown : nivel === "admin" ? ShieldCheck : nivel === "analista" ? User : UserRound;
+function IconeNivel({ perfil }: { perfil: string | null }) {
+  const Icone = perfil === "super_admin" ? Crown : perfil === "admin" ? ShieldCheck : perfil ? User : UserRound;
   return (
     <div
       className={cn(
         "flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px]",
-        nivel === "superadmin" ? "bg-warning-soft text-warning" : "bg-muted text-muted-foreground",
+        perfil === "super_admin" ? "bg-warning-soft text-warning" : "bg-muted text-muted-foreground",
       )}
     >
       <Icone className="h-4 w-4" />
@@ -67,6 +68,7 @@ function Usuarios() {
   const atualizar = useServerFn(atualizarUsuario);
   const definirSenha = useServerFn(definirSenhaUsuario);
   const desbloquear = useServerFn(desbloquearUsuario);
+  const listarPerfis = useServerFn(listarPerfisAtribuiveis);
 
   const [usuarios, setUsuarios] = useState<UsuarioPortal[] | null>(null);
   const [erroLista, setErroLista] = useState<string | null>(null);
@@ -74,6 +76,8 @@ function Usuarios() {
   const [erro, setErro] = useState<string | null>(null);
   const [salvando, setSalvando] = useState(false);
   const [senhaGerada, setSenhaGerada] = useState<SenhaGerada | null>(null);
+  const [perfis, setPerfis] = useState<PerfilAtribuivel[]>([]);
+  const nomeDoPerfil = (chave: string) => perfis.find((p) => p.chave === chave)?.nome ?? chave;
 
   const recarregar = useCallback(async () => {
     setUsuarios(null);
@@ -88,7 +92,10 @@ function Usuarios() {
 
   useEffect(() => {
     void recarregar();
-  }, [recarregar]);
+    listarPerfis()
+      .then(setPerfis)
+      .catch(() => setPerfis([]));
+  }, [recarregar, listarPerfis]);
 
   const editando = !!form?.id;
   const proprio = !!form?.id && form.id === user?.id;
@@ -105,7 +112,7 @@ function Usuarios() {
       id: u.id,
       nome: u.nome,
       email: u.email,
-      nivel: u.nivel ?? "analista",
+      perfil: u.perfil,
       ativo: u.ativo,
       trocar_senha: u.trocar_senha,
     });
@@ -121,18 +128,18 @@ function Usuarios() {
     try {
       if (editando) {
         await atualizar({
-          data: { userId: form.id!, nome: form.nome, nivel: form.nivel, ativo: form.ativo, trocar_senha: form.trocar_senha },
+          data: { userId: form.id!, nome: form.nome, perfil: form.perfil, ativo: form.ativo, trocar_senha: form.trocar_senha },
         });
-        toast.success("Usuário atualizado", { description: `${form.nome} (${NIVEL_LABEL[form.nivel]}${form.ativo ? "" : ", inativo"}).` });
+        toast.success("Usuário atualizado", { description: `${form.nome} (${nomeDoPerfil(form.perfil)}${form.ativo ? "" : ", inativo"}).` });
         setForm(null);
       } else {
         const email = form.email.trim().toLowerCase();
-        const r = await criar({ data: { nome: form.nome, email, nivel: form.nivel, ativo: form.ativo } });
+        const r = await criar({ data: { nome: form.nome, email, perfil: form.perfil, ativo: form.ativo } });
         if (r?.aviso) {
           toast.warning("Usuário vinculado", { description: r.aviso, duration: 12000 });
           setForm(null);
         } else {
-          toast.success("Usuário criado", { description: `${form.nome} (${NIVEL_LABEL[form.nivel]}).` });
+          toast.success("Usuário criado", { description: `${form.nome} (${nomeDoPerfil(form.perfil)}).` });
           setForm(null);
           if (r?.senhaInicial) setSenhaGerada({ nome: form.nome, email, senha: r.senhaInicial });
         }
@@ -226,7 +233,7 @@ function Usuarios() {
                     form?.id === u.id && "border-l-[3px] border-l-primary",
                   )}
                 >
-                  <IconeNivel nivel={u.nivel} />
+                  <IconeNivel perfil={u.perfil} />
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-1.5">
                       <strong className="truncate text-[13px]">{u.nome || u.email}</strong>
@@ -236,7 +243,7 @@ function Usuarios() {
                       {bloqueadoAte(u) && <Selo tom="warning">bloqueado até {bloqueadoAte(u)}</Selo>}
                     </div>
                     <p className="truncate text-xs text-muted-foreground">
-                      {u.nivel ? NIVEL_LABEL[u.nivel] : "Sem perfil"} · {u.email}
+                      {u.perfil_nome} · {u.email}
                     </p>
                   </div>
                   {bloqueadoAte(u) && (
@@ -263,7 +270,7 @@ function Usuarios() {
                 <Input
                   id="u-email"
                   type="email"
-                  placeholder="nome@calper.com.br"
+                  placeholder="nome@imobiliaria.com.br"
                   value={form.email}
                   disabled={editando}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
@@ -280,19 +287,23 @@ function Usuarios() {
               <Campo id="u-nivel" label="Perfil de acesso">
                 <select
                   id="u-nivel"
-                  value={form.nivel}
+                  value={form.perfil}
                   disabled={proprio}
-                  onChange={(e) => setForm({ ...form, nivel: e.target.value as Nivel })}
+                  onChange={(e) => setForm({ ...form, perfil: e.target.value })}
                   className="h-9 w-full rounded-lg border border-input bg-card px-2.5 text-[13px]"
                 >
-                  {NIVEIS.map((n) => (
-                    <option key={n} value={n}>
-                      {NIVEL_LABEL[n]}
+                  {!perfis.some((p) => p.chave === form.perfil) && <option value={form.perfil}>{nomeDoPerfil(form.perfil)}</option>}
+                  {perfis.map((p) => (
+                    <option key={p.chave} value={p.chave}>
+                      {p.nome}
                     </option>
                   ))}
                 </select>
               </Campo>
-              <Nota>{DESCRICAO_NIVEL[form.nivel]}</Nota>
+              <Nota>
+                {perfis.find((p) => p.chave === form.perfil)?.descricao ??
+                  "As permissões de cada perfil ficam em Configurações › Perfis e permissões."}
+              </Nota>
 
               <label className="flex cursor-pointer items-center gap-2 text-[13px] text-muted-foreground">
                 <input

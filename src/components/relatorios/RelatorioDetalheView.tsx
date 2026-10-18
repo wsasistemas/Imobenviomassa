@@ -30,17 +30,17 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import type { Database } from "@/integrations/supabase/types";
 import { DEST_STATUS_LABEL, getStatusAssinatura, getStatusAssinaturaSimples, STATUS_SIMPLES_LABEL, STATUS_SIMPLES_VARIANT, type StatusAssinaturaSimples } from "@/lib/relatorios/status";
 
-type Campanha = Database["public"]["Tables"]["wa_campanhas"]["Row"];
+type Campanha = Database["imobenviomassa"]["Tables"]["wa_campanhas"]["Row"];
 // LGPD: o navegador NÃO lê cpf, telefone, email nem dados_extras desta tabela (GRANT por coluna, migração
 // 20261001190000). Telefone e e-mail vêm de `contatosDaCampanha` (servidor, mascarados por padrão); o CPF
 // não é carregado em lugar nenhum desta tela. Também não se lê o JSON bruto do DocuSign (`raw`).
 type Destinatario = Omit<
-  Database["public"]["Tables"]["wa_campanha_destinatarios"]["Row"],
+  Database["imobenviomassa"]["Tables"]["wa_campanha_destinatarios"]["Row"],
   "cpf" | "telefone" | "email" | "dados_extras" | "anonimizado_em"
 > & {
   anonimizado_em?: string | null;
 };
-type Envelope = Omit<Database["public"]["Tables"]["docusign_envelopes"]["Row"], "raw">;
+type Envelope = Omit<Database["imobenviomassa"]["Tables"]["docusign_envelopes"]["Row"], "raw">;
 
 const COLUNAS_DESTINATARIO =
   "id, campanha_id, nome, empreendimento, bloco, unidade, status, envelope_docusign_id, enviado_em, assinado_em, erro_msg, created_at, updated_at, anonimizado_em";

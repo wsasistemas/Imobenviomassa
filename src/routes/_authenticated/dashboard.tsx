@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ComAcesso } from "@/components/page";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useResumoDisparos } from "@/hooks/use-resumo-disparos";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Send, CheckCircle2, Clock, AlertCircle, TrendingUp, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -17,8 +16,7 @@ import {
 import { useCurrentUser } from "@/hooks/use-current-user";
 import type { Database } from "@/integrations/supabase/types";
 
-type Campanha = Database["public"]["Tables"]["wa_campanhas"]["Row"];
-type CampanhaStatus = Database["public"]["Enums"]["wa_campanha_status"];
+type CampanhaStatus = Database["imobenviomassa"]["Enums"]["wa_campanha_status"];
 
 const STATUS_LABEL: Record<CampanhaStatus, string> = {
   rascunho: "Rascunho",
@@ -63,30 +61,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 function DashboardPage() {
   const { fullName } = useCurrentUser();
 
-  const { data: campanhas = [], isLoading } = useQuery({
-    queryKey: ["dashboard_campanhas"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("wa_campanhas")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(500);
-      if (error) throw error;
-      return (data ?? []) as Campanha[];
-    },
-  });
-
-  const hojeStr = new Date().toISOString().slice(0, 10);
-  const totalHoje = campanhas.filter((c) => c.created_at.slice(0, 10) === hojeStr).length;
-  const somaCampo = (campo: "destinatarios" | "enviados" | "erros") =>
-    campanhas.reduce((acc, c) => {
-      const t = (c.totais ?? {}) as Record<string, unknown>;
-      return acc + Number(t[campo] ?? 0);
-    }, 0);
-  const totalEnviados = somaCampo("enviados");
-  const totalErros = somaCampo("erros");
-  const totalDestinatarios = somaCampo("destinatarios");
-  const aguardando = Math.max(totalDestinatarios - totalEnviados - totalErros, 0);
+  const { campanhas, isLoading, totalHoje, totalEnviados, totalErros, aguardando } = useResumoDisparos();
 
   const kpis = [
     {

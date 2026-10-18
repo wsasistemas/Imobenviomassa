@@ -1,50 +1,23 @@
-project_id = "cjofyxgcuvpeeslkfawu"
+# Supabase ImobSystem (compartilhado com ImobSystem, Imobsuprimentos e ImobDoces). Schema do app: imobenviomassa.
+# A configuração original da Calper está em supabase/_referencia-calper/config.toml (só consulta).
+project_id = "ikvjaowvpvxojvcfwnct"
 
-[functions.api-proxy]
+# Edge Functions com o prefixo do app: o projeto é compartilhado e nomes genéricos colidiriam com os de outros sistemas.
+# Deploy: supabase functions deploy imobenviomassa-api-proxy imobenviomassa-totvs-soap-proxy
+# Secrets (Dashboard -> Edge Functions -> Secrets):
+#   ALLOWED_ORIGINS=https://enviomassa.imobsystems.com.br,http://localhost:3000   # CORS das functions
+#   GW_<NOME>...                                                                  # secrets de API do gateway
+[functions.imobenviomassa-api-proxy]
 verify_jwt = true
 
-[functions.totvs-soap-proxy]
+[functions.imobenviomassa-totvs-soap-proxy]
 verify_jwt = true
 
-# ---------------------------------------------------------------------------
-# Auth (auditoria de segurança 2026-10-01, Fase 3)
-#
-# Em projeto hospedado estas chaves NÃO são aplicadas automaticamente: rode
-#   supabase config push
-# (Supabase CLI >= 1.150) ou ajuste manualmente no Dashboard
-# (Authentication -> Providers / Sign In / Sessions / Multi-Factor / Rate Limits).
-# Elas também valem para `supabase start` local.
-#
-# ATENÇÃO antes do `config push`: o CLI envia a seção [auth] inteira, inclusive os defaults das chaves
-# não declaradas (site_url = "http://127.0.0.1:3000", additional_redirect_urls = [...]). Preencha
-# site_url/additional_redirect_urls abaixo com as URLs reais do portal antes de rodar o push, ou
-# confira o diff que o comando mostra e cancele se ele for sobrescrever URLs de redirect.
-# site_url = "https://portal.calper.com.br"
-# additional_redirect_urls = ["https://portal.calper.com.br", "http://localhost:3000"]
-#
-# Secrets das edge functions (Dashboard -> Edge Functions -> Secrets ou `supabase secrets set`):
-#   ALLOWED_ORIGINS=https://portal.calper.com.br,http://localhost:3000   # CORS das functions
-#   GW_<NOME>...                                                          # secrets de API do gateway
-# ---------------------------------------------------------------------------
-[auth]
-# Cadastro só pelo admin (convite/criação em Usuários); sem auto-cadastro nem anônimo.
-enable_signup = false
-enable_anonymous_sign_ins = false
-# Access token de 15 min (refresh token segue renovando a sessão).
-jwt_expiry = 900
-
-[auth.email]
-# Contas são criadas pelo admin já verificadas; sem fluxo de confirmação por e-mail.
-enable_confirmations = false
-
-[auth.mfa.totp]
-enroll_enabled = true
-verify_enabled = true
-
-[auth.rate_limit]
-# Limites por hora/intervalo (valores padrão do Supabase, explicitados para ficarem versionados).
-email_sent = 2
-sms_sent = 30
-token_refresh = 150
-sign_in_sign_ups = 30
-token_verifications = 30
+# ---------------------------------------------------------------------------------------------------------------------
+# SEM seção [auth] de propósito. O login (Supabase Auth) é do projeto inteiro: um `supabase config push` com
+# enable_signup, jwt_expiry, MFA ou rate limits mudaria o login de TODOS os sistemas do ImobSystem. Ajustes de Auth
+# só pelo Dashboard, combinados com os outros apps. O que o Imobenviomassa precisa já está no próprio app:
+#   · sem autocadastro: usuários só pela tela Usuários (server function com service_role);
+#   · limite de tentativas de login: imobenviomassa.auth_pre_login / auth_registrar_resultado;
+#   · MFA (TOTP): exigido nas operações sensíveis pela claim aal2 (src/lib/authz.ts).
+# ---------------------------------------------------------------------------------------------------------------------

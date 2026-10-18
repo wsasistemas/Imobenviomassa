@@ -21,7 +21,7 @@ function CentroDeTreinamentoPage() {
       <section>
         <h2 className="mb-3 text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground">Guias disponíveis</h2>
         <div className="grid grid-cols-1 gap-3.5 md:grid-cols-2">
-          <article className="flex flex-col rounded-[10px] border border-primary bg-card p-5 shadow-[0_6px_18px_-8px_rgba(214,41,59,0.35)]">
+          <article className="flex flex-col rounded-[10px] border border-primary bg-card p-5 shadow-brand">
             <div className="mb-3 flex items-start justify-between gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-[10px] bg-primary-soft text-primary">
                 <Send className="h-5 w-5" />

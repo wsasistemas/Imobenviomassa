@@ -1,6 +1,6 @@
 import type { Database } from "@/integrations/supabase/types";
 
-export type DestinatarioStatus = Database["public"]["Enums"]["wa_destinatario_status"];
+export type DestinatarioStatus = Database["imobenviomassa"]["Enums"]["wa_destinatario_status"];
 
 type DestinatarioStatusFields = {
   status: DestinatarioStatus;

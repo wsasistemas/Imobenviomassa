@@ -1,9 +1,6 @@
 /**
- * Chave do Disparo em Massa na tela Permissões por aplicativo (Central de acessos Calper).
- *
- * O cadastro na Central é feito pela migração supabase/migrations/20261007100000_acessos_disparo_massa.sql:
- * aplicativo manual com chave `disparo_massa` e schema de dados `disparo_massa` (Contrato Calper: views
- * usuarios/perfis sobre public.wa_project_users e public.user_roles). Usada no navegador
- * (src/lib/app-access.ts) e no servidor (src/lib/authz.ts).
+ * Chave do app na Central de acessos do ikvj (acessos.aplicativos.schema_name) = schema do app.
+ * Registrada pela migração supabase/imobsystem/migrations/20261018090000_imobenviomassa_02_estrutura.sql
+ * (contrato: imobenviomassa.usuarios e imobenviomassa.perfis).
  */
-export const APP_KEY = "disparo_massa";
+export const APP_KEY = "imobenviomassa";

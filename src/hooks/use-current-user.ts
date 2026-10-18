@@ -1,63 +1,95 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
-import { nivelDosPapeis, nivelPode, type Nivel, type Permissao } from "@/lib/permissoes";
+import type { Nivel, Permissao } from "@/lib/permissoes";
+import type { PermissionId } from "@/config/menu-registry";
+import { canOpenWith, computePermissions, resolvePermissionForPath, type Regras } from "@/lib/acesso/policy";
 import { souSuperAdminCentral } from "@/lib/app-access";
 
-export type AppRole = "super_admin" | "admin" | "operadora" | "cliente";
+/** Permissão antiga (3 níveis fixos) → id do menu-registry. As telas migram para `podeAcessar` aos poucos. */
+const PERMISSAO_LEGADA: Record<Permissao, PermissionId> = {
+  verDashboard: "ver_dashboard",
+  criarDisparo: "criar_disparo",
+  verHistorico: "ver_historico",
+  verRelatorios: "ver_relatorios",
+  integracoes: "configure_integrations",
+  gateway: "gateway_apis",
+  logs: "view_audit_logs",
+  privacidade: "manage_privacy",
+  credenciais: "gerenciar_credenciais",
+  usuarios: "manage_users",
+};
 
 export interface CurrentUser {
   user: User | null;
   fullName: string | null;
   email: string | null;
-  roles: AppRole[];
-  /** Perfil do portal (Super Admin, Admin, Analista); null = sem perfil. */
+  /** Perfil no app (chave: super_admin, admin, analista ou um criado na tela Perfis e permissões). */
+  perfil: string | null;
+  perfilNome: string | null;
+  imobiliariaId: string | null;
+  imobiliariaNome: string | null;
+  /** Compatibilidade: [perfil]. */
+  roles: string[];
+  /** Compatibilidade com os 3 níveis antigos (perfis criados contam como Analista). */
   nivel: Nivel | null;
   isAdmin: boolean;
   ativo: boolean;
   trocarSenha: boolean;
-  /** Super admin da Central de acessos Calper: só ele vê "Permissões por aplicativo". */
+  /** Super admin da Central de acessos do ikvj: só ele vê "Permissões por aplicativo". */
   souSuperAdminCentral: boolean;
   loading: boolean;
+  /** Regra antiga por nome; traduzida para o id do menu-registry. */
   pode: (p: Permissao) => boolean;
+  /** Permissões efetivas por id do menu-registry. */
+  permissoes: Record<PermissionId, boolean>;
+  podeAcessar: (id: PermissionId) => boolean;
+  /** Item abre na sidebar/cards (agrupador: algum filho abre). */
+  canOpen: (id: PermissionId) => boolean;
+  canAccessPath: (pathname: string) => boolean;
 }
 
-type Estado = Omit<CurrentUser, "pode">;
+type Estado = Omit<CurrentUser, "pode" | "permissoes" | "podeAcessar" | "canOpen" | "canAccessPath" | "roles" | "nivel" | "isAdmin"> & {
+  regras: Regras;
+};
 
 const VAZIO: Estado = {
   user: null,
   fullName: null,
   email: null,
-  roles: [],
-  nivel: null,
-  isAdmin: false,
+  perfil: null,
+  perfilNome: null,
+  imobiliariaId: null,
+  imobiliariaNome: null,
   ativo: true,
   trocarSenha: false,
   souSuperAdminCentral: false,
   loading: true,
+  regras: {},
 };
 
-/** Lê perfil, papéis e situação da conta (ativa / troca de senha pendente) do usuário logado. */
+/**
+ * Lê o acesso do usuário logado (imobenviomassa.meu_acesso: só devolve linha se ele estiver ativo, numa
+ * imobiliária ativa e liberado na Central). Sem linha = sem acesso (fail closed).
+ */
 export async function carregarAcesso(user: User): Promise<Omit<Estado, "user" | "loading">> {
-  const [{ data: profile }, { data: roles }, membro, central] = await Promise.all([
-    supabase.from("profiles").select("full_name, email").eq("id", user.id).maybeSingle(),
-    supabase.from("user_roles").select("role").eq("user_id", user.id),
-    supabase.from("wa_project_users").select("ativo, trocar_senha").eq("user_id", user.id).maybeSingle(),
+  const [acesso, cadastro, central] = await Promise.all([
+    supabase.rpc("meu_acesso"),
+    supabase.from("usuarios").select("nome, email").eq("id", user.id).maybeSingle(),
     souSuperAdminCentral(),
   ]);
-  const rolesList = (roles ?? []).map((r) => r.role as AppRole);
-  const nivel = nivelDosPapeis(rolesList);
+  const linha = !acesso.error && Array.isArray(acesso.data) ? acesso.data[0] : null;
   return {
-    fullName: profile?.full_name ?? user.email ?? null,
-    email: profile?.email ?? user.email ?? null,
-    roles: rolesList,
-    nivel,
-    isAdmin: nivel === "superadmin",
-    // Todo usuário do portal tem linha de membro: sem linha, sem acesso. Se a consulta falhar,
-    // a conta é tratada como inativa (fail closed).
-    ativo: !membro.error && !!membro.data && membro.data.ativo !== false,
-    trocarSenha: !membro.error && !!membro.data && membro.data.trocar_senha === true,
+    fullName: cadastro.data?.nome ?? user.user_metadata?.full_name ?? user.email ?? null,
+    email: cadastro.data?.email ?? user.email ?? null,
+    perfil: linha?.perfil ?? null,
+    perfilNome: linha?.perfil_nome ?? null,
+    imobiliariaId: linha?.imobiliaria_id ?? null,
+    imobiliariaNome: linha?.imobiliaria_nome ?? null,
+    ativo: !!linha && linha.ativo !== false,
+    trocarSenha: !!linha && linha.trocar_senha === true,
     souSuperAdminCentral: central,
+    regras: ((linha?.regras ?? {}) as Regras) || {},
   };
 }
 
@@ -92,10 +124,39 @@ export function useCurrentUser(): CurrentUser {
     };
   }, []);
 
-  const pode = useCallback(
-    (p: Permissao) => state.ativo && !state.trocarSenha && nivelPode(state.nivel, p),
-    [state.ativo, state.trocarSenha, state.nivel],
+  const permissoes = useMemo(() => {
+    const liberado = state.ativo && !state.trocarSenha && !!state.perfil;
+    return computePermissions(liberado ? state.perfil : null, state.regras, liberado && state.souSuperAdminCentral);
+  }, [state.ativo, state.trocarSenha, state.perfil, state.regras, state.souSuperAdminCentral]);
+
+  const podeAcessar = useCallback((id: PermissionId) => permissoes[id] === true, [permissoes]);
+  const pode = useCallback((p: Permissao) => permissoes[PERMISSAO_LEGADA[p]] === true, [permissoes]);
+  const canOpen = useCallback((id: PermissionId) => canOpenWith(permissoes, id), [permissoes]);
+  const canAccessPath = useCallback(
+    (pathname: string) => {
+      const id = resolvePermissionForPath(pathname);
+      return id === null || permissoes[id] === true;
+    },
+    [permissoes],
   );
 
-  return { ...state, pode };
+  const nivel: Nivel | null = !state.perfil
+    ? null
+    : state.perfil === "super_admin"
+      ? "superadmin"
+      : state.perfil === "admin"
+        ? "admin"
+        : "analista";
+
+  return {
+    ...state,
+    roles: state.perfil ? [state.perfil] : [],
+    nivel,
+    isAdmin: state.perfil === "super_admin",
+    pode,
+    permissoes,
+    podeAcessar,
+    canOpen,
+    canAccessPath,
+  };
 }

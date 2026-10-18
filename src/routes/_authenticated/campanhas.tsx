@@ -18,9 +18,9 @@ import {
 import { BarChart3, History, Search, Send } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
 
-type Campanha = Database["public"]["Tables"]["wa_campanhas"]["Row"];
-type CampanhaStatus = Database["public"]["Enums"]["wa_campanha_status"];
-type CampanhaOrigem = Database["public"]["Enums"]["wa_campanha_origem"];
+type Campanha = Database["imobenviomassa"]["Tables"]["wa_campanhas"]["Row"];
+type CampanhaStatus = Database["imobenviomassa"]["Enums"]["wa_campanha_status"];
+type CampanhaOrigem = Database["imobenviomassa"]["Enums"]["wa_campanha_origem"];
 
 export const Route = createFileRoute("/_authenticated/campanhas")({
   component: () => (

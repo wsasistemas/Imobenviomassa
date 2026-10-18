@@ -35,17 +35,17 @@ import { RelatorioDetalheView } from "@/components/relatorios/RelatorioDetalheVi
 import { getStatusAssinatura } from "@/lib/relatorios/status";
 import type { Database } from "@/integrations/supabase/types";
 
-type Campanha = Database["public"]["Tables"]["wa_campanhas"]["Row"];
+type Campanha = Database["imobenviomassa"]["Tables"]["wa_campanhas"]["Row"];
 type Destinatario = Pick<
-  Database["public"]["Tables"]["wa_campanha_destinatarios"]["Row"],
+  Database["imobenviomassa"]["Tables"]["wa_campanha_destinatarios"]["Row"],
   "id" | "campanha_id" | "status" | "envelope_docusign_id" | "assinado_em" | "updated_at"
 >;
 type Envelope = Pick<
-  Database["public"]["Tables"]["docusign_envelopes"]["Row"],
+  Database["imobenviomassa"]["Tables"]["docusign_envelopes"]["Row"],
   "campanha_id" | "envelope_id" | "status" | "sent_at" | "completed_at" | "declined_at" | "voided_at" | "last_event_at"
 >;
-type CampanhaStatus = Database["public"]["Enums"]["wa_campanha_status"];
-type CampanhaOrigem = Database["public"]["Enums"]["wa_campanha_origem"];
+type CampanhaStatus = Database["imobenviomassa"]["Enums"]["wa_campanha_status"];
+type CampanhaOrigem = Database["imobenviomassa"]["Enums"]["wa_campanha_origem"];
 
 type CampanhaComTotais = Campanha & {
   totaisAssinatura: {

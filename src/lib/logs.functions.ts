@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { Json } from "@/integrations/supabase/types";
-import { exigirPapel, temPapel, type ContextoAutenticado } from "@/lib/authz";
+import { exigirPapel, imobiliariaDoContexto, temPapel, type ContextoAutenticado } from "@/lib/authz";
 
 // Administração → Logs, lido pelo SERVIDOR (auditoria de segurança 2026-10-01, item N16 / Fase 4 LGPD).
 //
@@ -110,10 +110,12 @@ export const listarAuditoria = createServerFn({ method: "GET" })
     const ctx = context as ContextoAutenticado;
     const verTudo = await exigirAdminEVerSePrivilegiado(ctx, "Seu perfil não tem acesso ao histórico de ações.");
 
+    const imob = await imobiliariaDoContexto(ctx);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data, error } = await supabaseAdmin
       .from("wa_auditoria")
       .select("id, created_at, usuario_nome, acao, entidade, entidade_id, detalhes, ip")
+      .eq("imobiliaria_id", imob)
       .order("created_at", { ascending: false })
       .limit(LIMITE_AUDITORIA);
     if (error) {

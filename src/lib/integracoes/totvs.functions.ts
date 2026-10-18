@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { exigirAal2, exigirPapel, temPapel } from "@/lib/authz";
+import { exigirAal2, exigirPapel, imobiliariaDoContexto, temPapel } from "@/lib/authz";
 import type { RecursoRm, StatusRm } from "./rm.server";
 
 // ---------- Validação de entrada (auditoria de segurança, Fase 2 / N4) ----------
@@ -106,7 +106,7 @@ async function exigirOperacao(context: Contexto) {
   await exigirPapel(
     context,
     ["operadora", "admin", "super_admin"],
-    "Seu perfil ainda não tem acesso aos dados do TOTVS RM. Solicite o papel de operadora a um administrador.",
+    "Seu perfil ainda não tem acesso aos dados do TOTVS RM. Peça a liberação ao administrador da sua imobiliária.",
   );
 }
 
@@ -252,12 +252,13 @@ export const listarEmpreendimentosTotvs = createServerFn({ method: "POST" })
       count?: number;
     }> => {
       await exigirOperacao(context as unknown as Contexto);
+      const imob = await imobiliariaDoContexto(context as unknown as Contexto);
       const rm = await import("./rm.server");
       try {
-        const cred = await rm.credencialRm("empreendimentos");
+        const cred = await rm.credencialRm(imob, "empreendimentos");
         if (!cred) return { empreendimentos: [], error: NAO_CONFIGURADO };
 
-        const cacheKey = `emp:${cred.endpoint}:${cred.usuario}`;
+        const cacheKey = `emp:${imob}:${cred.endpoint}:${cred.usuario}`;
         if (data?.forceRefresh) memCache.delete(cacheKey);
         const cached = cacheGet<{ empreendimentos: EmpreendimentoTotvs[]; fetchedAt: string }>(cacheKey);
         if (cached) {
@@ -267,7 +268,7 @@ export const listarEmpreendimentosTotvs = createServerFn({ method: "POST" })
         const empreendimentos = mapEmpreendimentos(extractRows(await rm.buscarNoRm(cred.endpoint, cred)));
         const fetchedAt = new Date().toISOString();
         cacheSet(cacheKey, { empreendimentos, fetchedAt });
-        void rm.registrarConsultaRm("empreendimentos").catch(() => undefined);
+        void rm.registrarConsultaRm(imob, "empreendimentos").catch(() => undefined);
         return { empreendimentos, fetchedAt, fromCache: false, count: empreendimentos.length };
       } catch (e) {
         return { empreendimentos: [], error: e instanceof Error ? e.message : "Erro desconhecido ao consultar o TOTVS RM" };
@@ -280,16 +281,17 @@ export const buscarCompradoresPorEmpreendimento = createServerFn({ method: "POST
   .inputValidator(validar(z.object({ empreendimento_id: empreendimentoIdSchema })))
   .handler(async ({ data, context }): Promise<{ contratos: ContratoTotvs[]; error?: string }> => {
     await exigirOperacao(context as unknown as Contexto);
+    const imob = await imobiliariaDoContexto(context as unknown as Contexto);
     const rm = await import("./rm.server");
     try {
-      const cred = await rm.credencialRm("compradores");
+      const cred = await rm.credencialRm(imob, "compradores");
       if (!cred) return { contratos: [], error: NAO_CONFIGURADO };
       // GET {endpoint}?parameters=CODCOLIGADA={codigo do empreendimento}
       // `empreendimento_id` já passou pelo regex acima; rm.urlCompradores aplica encodeURIComponent
       // (não encodar aqui para não codificar duas vezes).
       const payload = await rm.buscarNoRm(rm.urlCompradores(cred.endpoint, data.empreendimento_id), cred);
       const contratos = mapContratos(extractRows(payload), data.empreendimento_id);
-      void rm.registrarConsultaRm("compradores").catch(() => undefined);
+      void rm.registrarConsultaRm(imob, "compradores").catch(() => undefined);
       return { contratos };
     } catch (e) {
       return { contratos: [], error: e instanceof Error ? e.message : "Erro desconhecido ao consultar o TOTVS RM" };
@@ -302,8 +304,9 @@ export const statusIntegracaoRm = createServerFn({ method: "GET" })
   .handler(async ({ context }): Promise<{ status: StatusRm[] | null; superAdmin: boolean }> => {
     const ctx = context as unknown as Contexto;
     await exigirAdmin(ctx);
+    const imob = await imobiliariaDoContexto(ctx);
     const rm = await import("./rm.server");
-    const [status, superAdmin] = await Promise.all([rm.statusRm(), temPapel(ctx, ["super_admin"])]);
+    const [status, superAdmin] = await Promise.all([rm.statusRm(imob), temPapel(ctx, ["super_admin"])]);
     return { status, superAdmin };
   });
 
@@ -325,6 +328,7 @@ export const salvarCredenciaisRm = createServerFn({ method: "POST" })
       throw new Error("Só um Super Admin altera as credenciais do TOTVS RM.");
     }
     await exigirAal2(ctx); // segundo fator (TOTP) obrigatório para mexer em credenciais
+    const imob = await imobiliariaDoContexto(ctx);
     const rm = await import("./rm.server");
     if (!rm.ehRecursoRm(data.recurso)) throw new Error("Integração desconhecida.");
     const endpoint = data.endpoint;
@@ -341,7 +345,7 @@ export const salvarCredenciaisRm = createServerFn({ method: "POST" })
         throw new Error(`O host "${host}" não está na lista de hosts permitidos do TOTVS RM (RM_HOSTS_PERMITIDOS).`);
       }
     } else {
-      const outrosHosts = ((await rm.statusRm()) ?? [])
+      const outrosHosts = ((await rm.statusRm(imob)) ?? [])
         .filter((s) => s.recurso !== data.recurso && s.endpoint)
         .map((s) => hostDaUrl(s.endpoint))
         .filter((h): h is string => Boolean(h));
@@ -357,6 +361,7 @@ export const salvarCredenciaisRm = createServerFn({ method: "POST" })
 
     const autor = ctx.claims?.email ?? ctx.userId;
     await rm.salvarCredencialRm({
+      imobiliariaId: imob,
       recurso: data.recurso,
       endpoint,
       usuario: data.usuario,
@@ -389,15 +394,16 @@ export const testarConexaoRm = createServerFn({ method: "POST" })
   .inputValidator(validar(z.object({ recurso: recursoRmSchema })))
   .handler(async ({ data, context }): Promise<TesteConexaoRm> => {
     await exigirAdmin(context as unknown as Contexto);
+    const imob = await imobiliariaDoContexto(context as unknown as Contexto);
     const rm = await import("./rm.server");
     if (!rm.ehRecursoRm(data.recurso)) return { ok: false, msg: "Integração desconhecida." };
     try {
-      const cred = await rm.credencialRm(data.recurso);
+      const cred = await rm.credencialRm(imob, data.recurso);
       if (!cred) return { ok: false, msg: "Cadastre o endpoint, o usuário e a senha desta integração antes de testar." };
 
       let url = cred.endpoint;
       if (data.recurso === "compradores") {
-        const emp = await rm.credencialRm("empreendimentos");
+        const emp = await rm.credencialRm(imob, "empreendimentos");
         if (!emp) return { ok: false, msg: "Cadastre primeiro a integração de empreendimentos: o teste usa um deles como exemplo." };
         const primeiro = mapEmpreendimentos(extractRows(await rm.buscarNoRm(emp.endpoint, emp)))[0];
         if (!primeiro) return { ok: false, msg: "O RM não devolveu nenhum empreendimento para usar no teste." };
@@ -405,7 +411,7 @@ export const testarConexaoRm = createServerFn({ method: "POST" })
       }
 
       const rows = extractRows(await rm.buscarNoRm(url, cred));
-      void rm.registrarConsultaRm(data.recurso).catch(() => undefined);
+      void rm.registrarConsultaRm(imob, data.recurso).catch(() => undefined);
       return {
         ok: true,
         msg: `Conexão OK — ${rows.length} registro(s) retornado(s).`,

@@ -58,7 +58,7 @@ function FormLogin() {
         refresh_token: sessao.refresh_token,
       });
       if (error) throw new Error("Não foi possível iniciar a sessão. Tente novamente.");
-      // Central de acessos Calper: sem permissão neste aplicativo, encerra a sessão e abre o pop-up.
+      // Central de acessos: sem permissão neste aplicativo, encerra a sessão e abre o pop-up.
       if (!(await conferirAcessoApp())) {
         setLoading(false);
         return;
@@ -96,7 +96,7 @@ function FormLogin() {
           id="login-email"
           type="email"
           autoComplete="username"
-          placeholder="seu@calper.com.br"
+          placeholder="seu@empresa.com.br"
           autoFocus
           value={email}
           onChange={(e) => {

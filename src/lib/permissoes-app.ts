@@ -1,8 +1,13 @@
-// Tela "Permissões por aplicativo" — a mesma do Gestão Comercial, do Financeiro, do Gestão de
-// Contratos e do Portal DP. Tudo passa pelas RPCs públicas do Supabase compartilhado (public.pa_*),
-// que gravam no schema "acessos": o que o Super admin da Central muda aqui aparece igual em todos os
-// aplicativos da Calper. O servidor (as próprias RPCs) confere o Super admin.
+// Tela "Permissões por aplicativo" — Central de acessos do Supabase ImobSystem (schema "acessos"), a mesma do
+// ImobSystem, do Imobsuprimentos e do ImobDoces. Tudo passa pelas RPCs públicas public.pa_*: o que o super admin
+// da Central muda aqui vale para todos os aplicativos do login compartilhado. As próprias RPCs conferem o
+// super admin (conta proprietária).
+//
+// A tela foi desenhada para a Central da Calper (pa_*_v2, cadastro de app pela tela). Este adaptador mantém o
+// formato que ela usa e traduz para as RPCs do ikvj: pa_listar_aplicativos, pa_listar_usuarios(p_app, p_busca),
+// pa_definir_permissao(p_app, p_usuario, p_pode), pa_definir_controle, pa_salvar_aplicativo.
 import { supabase } from "@/integrations/supabase/client";
+import { APP_KEY } from "@/lib/app-key";
 
 export interface PerfilApp {
   value: string;
@@ -53,63 +58,85 @@ export function mensagemErroAcesso(e: unknown): string {
   return msg && !msg.startsWith("{") ? msg : "Não foi possível concluir a ação. Tente de novo.";
 }
 
-// As RPCs da Central não estão no types.ts gerado deste projeto.
-const chamar = supabase.rpc.bind(supabase) as unknown as (
-  fn: string,
-  args?: Record<string, unknown>,
-) => Promise<{ data: unknown; error: unknown }>;
+const central = () => supabase.schema("public");
 
-async function rpc<T>(nome: string, args: Record<string, unknown> = {}): Promise<T> {
-  const { data, error } = await chamar(nome, args);
-  if (error) throw error;
-  return data as T;
-}
-
-/**
- * Schemas que a API expõe de fato: um schema inexistente no Accept-Profile devolve PGRST106 com
- * "Only the following schemas are exposed: …". `null` se a API não responder assim.
- */
-async function schemasExpostos(): Promise<string[] | null> {
-  try {
-    const url = import.meta.env.VITE_SUPABASE_URL as string;
-    const chave = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
-    const r = await fetch(`${url}/rest/v1/pa_consulta_schemas_expostos`, {
-      headers: { apikey: chave, "Accept-Profile": "pa_consulta_schemas_expostos" },
-    });
-    const corpo = (await r.json()) as { code?: string; hint?: string | null };
-    const m = corpo.code === "PGRST106" ? /exposed:\s*(.+)$/i.exec(corpo.hint ?? "") : null;
-    if (!m) return null;
-    const lista = m[1].split(",").map((s) => s.trim()).filter(Boolean);
-    return lista.length ? lista : null;
-  } catch {
-    return null;
-  }
+function nomeDoEmail(email: string) {
+  return email
+    .split("@")[0]
+    .replace(/[._-]+/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 export const permissoesApp = {
   async listarAplicativos(): Promise<AppAcesso[]> {
-    return rpc<AppAcesso[]>("pa_listar_aplicativos_expostos", { p_expostos: (await schemasExpostos()) ?? [] });
+    const { data, error } = await central().rpc("pa_listar_aplicativos");
+    if (error) throw error;
+    return (data ?? []).map((a) => {
+      const proprio = a.schema_name === APP_KEY;
+      return {
+        schema: a.schema_name,
+        name: a.nome,
+        url: a.url,
+        dataSchema: a.schema_dados,
+        manual: a.schema_dados !== a.schema_name,
+        controlActive: a.controle_ativo,
+        newLoginsDefault: a.padrao_novos === "liberado" ? "liberado" : "bloqueado",
+        configured: true,
+        // Neste app, "Liberar" na Central cadastra como Analista (acessos.aplicativos.perfil_liberar).
+        defaultProfile: proprio ? "Analista" : null,
+        releaseProfile: null,
+        profiles: undefined,
+        // Neste app a Central também vale na RLS (tenant_atual → acessos.eu_posso).
+        protected: proprio,
+        lastCheckAt: a.ultima_verificacao_em,
+        totalLogins: Number(a.liberados) + Number(a.bloqueados),
+        allowedCount: Number(a.liberados),
+      } satisfies AppAcesso;
+    });
   },
-  listarLogins(schema: string): Promise<LoginAcesso[]> {
-    return rpc<LoginAcesso[]>("pa_listar_usuarios", { p_schema: schema });
+
+  async listarLogins(schema: string): Promise<LoginAcesso[]> {
+    const { data, error } = await central().rpc("pa_listar_usuarios", { p_app: schema });
+    if (error) throw error;
+    return (data ?? []).map((u) => ({
+      id: u.user_id,
+      name: nomeDoEmail(u.email),
+      email: u.email,
+      lastSignInAt: u.ultimo_login,
+      registered: u.tem_cadastro,
+      owner: u.proprietario,
+      canEnter: u.efetivo,
+    }));
   },
-  definirPermissao(schema: string, ids: string[], pode: boolean): Promise<ResultadoLiberacao> {
-    return rpc<ResultadoLiberacao>("pa_definir_permissao_v2", { p_schema: schema, p_usuarios: ids, p_pode: pode });
+
+  async definirPermissao(schema: string, ids: string[], pode: boolean): Promise<ResultadoLiberacao> {
+    let changed = 0;
+    for (const id of ids) {
+      const { error } = await central().rpc("pa_definir_permissao", { p_app: schema, p_usuario: id, p_pode: pode });
+      if (error) throw error;
+      changed++;
+    }
+    return { changed, created: 0, reactivated: 0, skippedSuffix: 0, profile: null };
   },
-  definirControle(schema: string, ativo: boolean): Promise<void> {
-    return rpc<void>("pa_definir_controle", { p_schema: schema, p_ativo: ativo });
+
+  async definirControle(schema: string, ativo: boolean): Promise<void> {
+    const { error } = await central().rpc("pa_definir_controle", { p_app: schema, p_ativo: ativo });
+    if (error) throw error;
   },
-  salvarAplicativo(schema: string, nome: string, url: string, padraoNovos: string, perfilLiberar: string): Promise<void> {
-    return rpc<void>("pa_salvar_aplicativo_v2", {
-      p_schema: schema,
+
+  // A Central do ikvj não guarda "perfil ao liberar" pela tela (o app define na própria migração).
+  async salvarAplicativo(schema: string, nome: string, url: string, padraoNovos: string, _perfilLiberar: string): Promise<void> {
+    const { error } = await central().rpc("pa_salvar_aplicativo", {
+      p_app: schema,
       p_nome: nome,
       p_url: url,
       p_padrao_novos: padraoNovos,
-      p_perfil_liberar: perfilLiberar,
     });
+    if (error) throw error;
   },
-  adicionarAplicativo(chave: string, nome: string, url: string, schemaDados: string): Promise<void> {
-    return rpc<void>("pa_adicionar_aplicativo", { p_chave: chave, p_nome: nome, p_url: url, p_schema_dados: schemaDados });
+
+  async adicionarAplicativo(_chave: string, _nome: string, _url: string, _schemaDados: string): Promise<void> {
+    throw new Error("Na Central do ImobSystem, cada aplicativo se cadastra pela própria migração do banco.");
   },
 };
 

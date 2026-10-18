@@ -1,3 +1,5 @@
+import type { PermissionId } from "@/config/menu-registry";
+
 // Matriz de permissões por perfil — mesmo modelo do Portal DP e do Gestão de Contratos.
 // Para mudar o que um perfil pode fazer, edite apenas este arquivo (e as checagens do servidor em
 // src/lib/authz.ts e nas Edge Functions, que espelham estas regras).
@@ -79,3 +81,23 @@ export function nivelDosPapeis(roles: string[]): Nivel | null {
 export function nivelPode(nivel: Nivel | null | undefined, permissao: Permissao): boolean {
   return !!nivel && PERMISSOES[nivel].has(permissao);
 }
+
+/**
+ * Liberações de cada nível nos ids do menu-registry. Transição: na Fase 3 os perfis e a matriz vão para o banco
+ * (imobenviomassa.perfil_permissoes) e esta tabela é só o espelho do seed (provisionar_imobiliaria).
+ */
+export const REGRAS_DO_NIVEL: Record<Nivel, readonly PermissionId[]> = {
+  superadmin: [],
+  admin: [
+    "disparos",
+    "docusign",
+    "ver_dashboard",
+    "criar_disparo",
+    "ver_historico",
+    "ver_relatorios",
+    "gateway_apis",
+    "view_audit_logs",
+    "manage_privacy",
+  ],
+  analista: ["disparos", "docusign", "ver_dashboard", "criar_disparo", "ver_historico", "ver_relatorios"],
+};

@@ -130,7 +130,12 @@ const incluiConjuge = (modo: string | undefined | null) => modo === "assina" || 
  * o conjunto de chaves `${tipo}:${valor}` encontradas. Falha na consulta LANÇA (fail closed): sem
  * conseguir verificar o descadastro, nada é enviado.
  */
-async function buscarOptOuts(sb: SupabaseAdmin, destinatarios: DadosOptOut[], incluirConjuge: boolean): Promise<Set<string>> {
+async function buscarOptOuts(
+  sb: SupabaseAdmin,
+  imobiliariaId: string,
+  destinatarios: DadosOptOut[],
+  incluirConjuge: boolean,
+): Promise<Set<string>> {
   const valoresPorTipo: Record<TipoOptOut, Set<string>> = { cpf: new Set(), email: new Set(), telefone: new Set() };
   for (const d of destinatarios) {
     for (const { tipo, valor } of identificadoresOptOut(d, incluirConjuge)) valoresPorTipo[tipo].add(valor);
@@ -144,7 +149,12 @@ async function buscarOptOuts(sb: SupabaseAdmin, destinatarios: DadosOptOut[], in
       const lote = valores.slice(i, i + LOTE_CONSULTA_OPT_OUT);
       consultas.push(
         (async () => {
-          const { data, error } = await sb.from("wa_opt_outs").select("tipo, valor").eq("tipo", tipo).in("valor", lote);
+          const { data, error } = await sb
+            .from("wa_opt_outs")
+            .select("tipo, valor")
+            .eq("imobiliaria_id", imobiliariaId)
+            .eq("tipo", tipo)
+            .in("valor", lote);
           if (error) throw error;
           for (const r of (data ?? []) as { tipo: string; valor: string }[]) achados.add(`${r.tipo}:${r.valor}`);
         })(),
@@ -244,11 +254,14 @@ export const criarCampanha = createServerFn({ method: "POST" })
     const { assertOperacao, templateExisteDocusign } = await import("@/lib/integracoes/docusign.functions");
     const { auditar } = await import("@/lib/auditoria.server");
     await assertOperacao(ctx);
+    const { imobiliariaDoContexto } = await import("@/lib/authz");
+    const imob = await imobiliariaDoContexto(ctx);
     const sb = await admin();
 
-    // Lista de descadastro (LGPD): quem consta nela entra na campanha como 'opt_out' e não vai para a fila.
+    // Lista de descadastro (LGPD) da imobiliária: quem consta nela entra na campanha como 'opt_out' e não vai
+    // para a fila.
     const conjugeNoEnvelope = incluiConjuge(data.config_assinatura.segundo_comprador);
-    const optOuts = await buscarOptOuts(sb, data.destinatarios, conjugeNoEnvelope);
+    const optOuts = await buscarOptOuts(sb, imob, data.destinatarios, conjugeNoEnvelope);
     const bloqueados = data.destinatarios.map((d) => emOptOut(d, conjugeNoEnvelope, optOuts));
     const qtdOptOut = bloqueados.filter(Boolean).length;
     const aEnviar = data.destinatarios.length - qtdOptOut;
@@ -260,13 +273,14 @@ export const criarCampanha = createServerFn({ method: "POST" })
     }
 
     // O modelo precisa existir na conta DocuSign configurada.
-    if (!(await templateExisteDocusign(data.modelo.id))) {
+    if (!(await templateExisteDocusign(imob, data.modelo.id))) {
       throw new Error("O modelo escolhido não existe na conta DocuSign configurada.");
     }
 
     const { data: camp, error } = await sb
       .from("wa_campanhas")
       .insert({
+        imobiliaria_id: imob,
         nome: data.nome,
         criado_por: ctx.userId,
         origem: data.origem,
@@ -286,6 +300,7 @@ export const criarCampanha = createServerFn({ method: "POST" })
     }
 
     const rows = data.destinatarios.map((d, i) => ({
+      imobiliaria_id: imob,
       campanha_id: camp.id,
       nome: d.nome,
       cpf: soDigitos(d.cpf),
@@ -356,7 +371,7 @@ export const enviarDestinatarioCampanha = createServerFn({ method: "POST" })
     const [{ data: camp }, { data: dest }] = await Promise.all([
       sb
         .from("wa_campanhas")
-        .select("id, status, modelo_docusign_id, config_assinatura, mensagem_whatsapp")
+        .select("id, imobiliaria_id, status, modelo_docusign_id, config_assinatura, mensagem_whatsapp")
         .eq("id", data.campanhaId)
         .maybeSingle(),
       sb
@@ -395,7 +410,7 @@ export const enviarDestinatarioCampanha = createServerFn({ method: "POST" })
     try {
       // Recheca o descadastro (LGPD) logo antes de enviar: o titular pode ter pedido para sair depois
       // de a campanha ser criada. Falha na consulta lança → cai no catch (nada é enviado).
-      const optOuts = await buscarOptOuts(sb, [dest], incluiConjuge(cfg.segundo_comprador));
+      const optOuts = await buscarOptOuts(sb, camp.imobiliaria_id, [dest], incluiConjuge(cfg.segundo_comprador));
       if (emOptOut(dest, incluiConjuge(cfg.segundo_comprador), optOuts)) {
         await sb.from("wa_campanha_destinatarios").update({ status: "opt_out", erro_msg: MSG_OPT_OUT }).eq("id", dest.id);
         return { ok: false, envelopeId: null, erro: MSG_OPT_OUT, optOut: true };
@@ -484,6 +499,7 @@ export const enviarDestinatarioCampanha = createServerFn({ method: "POST" })
         viaWhatsapp: enviaWhatsapp,
         campanhaId: camp.id,
         destinatarioId: dest.id,
+        imobiliariaId: camp.imobiliaria_id,
       });
 
       if (!res.envelopeId) return await marcarErro(res.error ?? "Falha desconhecida no DocuSign");

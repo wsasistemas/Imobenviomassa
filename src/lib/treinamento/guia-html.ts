@@ -23,7 +23,7 @@ export async function imagemParaDataUrl(url: string): Promise<string | null> {
 }
 
 const CSS = `
-:root{--p:#d6293b;--pd:#a91d2c;--ps:#fdecee;--g:#17181c;--m:#6b7280;--b:#e9eaee;--bg:#f5f6f8;--ok:#2f7d4f;--oks:#e2f3e8;--w:#a9741e;--ws:#fbf0dc;--i:#2c4a77;--is:#e8eef7}
+:root{--p:#c8234f;--pd:#9b1c3d;--ps:#fbe9ee;--g:#2f1712;--m:#7a6660;--b:#ece2dc;--bg:#fdf9f6;--ok:#2f7d4f;--oks:#e2f3e8;--w:#a9741e;--ws:#fbf0dc;--i:#2c4a77;--is:#e8eef7}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--g);font:15px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 header.topo{background:var(--g);color:#fff;padding:28px 20px}
@@ -123,8 +123,8 @@ export function gerarGuiaHtml(guia: Guia, { logo, imagens }: OpcoesHtml): string
   return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(
     guia.titulo,
   )}</title><style>${CSS}</style></head><body><header class="topo"><div class="in">${
-    logo ? `<img src="${logo}" alt="Calper" style="height:34px;background:#fff;border-radius:6px;padding:4px 8px;margin-bottom:14px;display:block">` : ""
-  }<div class="marca"></div><small>Centro de Treinamento · Calper</small><h1>${esc(guia.titulo)}</h1><p>${esc(
+    logo ? `<img src="${logo}" alt="WSA Sistemas" style="height:48px;width:48px;border-radius:50%;margin-bottom:14px;display:block">` : ""
+  }<div class="marca"></div><small>Centro de Treinamento · WSA Sistemas</small><h1>${esc(guia.titulo)}</h1><p>${esc(
     guia.subtitulo,
   )}</p></div></header><main><nav class="sumario"><h2>Neste guia</h2><ol>${sumario}<li><a href="#problemas">Problemas comuns e quem acionar</a></li></ol></nav>${passos}${problemas}</main><footer>${esc(
     guia.publico,

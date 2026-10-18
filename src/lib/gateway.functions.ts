@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { exigirAal2, exigirPapel, type ContextoAutenticado } from "@/lib/authz";
+import { exigirAal2, exigirPapel, imobiliariaDoContexto, type ContextoAutenticado } from "@/lib/authz";
 
 // Gateway de APIs — escrita em api_registry só pelo SERVIDOR (auditoria de segurança 2026-10-01,
 // item A11). Uma API cadastrada apontando para outro host receberia as credenciais do RM, por isso
@@ -77,12 +77,14 @@ export const registrarApiGateway = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<{ id: string }> => {
     await exigirSuperAdmin(context);
     const ctx = context as ContextoAutenticado;
+    const imob = await imobiliariaDoContexto(ctx);
     const sb = await admin();
     const { auditar } = await import("@/lib/auditoria.server");
 
     const { data: criado, error } = await sb
       .from("api_registry")
       .insert({
+        imobiliaria_id: imob,
         name: data.name,
         base_url: data.base_url ?? null,
         endpoint: data.endpoint,
@@ -124,13 +126,19 @@ export const removerApiGateway = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
     await exigirSuperAdmin(context);
     const ctx = context as ContextoAutenticado;
+    const imob = await imobiliariaDoContexto(ctx);
     const sb = await admin();
     const { auditar } = await import("@/lib/auditoria.server");
 
-    const { data: existente } = await sb.from("api_registry").select("name, endpoint").eq("id", data.id).maybeSingle();
+    const { data: existente } = await sb
+      .from("api_registry")
+      .select("name, endpoint")
+      .eq("id", data.id)
+      .eq("imobiliaria_id", imob)
+      .maybeSingle();
     if (!existente) throw new Error("API não encontrada.");
 
-    const { error } = await sb.from("api_registry").delete().eq("id", data.id);
+    const { error } = await sb.from("api_registry").delete().eq("id", data.id).eq("imobiliaria_id", imob);
     if (error) throw await erroGenerico("gateway.remover", error, "Não foi possível remover a API.");
 
     await auditar({

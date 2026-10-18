@@ -57,7 +57,7 @@ export async function gwProxy<T = unknown>(
   apiId: string,
   options: GwProxyOptions = {},
 ): Promise<GwProxyResponse<T>> {
-  const { data, error } = await supabase.functions.invoke("api-proxy", {
+  const { data, error } = await supabase.functions.invoke("imobenviomassa-api-proxy", {
     body: { apiId, ...options },
   });
   if (error) {
@@ -95,7 +95,7 @@ export async function gwSoap<T = unknown>(
   params: Record<string, unknown> = {},
   options: GwSoapOptions = {},
 ): Promise<GwSoapResponse<T>> {
-  const { data, error } = await supabase.functions.invoke("totvs-soap-proxy", {
+  const { data, error } = await supabase.functions.invoke("imobenviomassa-totvs-soap-proxy", {
     body: { apiName, params, ...options },
   });
   if (error) return corpoDoErro<GwSoapResponse<T>>(error, { ok: false, error: error.message });
@@ -107,7 +107,7 @@ export async function gwSoapById<T = unknown>(
   params: Record<string, unknown> = {},
   options: GwSoapOptions = {},
 ): Promise<GwSoapResponse<T>> {
-  const { data, error } = await supabase.functions.invoke("totvs-soap-proxy", {
+  const { data, error } = await supabase.functions.invoke("imobenviomassa-totvs-soap-proxy", {
     body: { apiId, params, ...options },
   });
   if (error) return corpoDoErro<GwSoapResponse<T>>(error, { ok: false, error: error.message });

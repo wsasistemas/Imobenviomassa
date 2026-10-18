@@ -6,7 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import { RelatorioDetalheView, formatDate } from "@/components/relatorios/RelatorioDetalheView";
 import type { Database } from "@/integrations/supabase/types";
 
-type Campanha = Database["public"]["Tables"]["wa_campanhas"]["Row"];
+type Campanha = Database["imobenviomassa"]["Tables"]["wa_campanhas"]["Row"];
 
 export const Route = createFileRoute("/_authenticated/relatorios/$campanhaId")({
   component: () => (

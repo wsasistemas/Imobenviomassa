@@ -10,7 +10,7 @@ export function PageHead({ title, children, actions }: { title: string; children
   return (
     <div className="flex flex-wrap items-end justify-between gap-4">
       <div>
-        <h1 className="text-[18px] font-bold">{title}</h1>
+        <h1 className="text-[22px] font-extrabold tracking-[-0.02em]">{title}</h1>
         {children && <p className="mt-1 max-w-[720px] text-[13px] leading-normal text-muted-foreground">{children}</p>}
       </div>
       {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
@@ -31,8 +31,8 @@ export function Panel({
   className?: string;
 }) {
   return (
-    <section className={cn("rounded-[10px] border bg-card px-4 py-3.5", className)}>
-      {title && <h2 className="mb-1 flex items-center gap-2 text-[14px] font-bold">{title}</h2>}
+    <section className={cn("rounded-xl border bg-card px-5 py-4 shadow-card", className)}>
+      {title && <h2 className="mb-1 flex items-center gap-2 text-[16px] font-bold">{title}</h2>}
       {sub && <p className="mb-3 text-[12px] leading-normal text-muted-foreground">{sub}</p>}
       {children}
     </section>
@@ -42,7 +42,7 @@ export function Panel({
 /** Aviso de área não liberada para o perfil (padrão "Acesso não liberado"). */
 export function SemAcesso({ texto = "Seu perfil não tem permissão para esta área. Fale com o administrador do sistema." }: { texto?: string }) {
   return (
-    <div className="flex flex-col items-center gap-3 rounded-[10px] border bg-card px-4 py-10 text-center">
+    <div className="flex flex-col items-center gap-3 rounded-xl border bg-card px-4 py-10 text-center shadow-card">
       <div className="flex h-11 w-11 items-center justify-center rounded-[10px] bg-primary-soft text-primary">
         <Lock className="h-5 w-5" />
       </div>
@@ -66,7 +66,7 @@ export function Selo({ children, tom }: { children: ReactNode; tom?: "info" | "w
   return (
     <span
       className={cn(
-        "inline-flex items-center whitespace-nowrap rounded-md px-2 py-[3px] text-[10.5px] font-bold uppercase tracking-[0.02em]",
+        "inline-flex items-center whitespace-nowrap rounded-full px-2.5 py-[3px] text-[11px] font-bold",
         tom ? cls[tom] : "bg-muted text-muted-foreground",
       )}
     >

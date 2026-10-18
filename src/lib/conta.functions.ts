@@ -43,11 +43,11 @@ export const trocarMinhaSenha = createServerFn({ method: "POST" })
     if (!email) throw new Error("Não foi possível identificar a sua conta.");
     email = email.toLowerCase();
 
-    // Conta do portal ativa? (sem linha ou desativada não testa senha nem conta como tentativa).
+    // Cadastro no app ativo? (sem linha ou desativado não testa senha nem conta como tentativa).
     const { data: membro, error: membroErr } = await supabaseAdmin
-      .from("wa_project_users")
+      .from("usuarios")
       .select("ativo")
-      .eq("user_id", ctx.userId)
+      .eq("id", ctx.userId)
       .maybeSingle();
     if (membroErr) {
       const { erroGenerico } = await import("@/lib/erros.server");
@@ -109,9 +109,9 @@ export const trocarMinhaSenha = createServerFn({ method: "POST" })
 
     // Libera o acesso.
     const { error: flagErr } = await supabaseAdmin
-      .from("wa_project_users")
+      .from("usuarios")
       .update({ trocar_senha: false })
-      .eq("user_id", ctx.userId);
+      .eq("id", ctx.userId);
     if (flagErr) {
       console.error("[conta] liberar acesso:", flagErr.message);
       throw new Error("A senha foi trocada, mas não foi possível liberar o acesso. Fale com o administrador.");
