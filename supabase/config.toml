@@ -3,7 +3,7 @@
 project_id = "ikvjaowvpvxojvcfwnct"
 
 # Edge Functions com o prefixo do app: o projeto é compartilhado e nomes genéricos colidiriam com os de outros sistemas.
-# Deploy: supabase functions deploy imobenviomassa-api-proxy imobenviomassa-totvs-soap-proxy
+# Deploy: supabase functions deploy imobenviomassa-api-proxy imobenviomassa-totvs-soap-proxy imobenviomassa-zenvia-webhook
 # Secrets (Dashboard -> Edge Functions -> Secrets):
 #   ALLOWED_ORIGINS=https://enviomassa.imobsystems.com.br,http://localhost:3000   # CORS das functions
 #   GW_<NOME>...                                                                  # secrets de API do gateway
@@ -12,6 +12,11 @@ verify_jwt = true
 
 [functions.imobenviomassa-totvs-soap-proxy]
 verify_jwt = true
+
+# Webhook da Zenvia (Régua de Cobrança): chamado pela Zenvia sem JWT. Autenticação = ?imob + cabeçalho
+# x-imobenviomassa-chave conferido com o segredo zenvia_webhook_<imob> do Vault.
+[functions.imobenviomassa-zenvia-webhook]
+verify_jwt = false
 
 # ---------------------------------------------------------------------------------------------------------------------
 # SEM seção [auth] de propósito. O login (Supabase Auth) é do projeto inteiro: um `supabase config push` com

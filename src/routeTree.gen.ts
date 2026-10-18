@@ -16,7 +16,6 @@ import { Route as TrocarSenhaRouteImport } from './routes/trocar-senha'
 import { Route as AuthenticatedCampanhasRouteImport } from './routes/_authenticated/campanhas'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
-import { Route as AuthenticatedReguaCobrancaRouteImport } from './routes/_authenticated/regua-cobranca'
 import { Route as AuthenticatedAdminSplatRouteImport } from './routes/_authenticated/admin.$'
 import { Route as AuthenticatedAdministracaoLogsRouteImport } from './routes/_authenticated/administracao/logs'
 import { Route as AuthenticatedAdministracaoPerfisRouteImport } from './routes/_authenticated/administracao/perfis'
@@ -24,10 +23,16 @@ import { Route as AuthenticatedAdministracaoPermissoesAplicativoRouteImport } fr
 import { Route as AuthenticatedAdministracaoPrivacidadeRouteImport } from './routes/_authenticated/administracao/privacidade'
 import { Route as AuthenticatedAdministracaoUsuariosRouteImport } from './routes/_authenticated/administracao/usuarios'
 import { Route as AuthenticatedConfiguracoesDocusignRouteImport } from './routes/_authenticated/configuracoes/docusign'
+import { Route as AuthenticatedConfiguracoesEmailRouteImport } from './routes/_authenticated/configuracoes/email'
 import { Route as AuthenticatedConfiguracoesGatewayRouteImport } from './routes/_authenticated/configuracoes/gateway'
 import { Route as AuthenticatedConfiguracoesIntegracoesRouteImport } from './routes/_authenticated/configuracoes/integracoes'
+import { Route as AuthenticatedConfiguracoesZenviaRouteImport } from './routes/_authenticated/configuracoes/zenvia'
 import { Route as AuthenticatedContaSegurancaRouteImport } from './routes/_authenticated/conta/seguranca'
 import { Route as AuthenticatedDisparoNovoRouteImport } from './routes/_authenticated/disparo.novo'
+import { Route as AuthenticatedReguaCobrancaIndexRouteImport } from './routes/_authenticated/regua-cobranca.index'
+import { Route as AuthenticatedReguaCobrancaConfiguracoesRouteImport } from './routes/_authenticated/regua-cobranca.configuracoes'
+import { Route as AuthenticatedReguaCobrancaNovoRouteImport } from './routes/_authenticated/regua-cobranca.novo'
+import { Route as AuthenticatedReguaCobrancaTemplatesRouteImport } from './routes/_authenticated/regua-cobranca.templates'
 import { Route as AuthenticatedRelatoriosIndexRouteImport } from './routes/_authenticated/relatorios.index'
 import { Route as AuthenticatedRelatoriosCampanhaIdRouteImport } from './routes/_authenticated/relatorios.$campanhaId'
 import { Route as AuthenticatedTreinamentoIndexRouteImport } from './routes/_authenticated/treinamento.index'
@@ -39,6 +44,8 @@ import { Route as AuthenticatedDisparoNovoModeloRouteImport } from './routes/_au
 import { Route as AuthenticatedDisparoNovoOrigemRouteImport } from './routes/_authenticated/disparo.novo.origem'
 import { Route as AuthenticatedDisparoNovoRevisaoRouteImport } from './routes/_authenticated/disparo.novo.revisao'
 import { Route as AuthenticatedDisparoNovoVerificacaoRouteImport } from './routes/_authenticated/disparo.novo.verificacao'
+import { Route as AuthenticatedReguaCobrancaLotesIndexRouteImport } from './routes/_authenticated/regua-cobranca.lotes.index'
+import { Route as AuthenticatedReguaCobrancaLotesLoteIdRouteImport } from './routes/_authenticated/regua-cobranca.lotes.$loteId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -74,12 +81,6 @@ const AuthenticatedHomeRoute = AuthenticatedHomeRouteImport.update({
   path: '/home',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedReguaCobrancaRoute =
-  AuthenticatedReguaCobrancaRouteImport.update({
-    id: '/regua-cobranca',
-    path: '/regua-cobranca',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
 const AuthenticatedAdminSplatRoute = AuthenticatedAdminSplatRouteImport.update({
   id: '/admin/$',
   path: '/admin/$',
@@ -121,6 +122,12 @@ const AuthenticatedConfiguracoesDocusignRoute =
     path: '/configuracoes/docusign',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedConfiguracoesEmailRoute =
+  AuthenticatedConfiguracoesEmailRouteImport.update({
+    id: '/configuracoes/email',
+    path: '/configuracoes/email',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedConfiguracoesGatewayRoute =
   AuthenticatedConfiguracoesGatewayRouteImport.update({
     id: '/configuracoes/gateway',
@@ -133,6 +140,12 @@ const AuthenticatedConfiguracoesIntegracoesRoute =
     path: '/configuracoes/integracoes',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedConfiguracoesZenviaRoute =
+  AuthenticatedConfiguracoesZenviaRouteImport.update({
+    id: '/configuracoes/zenvia',
+    path: '/configuracoes/zenvia',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedContaSegurancaRoute =
   AuthenticatedContaSegurancaRouteImport.update({
     id: '/conta/seguranca',
@@ -143,6 +156,30 @@ const AuthenticatedDisparoNovoRoute =
   AuthenticatedDisparoNovoRouteImport.update({
     id: '/disparo/novo',
     path: '/disparo/novo',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedReguaCobrancaIndexRoute =
+  AuthenticatedReguaCobrancaIndexRouteImport.update({
+    id: '/regua-cobranca/',
+    path: '/regua-cobranca/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedReguaCobrancaConfiguracoesRoute =
+  AuthenticatedReguaCobrancaConfiguracoesRouteImport.update({
+    id: '/regua-cobranca/configuracoes',
+    path: '/regua-cobranca/configuracoes',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedReguaCobrancaNovoRoute =
+  AuthenticatedReguaCobrancaNovoRouteImport.update({
+    id: '/regua-cobranca/novo',
+    path: '/regua-cobranca/novo',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedReguaCobrancaTemplatesRoute =
+  AuthenticatedReguaCobrancaTemplatesRouteImport.update({
+    id: '/regua-cobranca/templates',
+    path: '/regua-cobranca/templates',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedRelatoriosIndexRoute =
@@ -211,6 +248,18 @@ const AuthenticatedDisparoNovoVerificacaoRoute =
     path: '/verificacao',
     getParentRoute: () => AuthenticatedDisparoNovoRoute,
   } as any)
+const AuthenticatedReguaCobrancaLotesIndexRoute =
+  AuthenticatedReguaCobrancaLotesIndexRouteImport.update({
+    id: '/regua-cobranca/lotes/',
+    path: '/regua-cobranca/lotes/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedReguaCobrancaLotesLoteIdRoute =
+  AuthenticatedReguaCobrancaLotesLoteIdRouteImport.update({
+    id: '/regua-cobranca/lotes/$loteId',
+    path: '/regua-cobranca/lotes/$loteId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -219,7 +268,6 @@ export interface FileRoutesByFullPath {
   '/campanhas': typeof AuthenticatedCampanhasRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/home': typeof AuthenticatedHomeRoute
-  '/regua-cobranca': typeof AuthenticatedReguaCobrancaRoute
   '/admin/$': typeof AuthenticatedAdminSplatRoute
   '/administracao/logs': typeof AuthenticatedAdministracaoLogsRoute
   '/administracao/perfis': typeof AuthenticatedAdministracaoPerfisRoute
@@ -227,12 +275,18 @@ export interface FileRoutesByFullPath {
   '/administracao/privacidade': typeof AuthenticatedAdministracaoPrivacidadeRoute
   '/administracao/usuarios': typeof AuthenticatedAdministracaoUsuariosRoute
   '/configuracoes/docusign': typeof AuthenticatedConfiguracoesDocusignRoute
+  '/configuracoes/email': typeof AuthenticatedConfiguracoesEmailRoute
   '/configuracoes/gateway': typeof AuthenticatedConfiguracoesGatewayRoute
   '/configuracoes/integracoes': typeof AuthenticatedConfiguracoesIntegracoesRoute
+  '/configuracoes/zenvia': typeof AuthenticatedConfiguracoesZenviaRoute
   '/conta/seguranca': typeof AuthenticatedContaSegurancaRoute
   '/disparo/novo': typeof AuthenticatedDisparoNovoRouteWithChildren
+  '/regua-cobranca/configuracoes': typeof AuthenticatedReguaCobrancaConfiguracoesRoute
+  '/regua-cobranca/novo': typeof AuthenticatedReguaCobrancaNovoRoute
+  '/regua-cobranca/templates': typeof AuthenticatedReguaCobrancaTemplatesRoute
   '/relatorios/$campanhaId': typeof AuthenticatedRelatoriosCampanhaIdRoute
   '/treinamento/disparo-em-massa': typeof AuthenticatedTreinamentoDisparoEmMassaRoute
+  '/regua-cobranca/': typeof AuthenticatedReguaCobrancaIndexRoute
   '/relatorios/': typeof AuthenticatedRelatoriosIndexRoute
   '/treinamento/': typeof AuthenticatedTreinamentoIndexRoute
   '/disparo/novo/assinatura': typeof AuthenticatedDisparoNovoAssinaturaRoute
@@ -241,7 +295,9 @@ export interface FileRoutesByFullPath {
   '/disparo/novo/origem': typeof AuthenticatedDisparoNovoOrigemRoute
   '/disparo/novo/revisao': typeof AuthenticatedDisparoNovoRevisaoRoute
   '/disparo/novo/verificacao': typeof AuthenticatedDisparoNovoVerificacaoRoute
+  '/regua-cobranca/lotes/$loteId': typeof AuthenticatedReguaCobrancaLotesLoteIdRoute
   '/disparo/novo/': typeof AuthenticatedDisparoNovoIndexRoute
+  '/regua-cobranca/lotes/': typeof AuthenticatedReguaCobrancaLotesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -250,7 +306,6 @@ export interface FileRoutesByTo {
   '/campanhas': typeof AuthenticatedCampanhasRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/home': typeof AuthenticatedHomeRoute
-  '/regua-cobranca': typeof AuthenticatedReguaCobrancaRoute
   '/admin/$': typeof AuthenticatedAdminSplatRoute
   '/administracao/logs': typeof AuthenticatedAdministracaoLogsRoute
   '/administracao/perfis': typeof AuthenticatedAdministracaoPerfisRoute
@@ -258,11 +313,17 @@ export interface FileRoutesByTo {
   '/administracao/privacidade': typeof AuthenticatedAdministracaoPrivacidadeRoute
   '/administracao/usuarios': typeof AuthenticatedAdministracaoUsuariosRoute
   '/configuracoes/docusign': typeof AuthenticatedConfiguracoesDocusignRoute
+  '/configuracoes/email': typeof AuthenticatedConfiguracoesEmailRoute
   '/configuracoes/gateway': typeof AuthenticatedConfiguracoesGatewayRoute
   '/configuracoes/integracoes': typeof AuthenticatedConfiguracoesIntegracoesRoute
+  '/configuracoes/zenvia': typeof AuthenticatedConfiguracoesZenviaRoute
   '/conta/seguranca': typeof AuthenticatedContaSegurancaRoute
+  '/regua-cobranca/configuracoes': typeof AuthenticatedReguaCobrancaConfiguracoesRoute
+  '/regua-cobranca/novo': typeof AuthenticatedReguaCobrancaNovoRoute
+  '/regua-cobranca/templates': typeof AuthenticatedReguaCobrancaTemplatesRoute
   '/relatorios/$campanhaId': typeof AuthenticatedRelatoriosCampanhaIdRoute
   '/treinamento/disparo-em-massa': typeof AuthenticatedTreinamentoDisparoEmMassaRoute
+  '/regua-cobranca': typeof AuthenticatedReguaCobrancaIndexRoute
   '/relatorios': typeof AuthenticatedRelatoriosIndexRoute
   '/treinamento': typeof AuthenticatedTreinamentoIndexRoute
   '/disparo/novo/assinatura': typeof AuthenticatedDisparoNovoAssinaturaRoute
@@ -271,7 +332,9 @@ export interface FileRoutesByTo {
   '/disparo/novo/origem': typeof AuthenticatedDisparoNovoOrigemRoute
   '/disparo/novo/revisao': typeof AuthenticatedDisparoNovoRevisaoRoute
   '/disparo/novo/verificacao': typeof AuthenticatedDisparoNovoVerificacaoRoute
+  '/regua-cobranca/lotes/$loteId': typeof AuthenticatedReguaCobrancaLotesLoteIdRoute
   '/disparo/novo': typeof AuthenticatedDisparoNovoIndexRoute
+  '/regua-cobranca/lotes': typeof AuthenticatedReguaCobrancaLotesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -282,7 +345,6 @@ export interface FileRoutesById {
   '/_authenticated/campanhas': typeof AuthenticatedCampanhasRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
-  '/_authenticated/regua-cobranca': typeof AuthenticatedReguaCobrancaRoute
   '/_authenticated/admin/$': typeof AuthenticatedAdminSplatRoute
   '/_authenticated/administracao/logs': typeof AuthenticatedAdministracaoLogsRoute
   '/_authenticated/administracao/perfis': typeof AuthenticatedAdministracaoPerfisRoute
@@ -290,12 +352,18 @@ export interface FileRoutesById {
   '/_authenticated/administracao/privacidade': typeof AuthenticatedAdministracaoPrivacidadeRoute
   '/_authenticated/administracao/usuarios': typeof AuthenticatedAdministracaoUsuariosRoute
   '/_authenticated/configuracoes/docusign': typeof AuthenticatedConfiguracoesDocusignRoute
+  '/_authenticated/configuracoes/email': typeof AuthenticatedConfiguracoesEmailRoute
   '/_authenticated/configuracoes/gateway': typeof AuthenticatedConfiguracoesGatewayRoute
   '/_authenticated/configuracoes/integracoes': typeof AuthenticatedConfiguracoesIntegracoesRoute
+  '/_authenticated/configuracoes/zenvia': typeof AuthenticatedConfiguracoesZenviaRoute
   '/_authenticated/conta/seguranca': typeof AuthenticatedContaSegurancaRoute
   '/_authenticated/disparo/novo': typeof AuthenticatedDisparoNovoRouteWithChildren
+  '/_authenticated/regua-cobranca/configuracoes': typeof AuthenticatedReguaCobrancaConfiguracoesRoute
+  '/_authenticated/regua-cobranca/novo': typeof AuthenticatedReguaCobrancaNovoRoute
+  '/_authenticated/regua-cobranca/templates': typeof AuthenticatedReguaCobrancaTemplatesRoute
   '/_authenticated/relatorios/$campanhaId': typeof AuthenticatedRelatoriosCampanhaIdRoute
   '/_authenticated/treinamento/disparo-em-massa': typeof AuthenticatedTreinamentoDisparoEmMassaRoute
+  '/_authenticated/regua-cobranca/': typeof AuthenticatedReguaCobrancaIndexRoute
   '/_authenticated/relatorios/': typeof AuthenticatedRelatoriosIndexRoute
   '/_authenticated/treinamento/': typeof AuthenticatedTreinamentoIndexRoute
   '/_authenticated/disparo/novo/assinatura': typeof AuthenticatedDisparoNovoAssinaturaRoute
@@ -304,7 +372,9 @@ export interface FileRoutesById {
   '/_authenticated/disparo/novo/origem': typeof AuthenticatedDisparoNovoOrigemRoute
   '/_authenticated/disparo/novo/revisao': typeof AuthenticatedDisparoNovoRevisaoRoute
   '/_authenticated/disparo/novo/verificacao': typeof AuthenticatedDisparoNovoVerificacaoRoute
+  '/_authenticated/regua-cobranca/lotes/$loteId': typeof AuthenticatedReguaCobrancaLotesLoteIdRoute
   '/_authenticated/disparo/novo/': typeof AuthenticatedDisparoNovoIndexRoute
+  '/_authenticated/regua-cobranca/lotes/': typeof AuthenticatedReguaCobrancaLotesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -315,7 +385,6 @@ export interface FileRouteTypes {
     | '/campanhas'
     | '/dashboard'
     | '/home'
-    | '/regua-cobranca'
     | '/admin/$'
     | '/administracao/logs'
     | '/administracao/perfis'
@@ -323,12 +392,18 @@ export interface FileRouteTypes {
     | '/administracao/privacidade'
     | '/administracao/usuarios'
     | '/configuracoes/docusign'
+    | '/configuracoes/email'
     | '/configuracoes/gateway'
     | '/configuracoes/integracoes'
+    | '/configuracoes/zenvia'
     | '/conta/seguranca'
     | '/disparo/novo'
+    | '/regua-cobranca/configuracoes'
+    | '/regua-cobranca/novo'
+    | '/regua-cobranca/templates'
     | '/relatorios/$campanhaId'
     | '/treinamento/disparo-em-massa'
+    | '/regua-cobranca/'
     | '/relatorios/'
     | '/treinamento/'
     | '/disparo/novo/assinatura'
@@ -337,7 +412,9 @@ export interface FileRouteTypes {
     | '/disparo/novo/origem'
     | '/disparo/novo/revisao'
     | '/disparo/novo/verificacao'
+    | '/regua-cobranca/lotes/$loteId'
     | '/disparo/novo/'
+    | '/regua-cobranca/lotes/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -346,7 +423,6 @@ export interface FileRouteTypes {
     | '/campanhas'
     | '/dashboard'
     | '/home'
-    | '/regua-cobranca'
     | '/admin/$'
     | '/administracao/logs'
     | '/administracao/perfis'
@@ -354,11 +430,17 @@ export interface FileRouteTypes {
     | '/administracao/privacidade'
     | '/administracao/usuarios'
     | '/configuracoes/docusign'
+    | '/configuracoes/email'
     | '/configuracoes/gateway'
     | '/configuracoes/integracoes'
+    | '/configuracoes/zenvia'
     | '/conta/seguranca'
+    | '/regua-cobranca/configuracoes'
+    | '/regua-cobranca/novo'
+    | '/regua-cobranca/templates'
     | '/relatorios/$campanhaId'
     | '/treinamento/disparo-em-massa'
+    | '/regua-cobranca'
     | '/relatorios'
     | '/treinamento'
     | '/disparo/novo/assinatura'
@@ -367,7 +449,9 @@ export interface FileRouteTypes {
     | '/disparo/novo/origem'
     | '/disparo/novo/revisao'
     | '/disparo/novo/verificacao'
+    | '/regua-cobranca/lotes/$loteId'
     | '/disparo/novo'
+    | '/regua-cobranca/lotes'
   id:
     | '__root__'
     | '/'
@@ -377,7 +461,6 @@ export interface FileRouteTypes {
     | '/_authenticated/campanhas'
     | '/_authenticated/dashboard'
     | '/_authenticated/home'
-    | '/_authenticated/regua-cobranca'
     | '/_authenticated/admin/$'
     | '/_authenticated/administracao/logs'
     | '/_authenticated/administracao/perfis'
@@ -385,12 +468,18 @@ export interface FileRouteTypes {
     | '/_authenticated/administracao/privacidade'
     | '/_authenticated/administracao/usuarios'
     | '/_authenticated/configuracoes/docusign'
+    | '/_authenticated/configuracoes/email'
     | '/_authenticated/configuracoes/gateway'
     | '/_authenticated/configuracoes/integracoes'
+    | '/_authenticated/configuracoes/zenvia'
     | '/_authenticated/conta/seguranca'
     | '/_authenticated/disparo/novo'
+    | '/_authenticated/regua-cobranca/configuracoes'
+    | '/_authenticated/regua-cobranca/novo'
+    | '/_authenticated/regua-cobranca/templates'
     | '/_authenticated/relatorios/$campanhaId'
     | '/_authenticated/treinamento/disparo-em-massa'
+    | '/_authenticated/regua-cobranca/'
     | '/_authenticated/relatorios/'
     | '/_authenticated/treinamento/'
     | '/_authenticated/disparo/novo/assinatura'
@@ -399,7 +488,9 @@ export interface FileRouteTypes {
     | '/_authenticated/disparo/novo/origem'
     | '/_authenticated/disparo/novo/revisao'
     | '/_authenticated/disparo/novo/verificacao'
+    | '/_authenticated/regua-cobranca/lotes/$loteId'
     | '/_authenticated/disparo/novo/'
+    | '/_authenticated/regua-cobranca/lotes/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -460,13 +551,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedHomeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/regua-cobranca': {
-      id: '/_authenticated/regua-cobranca'
-      path: '/regua-cobranca'
-      fullPath: '/regua-cobranca'
-      preLoaderRoute: typeof AuthenticatedReguaCobrancaRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/admin/$': {
       id: '/_authenticated/admin/$'
       path: '/admin/$'
@@ -516,6 +600,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedConfiguracoesDocusignRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/configuracoes/email': {
+      id: '/_authenticated/configuracoes/email'
+      path: '/configuracoes/email'
+      fullPath: '/configuracoes/email'
+      preLoaderRoute: typeof AuthenticatedConfiguracoesEmailRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/configuracoes/gateway': {
       id: '/_authenticated/configuracoes/gateway'
       path: '/configuracoes/gateway'
@@ -530,6 +621,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedConfiguracoesIntegracoesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/configuracoes/zenvia': {
+      id: '/_authenticated/configuracoes/zenvia'
+      path: '/configuracoes/zenvia'
+      fullPath: '/configuracoes/zenvia'
+      preLoaderRoute: typeof AuthenticatedConfiguracoesZenviaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/conta/seguranca': {
       id: '/_authenticated/conta/seguranca'
       path: '/conta/seguranca'
@@ -542,6 +640,34 @@ declare module '@tanstack/react-router' {
       path: '/disparo/novo'
       fullPath: '/disparo/novo'
       preLoaderRoute: typeof AuthenticatedDisparoNovoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/regua-cobranca/': {
+      id: '/_authenticated/regua-cobranca/'
+      path: '/regua-cobranca'
+      fullPath: '/regua-cobranca/'
+      preLoaderRoute: typeof AuthenticatedReguaCobrancaIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/regua-cobranca/configuracoes': {
+      id: '/_authenticated/regua-cobranca/configuracoes'
+      path: '/regua-cobranca/configuracoes'
+      fullPath: '/regua-cobranca/configuracoes'
+      preLoaderRoute: typeof AuthenticatedReguaCobrancaConfiguracoesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/regua-cobranca/novo': {
+      id: '/_authenticated/regua-cobranca/novo'
+      path: '/regua-cobranca/novo'
+      fullPath: '/regua-cobranca/novo'
+      preLoaderRoute: typeof AuthenticatedReguaCobrancaNovoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/regua-cobranca/templates': {
+      id: '/_authenticated/regua-cobranca/templates'
+      path: '/regua-cobranca/templates'
+      fullPath: '/regua-cobranca/templates'
+      preLoaderRoute: typeof AuthenticatedReguaCobrancaTemplatesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/relatorios/': {
@@ -621,6 +747,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDisparoNovoVerificacaoRouteImport
       parentRoute: typeof AuthenticatedDisparoNovoRoute
     }
+    '/_authenticated/regua-cobranca/lotes/': {
+      id: '/_authenticated/regua-cobranca/lotes/'
+      path: '/regua-cobranca/lotes'
+      fullPath: '/regua-cobranca/lotes/'
+      preLoaderRoute: typeof AuthenticatedReguaCobrancaLotesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/regua-cobranca/lotes/$loteId': {
+      id: '/_authenticated/regua-cobranca/lotes/$loteId'
+      path: '/regua-cobranca/lotes/$loteId'
+      fullPath: '/regua-cobranca/lotes/$loteId'
+      preLoaderRoute: typeof AuthenticatedReguaCobrancaLotesLoteIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -657,7 +797,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCampanhasRoute: typeof AuthenticatedCampanhasRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
-  AuthenticatedReguaCobrancaRoute: typeof AuthenticatedReguaCobrancaRoute
   AuthenticatedAdminSplatRoute: typeof AuthenticatedAdminSplatRoute
   AuthenticatedAdministracaoLogsRoute: typeof AuthenticatedAdministracaoLogsRoute
   AuthenticatedAdministracaoPerfisRoute: typeof AuthenticatedAdministracaoPerfisRoute
@@ -665,21 +804,28 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdministracaoPrivacidadeRoute: typeof AuthenticatedAdministracaoPrivacidadeRoute
   AuthenticatedAdministracaoUsuariosRoute: typeof AuthenticatedAdministracaoUsuariosRoute
   AuthenticatedConfiguracoesDocusignRoute: typeof AuthenticatedConfiguracoesDocusignRoute
+  AuthenticatedConfiguracoesEmailRoute: typeof AuthenticatedConfiguracoesEmailRoute
   AuthenticatedConfiguracoesGatewayRoute: typeof AuthenticatedConfiguracoesGatewayRoute
   AuthenticatedConfiguracoesIntegracoesRoute: typeof AuthenticatedConfiguracoesIntegracoesRoute
+  AuthenticatedConfiguracoesZenviaRoute: typeof AuthenticatedConfiguracoesZenviaRoute
   AuthenticatedContaSegurancaRoute: typeof AuthenticatedContaSegurancaRoute
   AuthenticatedDisparoNovoRoute: typeof AuthenticatedDisparoNovoRouteWithChildren
+  AuthenticatedReguaCobrancaConfiguracoesRoute: typeof AuthenticatedReguaCobrancaConfiguracoesRoute
+  AuthenticatedReguaCobrancaNovoRoute: typeof AuthenticatedReguaCobrancaNovoRoute
+  AuthenticatedReguaCobrancaTemplatesRoute: typeof AuthenticatedReguaCobrancaTemplatesRoute
   AuthenticatedRelatoriosCampanhaIdRoute: typeof AuthenticatedRelatoriosCampanhaIdRoute
   AuthenticatedTreinamentoDisparoEmMassaRoute: typeof AuthenticatedTreinamentoDisparoEmMassaRoute
+  AuthenticatedReguaCobrancaIndexRoute: typeof AuthenticatedReguaCobrancaIndexRoute
   AuthenticatedRelatoriosIndexRoute: typeof AuthenticatedRelatoriosIndexRoute
   AuthenticatedTreinamentoIndexRoute: typeof AuthenticatedTreinamentoIndexRoute
+  AuthenticatedReguaCobrancaLotesLoteIdRoute: typeof AuthenticatedReguaCobrancaLotesLoteIdRoute
+  AuthenticatedReguaCobrancaLotesIndexRoute: typeof AuthenticatedReguaCobrancaLotesIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCampanhasRoute: AuthenticatedCampanhasRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
-  AuthenticatedReguaCobrancaRoute: AuthenticatedReguaCobrancaRoute,
   AuthenticatedAdminSplatRoute: AuthenticatedAdminSplatRoute,
   AuthenticatedAdministracaoLogsRoute: AuthenticatedAdministracaoLogsRoute,
   AuthenticatedAdministracaoPerfisRoute: AuthenticatedAdministracaoPerfisRoute,
@@ -691,18 +837,30 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedAdministracaoUsuariosRoute,
   AuthenticatedConfiguracoesDocusignRoute:
     AuthenticatedConfiguracoesDocusignRoute,
+  AuthenticatedConfiguracoesEmailRoute: AuthenticatedConfiguracoesEmailRoute,
   AuthenticatedConfiguracoesGatewayRoute:
     AuthenticatedConfiguracoesGatewayRoute,
   AuthenticatedConfiguracoesIntegracoesRoute:
     AuthenticatedConfiguracoesIntegracoesRoute,
+  AuthenticatedConfiguracoesZenviaRoute: AuthenticatedConfiguracoesZenviaRoute,
   AuthenticatedContaSegurancaRoute: AuthenticatedContaSegurancaRoute,
   AuthenticatedDisparoNovoRoute: AuthenticatedDisparoNovoRouteWithChildren,
+  AuthenticatedReguaCobrancaConfiguracoesRoute:
+    AuthenticatedReguaCobrancaConfiguracoesRoute,
+  AuthenticatedReguaCobrancaNovoRoute: AuthenticatedReguaCobrancaNovoRoute,
+  AuthenticatedReguaCobrancaTemplatesRoute:
+    AuthenticatedReguaCobrancaTemplatesRoute,
   AuthenticatedRelatoriosCampanhaIdRoute:
     AuthenticatedRelatoriosCampanhaIdRoute,
   AuthenticatedTreinamentoDisparoEmMassaRoute:
     AuthenticatedTreinamentoDisparoEmMassaRoute,
+  AuthenticatedReguaCobrancaIndexRoute: AuthenticatedReguaCobrancaIndexRoute,
   AuthenticatedRelatoriosIndexRoute: AuthenticatedRelatoriosIndexRoute,
   AuthenticatedTreinamentoIndexRoute: AuthenticatedTreinamentoIndexRoute,
+  AuthenticatedReguaCobrancaLotesLoteIdRoute:
+    AuthenticatedReguaCobrancaLotesLoteIdRoute,
+  AuthenticatedReguaCobrancaLotesIndexRoute:
+    AuthenticatedReguaCobrancaLotesIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

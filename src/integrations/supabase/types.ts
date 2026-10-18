@@ -343,6 +343,77 @@ export type Database = {
           },
         ]
       }
+      email_provedor: {
+        Row: {
+          ativo: boolean
+          atualizado_em: string
+          atualizado_por: string | null
+          credencial_testada_em: string | null
+          dominio: string | null
+          dominio_id_provedor: string | null
+          dominio_verificado_em: string | null
+          imobiliaria_id: string
+          registros_dns: Json
+          remetente_email: string | null
+          remetente_nome: string | null
+          reply_to: string | null
+          smtp_host: string | null
+          smtp_porta: number | null
+          smtp_seguro: boolean
+          smtp_usuario: string | null
+          status_dominio: string | null
+          tipo: string
+        }
+        Insert: {
+          ativo?: boolean
+          atualizado_em?: string
+          atualizado_por?: string | null
+          credencial_testada_em?: string | null
+          dominio?: string | null
+          dominio_id_provedor?: string | null
+          dominio_verificado_em?: string | null
+          imobiliaria_id: string
+          registros_dns?: Json
+          remetente_email?: string | null
+          remetente_nome?: string | null
+          reply_to?: string | null
+          smtp_host?: string | null
+          smtp_porta?: number | null
+          smtp_seguro?: boolean
+          smtp_usuario?: string | null
+          status_dominio?: string | null
+          tipo?: string
+        }
+        Update: {
+          ativo?: boolean
+          atualizado_em?: string
+          atualizado_por?: string | null
+          credencial_testada_em?: string | null
+          dominio?: string | null
+          dominio_id_provedor?: string | null
+          dominio_verificado_em?: string | null
+          imobiliaria_id?: string
+          registros_dns?: Json
+          remetente_email?: string | null
+          remetente_nome?: string | null
+          reply_to?: string | null
+          smtp_host?: string | null
+          smtp_porta?: number | null
+          smtp_seguro?: boolean
+          smtp_usuario?: string | null
+          status_dominio?: string | null
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_provedor_imobiliaria_id_fkey"
+            columns: ["imobiliaria_id"]
+            isOneToOne: true
+            referencedRelation: "imobiliarias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gateway_call_log: {
         Row: {
           api_id: string | null
@@ -497,6 +568,44 @@ export type Database = {
           },
         ]
       }
+      integracao_zenvia: {
+        Row: {
+          atualizado_em: string
+          atualizado_por: string | null
+          imobiliaria_id: string
+          status_conexao: string
+          testado_em: string | null
+          teste_resumo: Json
+          webhook_ids: Json
+        }
+        Insert: {
+          atualizado_em?: string
+          atualizado_por?: string | null
+          imobiliaria_id: string
+          status_conexao?: string
+          testado_em?: string | null
+          teste_resumo?: Json
+          webhook_ids?: Json
+        }
+        Update: {
+          atualizado_em?: string
+          atualizado_por?: string | null
+          imobiliaria_id?: string
+          status_conexao?: string
+          testado_em?: string | null
+          teste_resumo?: Json
+          webhook_ids?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integracao_zenvia_imobiliaria_id_fkey"
+            columns: ["imobiliaria_id"]
+            isOneToOne: true
+            referencedRelation: "imobiliarias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       perfil_permissoes: {
         Row: {
           atualizado_em: string
@@ -577,6 +686,457 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "imobiliarias"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      regua_boleto: {
+        Row: {
+          anonimizado_em: string | null
+          atualizado_em: string
+          cliente_codigo: string | null
+          cliente_nome: string
+          cpf_cnpj: string | null
+          criado_em: string
+          dados: Json
+          dias_atraso: number | null
+          empreendimento: string | null
+          id: string
+          imobiliaria_id: string
+          incluido: boolean
+          linha_digitavel: string | null
+          lote_id: string
+          numero: string
+          status_geral: string
+          status_registro_banco: string
+          unidade: string | null
+          valor: number | null
+          vencimento: string | null
+        }
+        Insert: {
+          anonimizado_em?: string | null
+          atualizado_em?: string
+          cliente_codigo?: string | null
+          cliente_nome: string
+          cpf_cnpj?: string | null
+          criado_em?: string
+          dados?: Json
+          dias_atraso?: number | null
+          empreendimento?: string | null
+          id?: string
+          imobiliaria_id: string
+          incluido?: boolean
+          linha_digitavel?: string | null
+          lote_id: string
+          numero: string
+          status_geral?: string
+          status_registro_banco?: string
+          unidade?: string | null
+          valor?: number | null
+          vencimento?: string | null
+        }
+        Update: {
+          anonimizado_em?: string | null
+          atualizado_em?: string
+          cliente_codigo?: string | null
+          cliente_nome?: string
+          cpf_cnpj?: string | null
+          criado_em?: string
+          dados?: Json
+          dias_atraso?: number | null
+          empreendimento?: string | null
+          id?: string
+          imobiliaria_id?: string
+          incluido?: boolean
+          linha_digitavel?: string | null
+          lote_id?: string
+          numero?: string
+          status_geral?: string
+          status_registro_banco?: string
+          unidade?: string | null
+          valor?: number | null
+          vencimento?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "regua_boleto_lote_id_imobiliaria_id_fkey"
+            columns: ["lote_id", "imobiliaria_id"]
+            isOneToOne: false
+            referencedRelation: "regua_lote"
+            referencedColumns: ["id", "imobiliaria_id"]
+          },
+        ]
+      }
+      regua_config: {
+        Row: {
+          atualizado_em: string
+          atualizado_por: string | null
+          imobiliaria_id: string
+          intervalo_whatsapp_seg: number
+          regra_senha: string
+          texto_dica: string
+          validade_link_horas: number
+        }
+        Insert: {
+          atualizado_em?: string
+          atualizado_por?: string | null
+          imobiliaria_id: string
+          intervalo_whatsapp_seg?: number
+          regra_senha?: string
+          texto_dica?: string
+          validade_link_horas?: number
+        }
+        Update: {
+          atualizado_em?: string
+          atualizado_por?: string | null
+          imobiliaria_id?: string
+          intervalo_whatsapp_seg?: number
+          regra_senha?: string
+          texto_dica?: string
+          validade_link_horas?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "regua_config_imobiliaria_id_fkey"
+            columns: ["imobiliaria_id"]
+            isOneToOne: true
+            referencedRelation: "imobiliarias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      regua_contato: {
+        Row: {
+          boleto_id: string
+          canal: string
+          id: string
+          imobiliaria_id: string
+          status_validacao: string
+          validado_em: string
+          valor: string | null
+        }
+        Insert: {
+          boleto_id: string
+          canal: string
+          id?: string
+          imobiliaria_id: string
+          status_validacao: string
+          validado_em?: string
+          valor?: string | null
+        }
+        Update: {
+          boleto_id?: string
+          canal?: string
+          id?: string
+          imobiliaria_id?: string
+          status_validacao?: string
+          validado_em?: string
+          valor?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "regua_contato_boleto_id_imobiliaria_id_fkey"
+            columns: ["boleto_id", "imobiliaria_id"]
+            isOneToOne: false
+            referencedRelation: "regua_boleto"
+            referencedColumns: ["id", "imobiliaria_id"]
+          },
+        ]
+      }
+      regua_documento: {
+        Row: {
+          boleto_id: string
+          criado_em: string
+          expira_em: string
+          id: string
+          imobiliaria_id: string
+          protegido: boolean
+          removido_em: string | null
+          storage_path: string
+          tamanho_bytes: number | null
+        }
+        Insert: {
+          boleto_id: string
+          criado_em?: string
+          expira_em: string
+          id?: string
+          imobiliaria_id: string
+          protegido?: boolean
+          removido_em?: string | null
+          storage_path: string
+          tamanho_bytes?: number | null
+        }
+        Update: {
+          boleto_id?: string
+          criado_em?: string
+          expira_em?: string
+          id?: string
+          imobiliaria_id?: string
+          protegido?: boolean
+          removido_em?: string | null
+          storage_path?: string
+          tamanho_bytes?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "regua_documento_boleto_id_imobiliaria_id_fkey"
+            columns: ["boleto_id", "imobiliaria_id"]
+            isOneToOne: false
+            referencedRelation: "regua_boleto"
+            referencedColumns: ["id", "imobiliaria_id"]
+          },
+        ]
+      }
+      regua_lote: {
+        Row: {
+          atualizado_em: string
+          canais: string[]
+          cancelado_em: string | null
+          contadores: Json
+          criado_em: string
+          faixa_atraso: string | null
+          filtros: Json
+          finalizado_em: string | null
+          id: string
+          imobiliaria_id: string
+          iniciado_em: string | null
+          justificativa: string | null
+          numero: number
+          observacao: string | null
+          origem: string
+          periodo_vencimento: unknown | null
+          status: string
+          template_email_id: string | null
+          template_whatsapp_id: string | null
+          tipo: string
+          tipo_regua: string
+          titulo: string
+          usuario_id: string
+          usuario_nome: string | null
+        }
+        Insert: {
+          atualizado_em?: string
+          canais: string[]
+          cancelado_em?: string | null
+          contadores?: Json
+          criado_em?: string
+          faixa_atraso?: string | null
+          filtros?: Json
+          finalizado_em?: string | null
+          id?: string
+          imobiliaria_id: string
+          iniciado_em?: string | null
+          justificativa?: string | null
+          numero?: number
+          observacao?: string | null
+          origem: string
+          periodo_vencimento?: unknown | null
+          status?: string
+          template_email_id?: string | null
+          template_whatsapp_id?: string | null
+          tipo?: string
+          tipo_regua: string
+          titulo: string
+          usuario_id: string
+          usuario_nome?: string | null
+        }
+        Update: {
+          atualizado_em?: string
+          canais?: string[]
+          cancelado_em?: string | null
+          contadores?: Json
+          criado_em?: string
+          faixa_atraso?: string | null
+          filtros?: Json
+          finalizado_em?: string | null
+          id?: string
+          imobiliaria_id?: string
+          iniciado_em?: string | null
+          justificativa?: string | null
+          numero?: number
+          observacao?: string | null
+          origem?: string
+          periodo_vencimento?: unknown | null
+          status?: string
+          template_email_id?: string | null
+          template_whatsapp_id?: string | null
+          tipo?: string
+          tipo_regua?: string
+          titulo?: string
+          usuario_id?: string
+          usuario_nome?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "regua_lote_imobiliaria_id_fkey"
+            columns: ["imobiliaria_id"]
+            isOneToOne: false
+            referencedRelation: "imobiliarias"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "regua_lote_template_email_id_imobiliaria_id_fkey"
+            columns: ["template_email_id", "imobiliaria_id"]
+            isOneToOne: false
+            referencedRelation: "regua_template"
+            referencedColumns: ["id", "imobiliaria_id"]
+          },
+          {
+            foreignKeyName: "regua_lote_template_whatsapp_id_imobiliaria_id_fkey"
+            columns: ["template_whatsapp_id", "imobiliaria_id"]
+            isOneToOne: false
+            referencedRelation: "regua_template"
+            referencedColumns: ["id", "imobiliaria_id"]
+          },
+        ]
+      }
+      regua_template: {
+        Row: {
+          anexo_tipo: string
+          assunto: string | null
+          ativo: boolean
+          atualizado_em: string
+          atualizado_por: string | null
+          canal: string
+          corpo: string | null
+          criado_em: string
+          id: string
+          imobiliaria_id: string
+          mapa_variaveis: Json
+          nome: string
+          regua_sugerida: string | null
+          remetente_id: string | null
+          usa_documento: boolean
+          whatsapp_template_id: string | null
+        }
+        Insert: {
+          anexo_tipo?: string
+          assunto?: string | null
+          ativo?: boolean
+          atualizado_em?: string
+          atualizado_por?: string | null
+          canal: string
+          corpo?: string | null
+          criado_em?: string
+          id?: string
+          imobiliaria_id: string
+          mapa_variaveis?: Json
+          nome: string
+          regua_sugerida?: string | null
+          remetente_id?: string | null
+          usa_documento?: boolean
+          whatsapp_template_id?: string | null
+        }
+        Update: {
+          anexo_tipo?: string
+          assunto?: string | null
+          ativo?: boolean
+          atualizado_em?: string
+          atualizado_por?: string | null
+          canal?: string
+          corpo?: string | null
+          criado_em?: string
+          id?: string
+          imobiliaria_id?: string
+          mapa_variaveis?: Json
+          nome?: string
+          regua_sugerida?: string | null
+          remetente_id?: string | null
+          usa_documento?: boolean
+          whatsapp_template_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "regua_template_imobiliaria_id_fkey"
+            columns: ["imobiliaria_id"]
+            isOneToOne: false
+            referencedRelation: "imobiliarias"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "regua_template_remetente_id_imobiliaria_id_fkey"
+            columns: ["remetente_id", "imobiliaria_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_remetente"
+            referencedColumns: ["id", "imobiliaria_id"]
+          },
+          {
+            foreignKeyName: "regua_template_whatsapp_template_id_imobiliaria_id_fkey"
+            columns: ["whatsapp_template_id", "imobiliaria_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_template"
+            referencedColumns: ["id", "imobiliaria_id"]
+          },
+        ]
+      }
+      regua_tentativa: {
+        Row: {
+          atualizado_em: string
+          boleto_id: string
+          canal: string
+          criado_em: string
+          entregue_em: string | null
+          erro: string | null
+          id: string
+          id_provedor: string | null
+          imobiliaria_id: string
+          lote_id: string
+          mensagem_renderizada: string | null
+          payload: Json | null
+          provedor: string | null
+          resposta: Json | null
+          status: string
+          tentado_em: string | null
+        }
+        Insert: {
+          atualizado_em?: string
+          boleto_id: string
+          canal: string
+          criado_em?: string
+          entregue_em?: string | null
+          erro?: string | null
+          id?: string
+          id_provedor?: string | null
+          imobiliaria_id: string
+          lote_id: string
+          mensagem_renderizada?: string | null
+          payload?: Json | null
+          provedor?: string | null
+          resposta?: Json | null
+          status?: string
+          tentado_em?: string | null
+        }
+        Update: {
+          atualizado_em?: string
+          boleto_id?: string
+          canal?: string
+          criado_em?: string
+          entregue_em?: string | null
+          erro?: string | null
+          id?: string
+          id_provedor?: string | null
+          imobiliaria_id?: string
+          lote_id?: string
+          mensagem_renderizada?: string | null
+          payload?: Json | null
+          provedor?: string | null
+          resposta?: Json | null
+          status?: string
+          tentado_em?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "regua_tentativa_boleto_id_imobiliaria_id_fkey"
+            columns: ["boleto_id", "imobiliaria_id"]
+            isOneToOne: false
+            referencedRelation: "regua_boleto"
+            referencedColumns: ["id", "imobiliaria_id"]
+          },
+          {
+            foreignKeyName: "regua_tentativa_lote_id_imobiliaria_id_fkey"
+            columns: ["lote_id", "imobiliaria_id"]
+            isOneToOne: false
+            referencedRelation: "regua_lote"
+            referencedColumns: ["id", "imobiliaria_id"]
           },
         ]
       }
@@ -927,6 +1487,144 @@ export type Database = {
           },
         ]
       }
+      whatsapp_remetente: {
+        Row: {
+          atualizado_em: string
+          criado_em: string
+          id: string
+          imobiliaria_id: string
+          na_conta: boolean
+          nome: string | null
+          numero: string
+          padrao_regua: boolean
+          setor: string | null
+          status: string
+        }
+        Insert: {
+          atualizado_em?: string
+          criado_em?: string
+          id?: string
+          imobiliaria_id: string
+          na_conta?: boolean
+          nome?: string | null
+          numero: string
+          padrao_regua?: boolean
+          setor?: string | null
+          status?: string
+        }
+        Update: {
+          atualizado_em?: string
+          criado_em?: string
+          id?: string
+          imobiliaria_id?: string
+          na_conta?: boolean
+          nome?: string | null
+          numero?: string
+          padrao_regua?: boolean
+          setor?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_remetente_imobiliaria_id_fkey"
+            columns: ["imobiliaria_id"]
+            isOneToOne: false
+            referencedRelation: "imobiliarias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whatsapp_template: {
+        Row: {
+          categoria: string | null
+          corpo: string | null
+          header_tipo: string | null
+          id: string
+          idioma: string | null
+          imobiliaria_id: string
+          nome: string
+          sender_id: string | null
+          sincronizado_em: string
+          status: string
+          variaveis: Json
+          zenvia_id: string
+        }
+        Insert: {
+          categoria?: string | null
+          corpo?: string | null
+          header_tipo?: string | null
+          id?: string
+          idioma?: string | null
+          imobiliaria_id: string
+          nome: string
+          sender_id?: string | null
+          sincronizado_em?: string
+          status: string
+          variaveis?: Json
+          zenvia_id: string
+        }
+        Update: {
+          categoria?: string | null
+          corpo?: string | null
+          header_tipo?: string | null
+          id?: string
+          idioma?: string | null
+          imobiliaria_id?: string
+          nome?: string
+          sender_id?: string | null
+          sincronizado_em?: string
+          status?: string
+          variaveis?: Json
+          zenvia_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_template_imobiliaria_id_fkey"
+            columns: ["imobiliaria_id"]
+            isOneToOne: false
+            referencedRelation: "imobiliarias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      zenvia_eventos: {
+        Row: {
+          id: string
+          imobiliaria_id: string
+          payload: Json
+          recebido_em: string
+          status: string | null
+          tipo: string
+          zenvia_id: string | null
+        }
+        Insert: {
+          id?: string
+          imobiliaria_id: string
+          payload: Json
+          recebido_em?: string
+          status?: string | null
+          tipo: string
+          zenvia_id?: string | null
+        }
+        Update: {
+          id?: string
+          imobiliaria_id?: string
+          payload?: Json
+          recebido_em?: string
+          status?: string | null
+          tipo?: string
+          zenvia_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zenvia_eventos_imobiliaria_id_fkey"
+            columns: ["imobiliaria_id"]
+            isOneToOne: false
+            referencedRelation: "imobiliarias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -1086,6 +1784,69 @@ export type Database = {
           enabled: boolean
         }[]
       }
+      regua_contadores: {
+        Args: {
+          p_lote: string
+        }
+        Returns: Json
+      }
+      regua_enviado_24h: {
+        Args: {
+          p_imobiliaria: string
+          p_numero: string
+          p_canal: string
+          p_ignorar_lote?: string | null
+        }
+        Returns: boolean
+      }
+      regua_liberar_presas: {
+        Args: {
+          p_imobiliaria: string
+          p_lote: string
+        }
+        Returns: number
+      }
+      regua_numeros_enviados_24h: {
+        Args: {
+          p_imobiliaria: string
+          p_numeros: string[]
+          p_canal: string
+        }
+        Returns: string[]
+      }
+      regua_painel: {
+        Args: {
+          p_imobiliaria: string
+          p_de: string
+          p_ate: string
+          p_empreendimento?: string | null
+          p_canal?: string | null
+          p_regua?: string | null
+          p_lote?: string | null
+          p_status?: string | null
+        }
+        Returns: Json
+      }
+      regua_recalcular_boleto: {
+        Args: {
+          p_boleto: string
+        }
+        Returns: string
+      }
+      regua_recalcular_lote: {
+        Args: {
+          p_lote: string
+        }
+        Returns: number
+      }
+      regua_reservar_tentativas: {
+        Args: {
+          p_imobiliaria: string
+          p_lote: string
+          p_limite: number
+        }
+        Returns: unknown[]
+      }
       rm_consulta_registrar: {
         Args: {
           p_imobiliaria: string
@@ -1135,6 +1896,12 @@ export type Database = {
           p_alteracoes: Json
         }
         Returns: number
+      }
+      segredo_nome_valido: {
+        Args: {
+          p_nome: string
+        }
+        Returns: boolean
       }
       sou_admin: {
         Args: never

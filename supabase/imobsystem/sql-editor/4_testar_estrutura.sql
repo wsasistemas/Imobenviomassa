@@ -54,8 +54,8 @@ begin
   r := r || format('%s 01 provisionou retenção e RM da imobiliária A', case when v_ok then 'ok    ' else 'FALHOU' end);
 
   v_ok := (select count(*) from imobenviomassa.perfil_permissoes where imobiliaria_id = c_a and perfil = 'analista') = 6
-      and (select count(*) from imobenviomassa.perfil_permissoes where imobiliaria_id = c_a and perfil = 'admin') = 9;
-  r := r || format('%s 02 regras iniciais: Analista com 6 liberações, Admin com 9', case when v_ok then 'ok    ' else 'FALHOU' end);
+      and (select count(*) from imobenviomassa.perfil_permissoes where imobiliaria_id = c_a and perfil = 'admin' and permission_id not like 'regua%') = 9;
+  r := r || format('%s 02 regras iniciais: Analista com 6 liberações, Admin com 9 (fora as da régua)', case when v_ok then 'ok    ' else 'FALHOU' end);
 
   v_ok := (select email from imobenviomassa.usuarios where id = c_a1) = 'teste.a1@imobenviomassa.test';
   r := r || format('%s 03 e-mail gravado em minúsculas', case when v_ok then 'ok    ' else 'FALHOU' end);
@@ -138,8 +138,10 @@ begin
   v_ok := imobenviomassa.salvar_permissoes_perfil((select chave from imobenviomassa.perfis where nome = 'Jurídico'),
             '[{"id":"ver_relatorios","enabled":true},{"id":"docusign","enabled":true}]') = 2;
   r := r || format('%s 18 A1 salva 2 permissões do perfil novo', case when coalesce(v_ok, false) then 'ok    ' else 'FALHOU' end);
-  v_ok := (select count(*) from imobenviomassa.listar_perfis()) = 4;
-  r := r || format('%s 19 listar_perfis da A traz 4 perfis', case when v_ok then 'ok    ' else 'FALHOU' end);
+  -- 3 do sistema + o Jurídico + os perfis do sistema que a 03 (Régua) acrescenta, se já aplicada.
+  v_ok := (select count(*) from imobenviomassa.listar_perfis())
+          = 4 + (select count(*) from imobenviomassa.perfis where sistema and chave not in ('super_admin', 'admin', 'analista'));
+  r := r || format('%s 19 listar_perfis da A traz os do sistema + o novo', case when v_ok then 'ok    ' else 'FALHOU' end);
   v_ok := (select count(*) from imobenviomassa.usuarios) = 2;
   r := r || format('%s 20 A1 vê os usuários da A, não os da B', case when v_ok then 'ok    ' else 'FALHOU' end);
 
