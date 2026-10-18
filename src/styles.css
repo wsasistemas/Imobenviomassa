@@ -1,0 +1,137 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Design system — mesmo padrão visual do Portal DP (Gestão de Pessoas · Calper)
+ * Vermelho Calper (#d6293b) + neutros, sidebar grafite (#17181c)
+ * Tipografia: Inter + IBM Plex Mono (números/códigos)
+ */
+
+@theme inline {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 2px);
+  --radius-2xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-dark: var(--primary-dark);
+  --color-primary-soft: var(--primary-soft);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-dimmer: var(--dimmer);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-soft: var(--warning-soft);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-info-soft: var(--info-soft);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+  --radius: 0.75rem;
+  color-scheme: light;
+
+  /* Fundo e superfícies */
+  --background: #f5f6f8;
+  --foreground: #17181c;
+  --card: #ffffff;
+  --card-foreground: #17181c;
+  --popover: #ffffff;
+  --popover-foreground: #17181c;
+
+  /* Primária — vermelho Calper */
+  --primary: #d6293b;
+  --primary-foreground: #ffffff;
+  --primary-dark: #a91d2c;
+  --primary-soft: #fdecee;
+
+  --secondary: #f1f2f5;
+  --secondary-foreground: #17181c;
+
+  --muted: #f1f2f5;
+  --muted-foreground: #6b7280;
+  --dimmer: #9ca3af;
+
+  --accent: #f1f2f5;
+  --accent-foreground: #17181c;
+
+  --destructive: #d6293b;
+  --destructive-foreground: #ffffff;
+
+  /* Estados (badges, KPIs, alertas) */
+  --success: #2f7d4f;
+  --success-foreground: #ffffff;
+  --success-soft: #e2f3e8;
+  --warning: #a9741e;
+  --warning-foreground: #ffffff;
+  --warning-soft: #fbf0dc;
+  --info: #2c4a77;
+  --info-foreground: #ffffff;
+  --info-soft: #e8eef7;
+
+  --border: #e9eaee;
+  --border-strong: #d5d7dd;
+  --input: #d5d7dd;
+  --ring: #d6293b;
+
+  /* Sidebar grafite */
+  --sidebar: #17181c;
+  --sidebar-foreground: #9a9ba3;
+  --sidebar-primary: #d6293b;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #232429;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #232429;
+  --sidebar-ring: #d6293b;
+}
+
+@layer base {
+  /* Escala compacta (padrão DP / Gestão de Contratos): 1rem = 15px, texto base dos componentes ≈ 13px. */
+  html {
+    font-size: 15px;
+  }
+
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+}

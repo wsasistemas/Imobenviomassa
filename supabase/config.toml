@@ -1,0 +1,50 @@
+project_id = "cjofyxgcuvpeeslkfawu"
+
+[functions.api-proxy]
+verify_jwt = true
+
+[functions.totvs-soap-proxy]
+verify_jwt = true
+
+# ---------------------------------------------------------------------------
+# Auth (auditoria de segurança 2026-10-01, Fase 3)
+#
+# Em projeto hospedado estas chaves NÃO são aplicadas automaticamente: rode
+#   supabase config push
+# (Supabase CLI >= 1.150) ou ajuste manualmente no Dashboard
+# (Authentication -> Providers / Sign In / Sessions / Multi-Factor / Rate Limits).
+# Elas também valem para `supabase start` local.
+#
+# ATENÇÃO antes do `config push`: o CLI envia a seção [auth] inteira, inclusive os defaults das chaves
+# não declaradas (site_url = "http://127.0.0.1:3000", additional_redirect_urls = [...]). Preencha
+# site_url/additional_redirect_urls abaixo com as URLs reais do portal antes de rodar o push, ou
+# confira o diff que o comando mostra e cancele se ele for sobrescrever URLs de redirect.
+# site_url = "https://portal.calper.com.br"
+# additional_redirect_urls = ["https://portal.calper.com.br", "http://localhost:3000"]
+#
+# Secrets das edge functions (Dashboard -> Edge Functions -> Secrets ou `supabase secrets set`):
+#   ALLOWED_ORIGINS=https://portal.calper.com.br,http://localhost:3000   # CORS das functions
+#   GW_<NOME>...                                                          # secrets de API do gateway
+# ---------------------------------------------------------------------------
+[auth]
+# Cadastro só pelo admin (convite/criação em Usuários); sem auto-cadastro nem anônimo.
+enable_signup = false
+enable_anonymous_sign_ins = false
+# Access token de 15 min (refresh token segue renovando a sessão).
+jwt_expiry = 900
+
+[auth.email]
+# Contas são criadas pelo admin já verificadas; sem fluxo de confirmação por e-mail.
+enable_confirmations = false
+
+[auth.mfa.totp]
+enroll_enabled = true
+verify_enabled = true
+
+[auth.rate_limit]
+# Limites por hora/intervalo (valores padrão do Supabase, explicitados para ficarem versionados).
+email_sent = 2
+sms_sent = 30
+token_refresh = 150
+sign_in_sign_ups = 30
+token_verifications = 30
