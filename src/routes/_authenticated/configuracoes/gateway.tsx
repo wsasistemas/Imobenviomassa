@@ -50,6 +50,7 @@ import {
 } from "lucide-react";
 import { getApisRegistradas } from "@/lib/gateway";
 import { registrarApiGateway, removerApiGateway } from "@/lib/gateway.functions";
+import { AbasIntegracoes } from "@/components/integracoes/abas-integracoes";
 import { ExecutarApiPanel } from "@/components/gateway/ExecutarApiPanel";
 import { PageHead, SemAcesso } from "@/components/page";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -190,6 +191,7 @@ function GatewayConteudo() {
 
   return (
     <div className="flex flex-col gap-5">
+      <AbasIntegracoes />
       <PageHead title="Gateway de APIs">
         Registre, gerencie e consulte os endpoints do TOTVS RM no gateway centralizado. As chamadas ao RM usam as
         credenciais de Integrações TOTVS RM.

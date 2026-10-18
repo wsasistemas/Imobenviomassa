@@ -85,7 +85,7 @@ Pedido de 17/10/2026: por enquanto o schema fica **vazio**. O app continua no Su
 - [ ] `npm run build` passa.
 
 ## Fase 5 — Integrações no padrão do Portal
-- [ ] `/configuracoes/integracoes` com abas TOTVS RM | DocuSign | Gateway de APIs. As rotas antigas redirecionam.
+- [x] Abas TOTVS RM | DocuSign | Gateway de APIs no topo das três telas (`src/components/integracoes/abas-integracoes.tsx`). As rotas `/configuracoes/docusign` e `/configuracoes/gateway` continuam (retorno do preview DocuSign e atalhos `/admin/*`); as abas navegam entre elas.
 - [ ] Card padrão em cada aba: cabeçalho com status, formulário, senha em branco mantém a atual, "Salva em … por …", "Integração ativa", rodapé Descartar/Salvar.
 - [ ] Card separado "Teste de conexão".
 - [ ] `npm run build` passa.

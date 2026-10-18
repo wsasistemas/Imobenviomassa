@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { AbasIntegracoes } from "@/components/integracoes/abas-integracoes";
 import { DocusignForm } from "@/components/integracoes/paineis";
 import { DocusignJsonReference } from "@/components/integracoes/docusign-json-reference";
 import { PageHead, SemAcesso } from "@/components/page";
@@ -16,6 +17,7 @@ function DocusignPage() {
 
   return (
     <div className="flex flex-col gap-5">
+      <AbasIntegracoes />
       <PageHead title="Integração DocuSign">
         Conta, chave de integração e modelos de documento usados no envio para assinatura. Admin consulta e testa a
         conexão; só um Super Admin altera as credenciais.
