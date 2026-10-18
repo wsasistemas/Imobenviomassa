@@ -2,10 +2,14 @@
 -- Teste a seco da estrutura do imobenviomassa (rodar no SQL Editor DEPOIS da 02). Tudo termina em ROLLBACK:
 -- cria imobiliárias, usuários e campanhas fictícios, simula cada pessoa e desfaz no fim.
 -- Esperado na última consulta: falharam = 0.
+-- Rode o arquivo INTEIRO, sem nenhum trecho selecionado (com seleção, o SQL Editor executa só o trecho).
 -- =====================================================================================================
 begin;
 
-create temp table resultado (n serial, teste text, ok boolean) on commit drop;
+-- Sem "on commit drop": se o SQL Editor fechar a transação antes do fim, o erro mostrado é o verdadeiro,
+-- não "relation resultado does not exist". O rollback do fim desfaz a tabela junto com o resto.
+drop table if exists pg_temp.resultado;
+create temp table resultado (n serial, teste text, ok boolean);
 grant all on resultado to authenticated, anon;
 grant usage on sequence resultado_n_seq to authenticated, anon;
 
