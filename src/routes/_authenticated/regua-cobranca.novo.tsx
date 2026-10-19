@@ -58,11 +58,14 @@ import {
   dataBr,
   moeda,
   sugerirTitulo,
+  descreverFiltro,
+  type FiltroCampo,
   type Canal,
   type FaixaAtraso,
   type TipoRegua,
 } from "@/lib/regua/comum";
 import { cn } from "@/lib/utils";
+import { FiltrosPorCampo } from "@/components/regua/filtros-por-campo";
 
 export const Route = createFileRoute("/_authenticated/regua-cobranca/novo")({
   validateSearch: z.object({ lote: z.string().uuid().optional() }),
@@ -71,8 +74,8 @@ export const Route = createFileRoute("/_authenticated/regua-cobranca/novo")({
 
 const PASSOS = [
   { n: 1, titulo: "Origem", sub: "TOTVS RM ou planilha" },
-  { n: 2, titulo: "Remessa e filtros", sub: "Título, atraso, canais" },
-  { n: 3, titulo: "Templates", sub: "WhatsApp e e-mail" },
+  { n: 2, titulo: "Remessa e filtros", sub: "Título, faixa e campos" },
+  { n: 3, titulo: "Canais e templates", sub: "WhatsApp, e-mail ou os dois" },
   { n: 4, titulo: "Pré-visualização", sub: "Boletos e mensagens" },
   { n: 5, titulo: "Confirmação", sub: "Acionar lote" },
 ] as const;
@@ -177,6 +180,9 @@ function NovoLotePage() {
   const [observacao, setObservacao] = useState("");
   const [tipo, setTipo] = useState<TipoRegua>("atraso");
   const [faixa, setFaixa] = useState<FaixaAtraso | null>("30");
+  const [diasMin, setDiasMin] = useState("120");
+  const [diasMax, setDiasMax] = useState("");
+  const [filtrosCampos, setFiltrosCampos] = useState<FiltroCampo[]>([]);
   const [vencDe, setVencDe] = useState(new Date().toISOString().slice(0, 10));
   const [vencAte, setVencAte] = useState(
     new Date(Date.now() + 5 * 86_400_000).toISOString().slice(0, 10),
@@ -223,8 +229,14 @@ function NovoLotePage() {
 
   // Título sugerido (D6) enquanto o usuário não editar.
   useEffect(() => {
-    if (!tituloEditado) setTitulo(sugerirTitulo(tipo, faixa, emps));
-  }, [tipo, faixa, emps, tituloEditado]);
+    if (!tituloEditado)
+      setTitulo(
+        sugerirTitulo(tipo, faixa, emps, new Date(), {
+          min: diasMin ? Number(diasMin) : null,
+          max: diasMax ? Number(diasMax) : null,
+        }),
+      );
+  }, [tipo, faixa, emps, tituloEditado, diasMin, diasMax]);
 
   const prontos = useMemo(() => {
     const t = biblioteca.data?.templates ?? [];
@@ -315,11 +327,23 @@ function NovoLotePage() {
     if (n >= 2) {
       if (titulo.trim().length < 3) return "Informe o título da remessa.";
       if (tipo === "atraso" && !faixa) return "Escolha a faixa de atraso.";
+      if (tipo === "atraso" && faixa === "personalizada") {
+        if (!diasMin) return "Informe a partir de quantos dias de atraso.";
+        if (diasMax && Number(diasMax) < Number(diasMin))
+          return "Na faixa personalizada, o máximo de dias precisa ser maior que o mínimo.";
+      }
+      const incompleto = filtrosCampos.find(
+        (f) =>
+          !f.campo ||
+          (!["vazio", "preenchido"].includes(f.op) && !(f.valor ?? "").trim()) ||
+          (f.op === "entre" && !(f.valor2 ?? "").trim()),
+      );
+      if (incompleto) return "Complete ou remova o filtro por campo que está pela metade.";
       if (tipo === "a_vencer" && (!vencDe || !vencAte || vencDe > vencAte))
         return "Informe um período de vencimento válido.";
-      if (!canais.length) return "Escolha ao menos um canal.";
     }
     if (n >= 3) {
+      if (!canais.length) return "Escolha ao menos um canal.";
       if (canais.includes("whatsapp") && !tplWhats) return "Escolha o template de WhatsApp.";
       if (canais.includes("email") && !tplEmail) return "Escolha o template de e-mail.";
     }
@@ -339,6 +363,10 @@ function NovoLotePage() {
           origem,
           tipoRegua: tipo,
           faixa: tipo === "atraso" ? faixa : null,
+          diasMin: tipo === "atraso" && faixa === "personalizada" ? Number(diasMin) : null,
+          diasMax:
+            tipo === "atraso" && faixa === "personalizada" && diasMax ? Number(diasMax) : null,
+          filtrosCampos,
           vencimentoDe: tipo === "a_vencer" ? vencDe : null,
           vencimentoAte: tipo === "a_vencer" ? vencAte : null,
           empreendimentos: emps,
@@ -578,7 +606,7 @@ function NovoLotePage() {
             {tipo === "atraso" ? (
               <div className="flex flex-col gap-1.5">
                 <span className="text-[12.5px] font-semibold">Faixa de atraso *</span>
-                <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
                   {FAIXAS.map((f) => (
                     <Opcao key={f.id} ativo={faixa === f.id} onClick={() => setFaixa(f.id)}>
                       <div>
@@ -587,7 +615,42 @@ function NovoLotePage() {
                       </div>
                     </Opcao>
                   ))}
+                  <Opcao
+                    ativo={faixa === "personalizada"}
+                    onClick={() => setFaixa("personalizada")}
+                  >
+                    <div>
+                      <b className="block text-[14px]">Personalizada</b>
+                      <p className="text-[12px] text-muted-foreground">Você escolhe os dias</p>
+                    </div>
+                  </Opcao>
                 </div>
+                {faixa === "personalizada" && (
+                  <div className="flex flex-wrap items-end gap-2.5 rounded-lg bg-secondary px-3 py-2.5">
+                    <label className="flex flex-col gap-1">
+                      <span className="text-[12px] font-semibold">De (dias de atraso) *</span>
+                      <Input
+                        value={diasMin}
+                        onChange={(e) => setDiasMin(e.target.value.replace(/\D/g, "").slice(0, 5))}
+                        className="h-8 w-[120px] bg-card"
+                        inputMode="numeric"
+                      />
+                    </label>
+                    <label className="flex flex-col gap-1">
+                      <span className="text-[12px] font-semibold">Até (dias)</span>
+                      <Input
+                        value={diasMax}
+                        onChange={(e) => setDiasMax(e.target.value.replace(/\D/g, "").slice(0, 5))}
+                        placeholder="sem limite"
+                        className="h-8 w-[120px] bg-card"
+                        inputMode="numeric"
+                      />
+                    </label>
+                    <span className="pb-1.5 text-[12px] text-muted-foreground">
+                      Ex.: de 120 até 180 dias. Deixe “Até” vazio para “ou mais”.
+                    </span>
+                  </div>
+                )}
                 {origem === "rm" && (
                   <small className="text-[11.5px] text-muted-foreground">
                     A faixa vai para a API do TOTVS como <span className="font-mono">DIAS_MIN</span>{" "}
@@ -649,39 +712,91 @@ function NovoLotePage() {
                   Opcional: unidades separadas por vírgula, como aparecem na origem.
                 </small>
               </label>
-              <div className="flex flex-col gap-1.5">
-                <span className="text-[12.5px] font-semibold">Canais *</span>
-                <div className="flex gap-1.5">
-                  {(["whatsapp", "email"] as const).map((c) => (
-                    <Chip
-                      key={c}
-                      ativo={canais.includes(c)}
-                      onClick={() =>
-                        setCanais(
-                          canais.includes(c) ? canais.filter((x) => x !== c) : [...canais, c],
-                        )
-                      }
-                    >
-                      {c === "whatsapp" ? "WhatsApp" : "E-mail"}
-                    </Chip>
-                  ))}
-                </div>
-                <small className="text-[11.5px] text-muted-foreground">
-                  Com os dois marcados, o próximo passo pede um template de cada.
-                </small>
-              </div>
             </div>
           </Card>
+          <FiltrosPorCampo
+            origem={origem}
+            linhasPlanilha={linhas}
+            consulta={{
+              tipoRegua: tipo,
+              faixa: tipo === "atraso" ? faixa : null,
+              diasMin:
+                tipo === "atraso" && faixa === "personalizada" && diasMin ? Number(diasMin) : null,
+              diasMax:
+                tipo === "atraso" && faixa === "personalizada" && diasMax ? Number(diasMax) : null,
+              vencimentoDe: tipo === "a_vencer" ? vencDe : null,
+              vencimentoAte: tipo === "a_vencer" ? vencAte : null,
+            }}
+            filtros={filtrosCampos}
+            onChange={setFiltrosCampos}
+          />
         </>
       )}
 
       {passo === 3 && (
         <>
-          <Aviso>
-            Escolha a mensagem de cada canal marcado. O sistema monta o texto de cada cliente com
-            estes templates e mostra o resultado no próximo passo. Só aparecem templates prontos:
-            WhatsApp <b>Aprovado</b> na Zenvia e e-mail com todas as variáveis válidas.
-          </Aviso>
+          <Card>
+            <div>
+              <h2 className="text-[16px] font-bold">Canais</h2>
+              <p className="text-[12.5px] text-muted-foreground">
+                Escolha por onde o boleto vai sair: um canal ou os dois. Para cada canal marcado,
+                escolha abaixo o template da mensagem.
+              </p>
+            </div>
+            <div className="grid gap-3 md:grid-cols-2">
+              {(
+                [
+                  [
+                    "whatsapp",
+                    "WhatsApp",
+                    MessageCircle,
+                    "Template aprovado na Zenvia, com o PDF do boleto no cabeçalho.",
+                  ],
+                  [
+                    "email",
+                    "E-mail",
+                    Mail,
+                    "Pelo provedor ativo em Integrações › E-mail, com o PDF anexo ou só o link.",
+                  ],
+                ] as const
+              ).map(([c, rotulo, Icone, texto]) => {
+                const ativo = canais.includes(c);
+                return (
+                  <Opcao
+                    key={c}
+                    ativo={ativo}
+                    onClick={() =>
+                      setCanais(ativo ? canais.filter((x) => x !== c) : [...canais, c])
+                    }
+                  >
+                    <IconeIlustrativo icon={Icone} size={30} />
+                    <div className="min-w-0 flex-1">
+                      <b className="block text-[14.5px]">{rotulo}</b>
+                      <p className="text-[12.5px] text-muted-foreground">{texto}</p>
+                    </div>
+                    <span
+                      className={cn(
+                        "grid h-5 w-5 shrink-0 place-items-center rounded-[5px] border-[1.5px] text-[12px] font-bold text-white",
+                        ativo ? "border-primary bg-primary" : "border-border-strong bg-card",
+                      )}
+                    >
+                      {ativo ? "✓" : ""}
+                    </span>
+                  </Opcao>
+                );
+              })}
+            </div>
+            {canais.length === 0 && (
+              <Aviso tom="warning">Marque ao menos um canal para continuar.</Aviso>
+            )}
+          </Card>
+          {canais.length > 0 && (
+            <Aviso>
+              O sistema monta a mensagem de cada cliente com os templates escolhidos e mostra o
+              resultado na pré-visualização. Só aparecem templates prontos: WhatsApp <b>Aprovado</b>{" "}
+              na Zenvia e e-mail com todas as variáveis válidas.
+            </Aviso>
+          )}
           {biblioteca.isLoading ? (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" /> Carregando templates…
@@ -856,8 +971,11 @@ function NovoLotePage() {
             regua:
               tipo === "a_vencer"
                 ? `A vencer · ${dataBr(vencDe)} a ${dataBr(vencAte)}`
-                : `Em atraso · faixa ${FAIXAS.find((f) => f.id === faixa)?.descricao ?? ""}`,
+                : faixa === "personalizada"
+                  ? `Em atraso · faixa personalizada: ${diasMin || 1}${diasMax ? ` a ${diasMax}` : " ou mais"} dias`
+                  : `Em atraso · faixa ${FAIXAS.find((f) => f.id === faixa)?.descricao ?? ""}`,
             emps,
+            filtros: filtrosCampos.map(descreverFiltro),
             whats: canais.includes("whatsapp") ? (tplWhatsSel?.nome ?? null) : null,
             email: canais.includes("email") ? (tplEmailSel?.nome ?? null) : null,
             externo: rascunhoExterno,
@@ -1235,6 +1353,7 @@ function PassoConfirmacao(p: {
     origem: "rm" | "planilha";
     regua: string;
     emps: string[];
+    filtros: string[];
     whats: string | null;
     email: string | null;
     externo: boolean;
@@ -1270,6 +1389,12 @@ function PassoConfirmacao(p: {
                   <TableCell className="text-muted-foreground">Empreendimentos</TableCell>
                   <TableCell>{p.resumo.emps.length ? p.resumo.emps.join(", ") : "Todos"}</TableCell>
                 </TableRow>
+                {p.resumo.filtros.length > 0 && (
+                  <TableRow>
+                    <TableCell className="text-muted-foreground">Filtros por campo</TableCell>
+                    <TableCell>{p.resumo.filtros.join(" · ")}</TableCell>
+                  </TableRow>
+                )}
               </>
             )}
             <TableRow>

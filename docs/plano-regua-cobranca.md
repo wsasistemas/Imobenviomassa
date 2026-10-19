@@ -121,3 +121,8 @@ chama o servidor em sequência (até 6 envios por chamada, respeitando o interva
 espera e continua de onde parou ao abrir de novo ("Continuar envio"); envios presos há mais de 10 min voltam para a fila.
 Para rodar sem tela aberta, o próximo passo é um agendador (pg_cron chamando uma Edge Function), que também faria a
 limpeza diária dos PDFs vencidos.
+
+## 8. Ajustes de 19/10/2026 (pedidos do Wagner)
+- [x] Faixa de atraso **personalizada** (de X a Y dias, ou "X ou mais"), além das prontas. Banco: `migrations/20261019100000_imobenviomassa_04_regua_faixa_personalizada.sql` (SQL Editor: `9_regua_faixa_personalizada.sql`); os dias ficam em `regua_lote.filtros.dias_min/dias_max` e vão ao TOTVS como `DIAS_MIN`/`DIAS_MAX`.
+- [x] **Filtros por campo** montados pelo usuário com as colunas que a API do TOTVS RM devolve ("Carregar campos do TOTVS") ou as colunas da planilha: campo + condição (igual, diferente, contém, maior, menor, entre, vazio, preenchido) + valor. Todos valem juntos (E), aplicados no servidor e gravados em `regua_lote.filtros.campos`; aparecem no resumo e no detalhe do lote.
+- [x] Passo 3 virou **Canais e templates**: o card Canais (WhatsApp, e-mail ou os dois) e, logo abaixo, os templates de cada canal marcado. Os canais saíram do card Filtros.

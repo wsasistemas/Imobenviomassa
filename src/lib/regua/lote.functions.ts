@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { aplicarFiltrosCampos, type CampoOrigem, type FiltroCampo } from "./comum";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
@@ -71,6 +72,23 @@ function mascararEmail(e: string | null): string {
 
 // ---------------------------------------------------------------- 1) preparar (passos 1 a 4)
 
+const filtroCampoSchema = z.object({
+  campo: z.string().trim().min(1, "Escolha o campo do filtro.").max(80),
+  op: z.enum([
+    "igual",
+    "diferente",
+    "contem",
+    "nao_contem",
+    "maior",
+    "menor",
+    "entre",
+    "vazio",
+    "preenchido",
+  ]),
+  valor: z.string().max(200).optional(),
+  valor2: z.string().max(200).optional(),
+});
+
 const prepararSchema = z
   .object({
     loteId: uuid.optional(),
@@ -82,7 +100,13 @@ const prepararSchema = z
     observacao: z.string().trim().max(300).nullable().optional(),
     origem: z.enum(["rm", "planilha"]),
     tipoRegua: z.enum(["a_vencer", "atraso"]),
-    faixa: z.enum(["30", "60", "90", "90+"]).nullable().optional(),
+    faixa: z.enum(["30", "60", "90", "90+", "personalizada"]).nullable().optional(),
+    diasMin: z.number().int().min(0).max(99999).nullable().optional(),
+    diasMax: z.number().int().min(0).max(99999).nullable().optional(),
+    filtrosCampos: z
+      .array(filtroCampoSchema)
+      .max(20, "No máximo 20 filtros por campo.")
+      .default([]),
     vencimentoDe: dataIso.nullable().optional(),
     vencimentoAte: dataIso.nullable().optional(),
     empreendimentos: z.array(z.string().trim().max(120)).max(200).default([]),
@@ -101,6 +125,15 @@ const prepararSchema = z
   .superRefine((v, c) => {
     if (v.tipoRegua === "atraso" && !v.faixa)
       c.addIssue({ code: "custom", message: "Escolha a faixa de atraso." });
+    if (v.tipoRegua === "atraso" && v.faixa === "personalizada") {
+      if (v.diasMin == null)
+        c.addIssue({ code: "custom", message: "Informe a partir de quantos dias de atraso." });
+      else if (v.diasMax != null && v.diasMax < v.diasMin)
+        c.addIssue({
+          code: "custom",
+          message: "Na faixa personalizada, o máximo de dias precisa ser maior que o mínimo.",
+        });
+    }
     if (v.tipoRegua === "a_vencer" && (!v.vencimentoDe || !v.vencimentoAte))
       c.addIssue({ code: "custom", message: "Informe o período de vencimento." });
     if (v.canais.includes("whatsapp") && !v.templateWhatsappId)
@@ -172,11 +205,15 @@ export const prepararLote = createServerFn({ method: "POST" })
       vencimentoAte: data.vencimentoAte ?? null,
       empreendimentos: data.empreendimentos,
       unidades: data.unidades,
+      diasMin: data.diasMin ?? null,
+      diasMax: data.diasMax ?? null,
     };
-    const brutas =
+    const todasBrutas =
       data.origem === "rm"
         ? await origem.buscarNoRm(imob, filtro)
         : (data.linhas as Record<string, unknown>[]);
+    // Filtros por campo montados pelo usuário valem sobre as colunas da origem (TOTVS RM ou planilha).
+    const brutas = aplicarFiltrosCampos(todasBrutas, data.filtrosCampos as FiltroCampo[]);
     const { boletos: normalizados, ignoradas } = origem.normalizarLinhas(brutas);
     const filtrados = origem.filtrar(normalizados, filtro);
     const limiteAtingido = filtrados.length > origem.LIMITE_BOLETOS;
@@ -194,6 +231,11 @@ export const prepararLote = createServerFn({ method: "POST" })
       filtros: {
         empreendimentos: data.empreendimentos,
         unidades: data.unidades,
+        campos: data.filtrosCampos,
+        ...(data.faixa === "personalizada"
+          ? { dias_min: data.diasMin ?? 1, dias_max: data.diasMax ?? null }
+          : {}),
+        da_origem: todasBrutas.length,
         ignoradas: ignoradas.length,
       },
       canais: data.canais,
@@ -287,6 +329,44 @@ export const prepararLote = createServerFn({ method: "POST" })
       ignoradas: ignoradas.slice(0, 50),
       limiteAtingido,
     };
+  });
+
+// ---------------------------------------------------------------- 1b) campos da origem (filtros montados pelo usuário)
+
+/**
+ * Lê uma amostra da API do TOTVS RM (com o tipo de régua e a faixa escolhidos) e devolve as colunas que ela traz,
+ * com o tipo provável e exemplos de valor. Colunas de dado pessoal vêm sem exemplos (LGPD).
+ */
+export const camposDaOrigemRm = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(
+    validar(
+      z.object({
+        tipoRegua: z.enum(["a_vencer", "atraso"]),
+        faixa: z.enum(["30", "60", "90", "90+", "personalizada"]).nullable().optional(),
+        diasMin: z.number().int().min(0).max(99999).nullable().optional(),
+        diasMax: z.number().int().min(0).max(99999).nullable().optional(),
+        vencimentoDe: dataIso.nullable().optional(),
+        vencimentoAte: dataIso.nullable().optional(),
+      }),
+    ),
+  )
+  .handler(async ({ data, context }): Promise<{ campos: CampoOrigem[]; total: number }> => {
+    await exigirPermissao(ctx(context), "regua_lote_criar", "Seu perfil não monta lotes da régua.");
+    const imob = await imobiliariaDoContexto(ctx(context));
+    const origem = await import("./origem.server");
+    const { camposDeLinhas } = await import("./comum");
+    const linhas = await origem.buscarNoRm(imob, {
+      tipoRegua: data.tipoRegua as TipoRegua,
+      faixa: (data.faixa ?? null) as FaixaAtraso | null,
+      vencimentoDe: data.vencimentoDe ?? null,
+      vencimentoAte: data.vencimentoAte ?? null,
+      empreendimentos: [],
+      unidades: [],
+      diasMin: data.diasMin ?? null,
+      diasMax: data.diasMax ?? null,
+    });
+    return { campos: camposDeLinhas(linhas), total: linhas.length };
   });
 
 // ---------------------------------------------------------------- 2) pré-visualização

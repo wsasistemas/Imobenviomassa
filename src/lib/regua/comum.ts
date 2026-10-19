@@ -3,8 +3,12 @@
 
 export type Canal = "whatsapp" | "email";
 export type TipoRegua = "a_vencer" | "atraso";
-export type FaixaAtraso = "30" | "60" | "90" | "90+";
-export type ReguaSugerida = "a_vencer" | FaixaAtraso;
+/** Faixas prontas + "personalizada" (o usuário informa de X a Y dias; os dias ficam em regua_lote.filtros). */
+export type FaixaAtraso = "30" | "60" | "90" | "90+" | "personalizada";
+/** Régua sugerida de um template (só as prontas). */
+export type ReguaSugerida = "a_vencer" | "30" | "60" | "90" | "90+";
+/** Régua de um lote: a sugerida ou a faixa personalizada. */
+export type ReguaLote = ReguaSugerida | "personalizada";
 export type OrigemLote = "rm" | "planilha";
 export type StatusLote =
   "rascunho" | "em_processamento" | "concluido" | "concluido_com_falhas" | "cancelado";
@@ -44,17 +48,188 @@ export const FAIXAS: {
   { id: "90+", rotulo: "Acima de 90", min: 91, max: null, descricao: "91 dias ou mais" },
 ];
 
-export const ROTULO_REGUA: Record<ReguaSugerida, string> = {
+export const ROTULO_REGUA: Record<ReguaLote, string> = {
   a_vencer: "A vencer",
   "30": "30 dias",
   "60": "60 dias",
   "90": "90 dias",
   "90+": "Acima de 90",
+  personalizada: "Personalizada",
 };
 
+/** Réguas que um template pode sugerir (a personalizada não tem template próprio). */
+export const REGUAS_SUGERIDAS: ReguaSugerida[] = ["a_vencer", "30", "60", "90", "90+"];
+
 /** Régua do lote: "A vencer" ou a faixa de atraso. */
-export function reguaDoLote(tipo: "a_vencer" | "atraso", faixa: string | null): ReguaSugerida {
-  return tipo === "a_vencer" ? "a_vencer" : ((faixa ?? "30") as ReguaSugerida);
+export function reguaDoLote(tipo: "a_vencer" | "atraso", faixa: string | null): ReguaLote {
+  return tipo === "a_vencer" ? "a_vencer" : ((faixa ?? "30") as ReguaLote);
+}
+
+/** Dias mínimo/máximo de atraso de uma faixa (pronta ou personalizada). */
+export function diasDaFaixa(
+  faixa: FaixaAtraso | null,
+  personalizada?: { min: number | null; max: number | null },
+): { min: number; max: number | null } | null {
+  if (faixa === "personalizada")
+    return { min: personalizada?.min ?? 1, max: personalizada?.max ?? null };
+  const f = FAIXAS.find((x) => x.id === faixa);
+  return f ? { min: f.min, max: f.max } : null;
+}
+
+// ---------------------------------------------------------------- filtros por campo (montados pelo usuário)
+
+export type OperadorFiltro =
+  | "igual"
+  | "diferente"
+  | "contem"
+  | "nao_contem"
+  | "maior"
+  | "menor"
+  | "entre"
+  | "vazio"
+  | "preenchido";
+
+export interface FiltroCampo {
+  /** Nome da coluna como vem da API do TOTVS RM (ou da planilha). */
+  campo: string;
+  op: OperadorFiltro;
+  valor?: string;
+  /** Só no "entre". */
+  valor2?: string;
+}
+
+export const OPERADORES: { id: OperadorFiltro; rotulo: string; valores: 0 | 1 | 2 }[] = [
+  { id: "igual", rotulo: "é igual a", valores: 1 },
+  { id: "diferente", rotulo: "é diferente de", valores: 1 },
+  { id: "contem", rotulo: "contém", valores: 1 },
+  { id: "nao_contem", rotulo: "não contém", valores: 1 },
+  { id: "maior", rotulo: "é maior que", valores: 1 },
+  { id: "menor", rotulo: "é menor que", valores: 1 },
+  { id: "entre", rotulo: "está entre", valores: 2 },
+  { id: "vazio", rotulo: "está vazio", valores: 0 },
+  { id: "preenchido", rotulo: "está preenchido", valores: 0 },
+];
+
+/** Colunas com dado pessoal: aparecem para filtrar, mas sem exemplos de valor (LGPD). */
+export const CAMPO_PESSOAL =
+  /cpf|cnpj|cgc|documento|e-?mail|fone|cel|whats|telefone|nome|pagador|linha|ipte|endereco|rua|cep/i;
+
+const semAcento = (v: string) => v.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+
+/** Número ("1.234,56", "1234.56") ou data ("dd/mm/aaaa", "aaaa-mm-dd" → aaaammdd) para comparar. */
+function comparavel(v: unknown): number | null {
+  if (v == null) return null;
+  if (typeof v === "number") return v;
+  const s = String(v).trim();
+  if (!s) return null;
+  let m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s);
+  if (m) return Number(m[1] + m[2] + m[3]);
+  m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})/.exec(s);
+  if (m) return Number(m[3] + m[2].padStart(2, "0") + m[1].padStart(2, "0"));
+  if (!/^[R$\s]*-?[\d.,]+$/.test(s)) return null;
+  const limpo = s.replace(/[^\d,.-]/g, "");
+  const n = Number(limpo.includes(",") ? limpo.replace(/\./g, "").replace(",", ".") : limpo);
+  return Number.isFinite(n) ? n : null;
+}
+
+/** Valor da coluna na linha, sem diferenciar maiúsculas, acentos e separadores no nome da coluna. */
+export function valorDoCampo(linha: Record<string, unknown>, campo: string): unknown {
+  if (campo in linha) return linha[campo];
+  const alvo = semAcento(campo).replace(/[^a-z0-9]/g, "");
+  for (const [k, v] of Object.entries(linha))
+    if (semAcento(k).replace(/[^a-z0-9]/g, "") === alvo) return v;
+  return undefined;
+}
+
+export function passaNoFiltro(linha: Record<string, unknown>, f: FiltroCampo): boolean {
+  const bruto = valorDoCampo(linha, f.campo);
+  const texto = bruto == null ? "" : semAcento(String(bruto));
+  const alvo = semAcento(f.valor ?? "");
+  const igual = () =>
+    texto === alvo || (comparavel(bruto) != null && comparavel(bruto) === comparavel(f.valor));
+  switch (f.op) {
+    case "vazio":
+      return texto === "";
+    case "preenchido":
+      return texto !== "";
+    case "igual":
+      return igual();
+    case "diferente":
+      return !igual();
+    case "contem":
+      return texto.includes(alvo);
+    case "nao_contem":
+      return !texto.includes(alvo);
+    case "maior":
+    case "menor":
+    case "entre": {
+      const v = comparavel(bruto);
+      const a = comparavel(f.valor);
+      if (v == null || a == null) return false;
+      if (f.op === "maior") return v > a;
+      if (f.op === "menor") return v < a;
+      const b = comparavel(f.valor2);
+      return b != null && v >= Math.min(a, b) && v <= Math.max(a, b);
+    }
+  }
+}
+
+export function aplicarFiltrosCampos<T extends Record<string, unknown>>(
+  linhas: T[],
+  filtros: FiltroCampo[],
+): T[] {
+  return filtros.length ? linhas.filter((l) => filtros.every((f) => passaNoFiltro(l, f))) : linhas;
+}
+
+export interface CampoOrigem {
+  nome: string;
+  tipo: "numero" | "data" | "texto";
+  /** Até 12 valores distintos (vazio para dado pessoal). */
+  exemplos: string[];
+  distintos: number;
+}
+
+/** Campos (colunas) de um conjunto de linhas, com o tipo provável e exemplos para o filtro. */
+export function camposDeLinhas(linhas: Record<string, unknown>[]): CampoOrigem[] {
+  const nomes = new Map<string, Set<string>>();
+  for (const l of linhas.slice(0, 5000)) {
+    for (const [k, v] of Object.entries(l)) {
+      if (!nomes.has(k)) nomes.set(k, new Set());
+      if (v != null && String(v).trim() !== "") {
+        const set = nomes.get(k)!;
+        if (set.size < 200) set.add(String(v).trim().slice(0, 80));
+      }
+    }
+  }
+  return [...nomes.entries()].map(([nome, valores]) => {
+    const amostra = [...valores];
+    const datas = amostra.filter((v) =>
+      /^\d{4}-\d{2}-\d{2}|^\d{1,2}\/\d{1,2}\/\d{4}/.test(v),
+    ).length;
+    const nums = amostra.filter((v) => /^[R$\s]*-?[\d.,]+$/.test(v)).length;
+    const tipo: CampoOrigem["tipo"] =
+      amostra.length && datas === amostra.length
+        ? "data"
+        : amostra.length && nums === amostra.length
+          ? "numero"
+          : "texto";
+    return {
+      nome,
+      tipo,
+      exemplos: CAMPO_PESSOAL.test(nome)
+        ? []
+        : amostra.sort((a, b) => a.localeCompare(b, "pt-BR")).slice(0, 12),
+      distintos: valores.size,
+    };
+  });
+}
+
+export function descreverFiltro(f: FiltroCampo): string {
+  const op = OPERADORES.find((o) => o.id === f.op);
+  if (!op) return f.campo;
+  if (op.valores === 0) return `${f.campo} ${op.rotulo}`;
+  if (op.valores === 2) return `${f.campo} ${op.rotulo} ${f.valor ?? "?"} e ${f.valor2 ?? "?"}`;
+  return `${f.campo} ${op.rotulo} "${f.valor ?? ""}"`;
 }
 
 export const ROTULO_STATUS_LOTE: Record<StatusLote, string> = {
@@ -210,11 +385,14 @@ export function sugerirTitulo(
   faixa: FaixaAtraso | null,
   empreendimentos: string[],
   agora = new Date(),
+  personalizada?: { min: number | null; max: number | null },
 ): string {
   const parte1 =
     tipo === "a_vencer"
       ? "A vencer"
-      : `Atraso ${faixa === "90+" ? "acima de 90 dias" : `${faixa ?? "?"} dias`}`;
+      : faixa === "personalizada"
+        ? `Atraso ${personalizada?.min ?? 1}${personalizada?.max != null ? ` a ${personalizada.max}` : "+"} dias`
+        : `Atraso ${faixa === "90+" ? "acima de 90 dias" : `${faixa ?? "?"} dias`}`;
   const emps =
     empreendimentos.length === 0
       ? "Todos"

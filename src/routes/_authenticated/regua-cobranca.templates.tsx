@@ -30,6 +30,7 @@ import {
 import {
   CAMPOS_BOLETO,
   ROTULO_REGUA,
+  REGUAS_SUGERIDAS,
   dadosDaMensagem,
   dataHoraBr,
   montarWhatsapp,
@@ -377,7 +378,7 @@ function TemplatesPage() {
                 }
               >
                 <option value="">Nenhuma</option>
-                {(Object.keys(ROTULO_REGUA) as ReguaSugerida[]).map((k) => (
+                {REGUAS_SUGERIDAS.map((k) => (
                   <option key={k} value={k}>
                     {ROTULO_REGUA[k]}
                   </option>

@@ -3,7 +3,7 @@
 --
 -- Um bloco só (do $$ … $$) que TERMINA COM ERRO DE PROPÓSITO: é isso que desfaz tudo o que o teste cria.
 -- Resultado esperado (aparece como "Error" no painel, é normal):
---   TESTE CONCLUÍDO — nada foi gravado. passaram: 30, falharam: 0
+--   TESTE CONCLUÍDO — nada foi gravado. passaram: 32, falharam: 0   (30 antes do 9_regua_faixa_personalizada.sql)
 -- =====================================================================================================
 do $teste$
 declare
@@ -243,6 +243,25 @@ begin
   exception when unique_violation then v_ok := true; when sqlstate 'P0099' then v_ok := false;
   end;
   r := r || format('%s 30 evento repetido da Zenvia é ignorado', case when v_ok then 'ok    ' else 'FALHOU' end);
+
+  -- ----- Faixa personalizada (migration 04, se já aplicada) -----
+  if exists (select 1 from pg_constraint where conname = 'regua_lote_faixa_personalizada_dias') then
+    begin
+      insert into imobenviomassa.regua_lote (imobiliaria_id, titulo, origem, tipo_regua, faixa_atraso, canais, usuario_id, filtros)
+      values (c_a, 'Atraso 120 a 180', 'rm', 'atraso', 'personalizada', array['email'], c_ac, '{"dias_min": 120, "dias_max": 180}');
+      v_ok := true;
+    exception when others then v_ok := false;
+    end;
+    r := r || format('%s 31 faixa personalizada com dias é aceita', case when v_ok then 'ok    ' else 'FALHOU' end);
+    begin
+      insert into imobenviomassa.regua_lote (imobiliaria_id, titulo, origem, tipo_regua, faixa_atraso, canais, usuario_id)
+      values (c_a, 'Personalizada sem dias', 'rm', 'atraso', 'personalizada', array['email'], c_ac);
+      v_ok := false;
+      raise exception using errcode = 'P0099';
+    exception when check_violation then v_ok := true; when sqlstate 'P0099' then v_ok := false;
+    end;
+    r := r || format('%s 32 faixa personalizada sem dias é recusada', case when v_ok then 'ok    ' else 'FALHOU' end);
+  end if;
 
   -- ----- Resultado: o erro abaixo é proposital e desfaz tudo o que o teste criou -----
   select string_agg(x, E'\n') into v_txt from unnest(r) x;

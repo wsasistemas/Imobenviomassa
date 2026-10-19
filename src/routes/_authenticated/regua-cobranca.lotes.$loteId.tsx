@@ -46,7 +46,14 @@ import { exportarExcel, exportarPdf } from "@/components/regua/exportar";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { cancelarLote, processarLote, reenviarFalhas } from "@/lib/regua/lote.functions";
 import { dadosExportacaoLote, detalheLote, trilhaBoleto } from "@/lib/regua/regua.functions";
-import { dataBr, dataHoraBr, moeda, reguaDoLote } from "@/lib/regua/comum";
+import {
+  dataBr,
+  dataHoraBr,
+  descreverFiltro,
+  moeda,
+  reguaDoLote,
+  type FiltroCampo,
+} from "@/lib/regua/comum";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/regua-cobranca/lotes/$loteId")({
@@ -202,6 +209,18 @@ function DetalheLotePage() {
               .filter(Boolean)
               .join(", ") || "—"}
           </p>
+          {l.faixa === "personalizada" && (
+            <p className="mt-0.5 text-[12.5px] text-muted-foreground">
+              Faixa personalizada: {l.filtros.diasMin ?? 1}
+              {l.filtros.diasMax != null ? ` a ${l.filtros.diasMax}` : " ou mais"} dias de atraso
+            </p>
+          )}
+          {l.filtros.campos.length > 0 && (
+            <p className="mt-0.5 text-[12.5px] text-muted-foreground">
+              Filtros por campo:{" "}
+              {l.filtros.campos.map((f) => descreverFiltro(f as FiltroCampo)).join(" · ")}
+            </p>
+          )}
           {l.observacao && (
             <p className="mt-0.5 text-[12.5px] text-muted-foreground">Obs.: {l.observacao}</p>
           )}

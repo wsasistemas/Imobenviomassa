@@ -7,7 +7,13 @@
 // monta lotes. Os filtros vão como parâmetros da consulta do RM (?parameters=DIAS_MIN=31;DIAS_MAX=60;…).
 
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { FAIXAS, soDigitos, type FaixaAtraso, type StatusRegistro, type TipoRegua } from "./comum";
+import {
+  diasDaFaixa,
+  soDigitos,
+  type FaixaAtraso,
+  type StatusRegistro,
+  type TipoRegua,
+} from "./comum";
 
 export const API_A_VENCER = "API.FIN.BOLETOS_A_VENCER";
 export const API_EM_ATRASO = "API.FIN.BOLETOS_EM_ATRASO";
@@ -191,11 +197,14 @@ export interface FiltroOrigem {
   vencimentoAte: string | null;
   empreendimentos: string[];
   unidades: string[];
+  /** Faixa personalizada: de X a Y dias (Y vazio = sem limite). */
+  diasMin?: number | null;
+  diasMax?: number | null;
 }
 
 /** Aplica os filtros também depois da origem (a planilha vem inteira; o RM pode não filtrar tudo). */
 export function filtrar(boletos: BoletoNormalizado[], f: FiltroOrigem): BoletoNormalizado[] {
-  const faixa = f.faixa ? FAIXAS.find((x) => x.id === f.faixa) : null;
+  const faixa = diasDaFaixa(f.faixa, { min: f.diasMin ?? null, max: f.diasMax ?? null });
   const emps = new Set(f.empreendimentos.map(norm));
   const unids = new Set(f.unidades.map(norm));
   return boletos.filter((b) => {
@@ -258,7 +267,7 @@ export async function buscarNoRm(
   if (url.origin !== origem)
     throw new Error(`A API ${nomeApi} aponta para outro servidor; use o mesmo do TOTVS RM.`);
 
-  const faixa = f.faixa ? FAIXAS.find((x) => x.id === f.faixa) : null;
+  const faixa = diasDaFaixa(f.faixa, { min: f.diasMin ?? null, max: f.diasMax ?? null });
   const params: string[] = [];
   if (f.tipoRegua === "atraso" && faixa) {
     params.push(`DIAS_MIN=${faixa.min}`, `DIAS_MAX=${faixa.max ?? 99999}`);

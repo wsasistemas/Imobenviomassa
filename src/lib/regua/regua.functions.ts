@@ -831,7 +831,13 @@ export interface DetalheLote {
     observacao: string | null;
     justificativa: string | null;
     periodo: string | null;
-    filtros: { empreendimentos: string[]; unidades: string[] };
+    filtros: {
+      empreendimentos: string[];
+      unidades: string[];
+      campos: { campo: string; op: string; valor?: string; valor2?: string }[];
+      diasMin: number | null;
+      diasMax: number | null;
+    };
     templateWhatsapp: string | null;
     templateEmail: string | null;
     canceladoEm: string | null;
@@ -968,6 +974,21 @@ export const detalheLote = createServerFn({ method: "POST" })
             (l.filtros as { empreendimentos?: string[] } | null)?.empreendimentos ?? []
           ).map(String),
           unidades: ((l.filtros as { unidades?: string[] } | null)?.unidades ?? []).map(String),
+          campos: (
+            ((l.filtros as { campos?: unknown[] } | null)?.campos ?? []) as {
+              campo: string;
+              op: string;
+              valor?: string;
+              valor2?: string;
+            }[]
+          ).map((f) => ({
+            campo: String(f.campo),
+            op: String(f.op),
+            valor: f.valor,
+            valor2: f.valor2,
+          })),
+          diasMin: (l.filtros as { dias_min?: number } | null)?.dias_min ?? null,
+          diasMax: (l.filtros as { dias_max?: number | null } | null)?.dias_max ?? null,
         },
         templateWhatsapp: l.template_whatsapp_id
           ? (nomes.get(l.template_whatsapp_id) ?? null)

@@ -18,7 +18,7 @@ import {
   ROTULO_REGUA,
   ROTULO_STATUS_LOTE,
   ROTULO_TENTATIVA,
-  type ReguaSugerida,
+  type ReguaLote,
   type StatusBoleto,
   type StatusContato,
   type StatusLote,
@@ -70,12 +70,13 @@ const TOM_REGISTRO: Record<StatusRegistro, Tom> = {
   nao_verificado: "warning",
   erro: "danger",
 };
-const TOM_REGUA: Record<ReguaSugerida, Tom> = {
+const TOM_REGUA: Record<ReguaLote, Tom> = {
   a_vencer: undefined,
   "30": "info",
   "60": "warning",
   "90": "danger",
   "90+": "danger",
+  personalizada: "info",
 };
 
 export const SeloLote = ({ s }: { s: StatusLote }) => (
@@ -99,7 +100,7 @@ export const SeloContato = ({ s }: { s: StatusContato | null | undefined }) =>
 export const SeloRegistro = ({ s }: { s: StatusRegistro }) => (
   <Selo tom={TOM_REGISTRO[s]}>{ROTULO_REGISTRO[s]}</Selo>
 );
-export const SeloRegua = ({ r }: { r: ReguaSugerida | null | undefined }) =>
+export const SeloRegua = ({ r }: { r: ReguaLote | null | undefined }) =>
   r ? (
     <Selo tom={TOM_REGUA[r]}>{ROTULO_REGUA[r]}</Selo>
   ) : (
