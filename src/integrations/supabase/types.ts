@@ -1140,6 +1140,40 @@ export type Database = {
           },
         ]
       }
+      senha_redefinicao: {
+        Row: {
+          criado_em: string
+          email: string
+          expira_em: string | null
+          id: string
+          ip: string | null
+          token_hash: string | null
+          usado_em: string | null
+          user_id: string | null
+        }
+        Insert: {
+          criado_em?: string
+          email: string
+          expira_em?: string | null
+          id?: string
+          ip?: string | null
+          token_hash?: string | null
+          usado_em?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          criado_em?: string
+          email?: string
+          expira_em?: string | null
+          id?: string
+          ip?: string | null
+          token_hash?: string | null
+          usado_em?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+        ]
+      }
       soap_envelope_templates: {
         Row: {
           action: string

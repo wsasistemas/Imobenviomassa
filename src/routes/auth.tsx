@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useState, type FormEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2, Mail } from "lucide-react";
+import { ArrowLeft, Loader2, Mail } from "lucide-react";
 import {
   Aviso,
   Campo,
@@ -15,6 +15,7 @@ import {
   submitCls,
 } from "@/components/login-layout";
 import { login } from "@/lib/auth.functions";
+import { solicitarRedefinicaoSenha } from "@/lib/redefinir-senha.functions";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
@@ -26,14 +27,89 @@ export const Route = createFileRoute("/auth")({
 });
 
 function AuthPage() {
+  const [esqueci, setEsqueci] = useState<string | null>(null);
   return (
     <LoginLayout>
-      <FormLogin />
+      {esqueci === null ? (
+        <FormLogin onEsqueci={setEsqueci} />
+      ) : (
+        <FormEsqueci emailInicial={esqueci} onVoltar={() => setEsqueci(null)} />
+      )}
     </LoginLayout>
   );
 }
 
-function FormLogin() {
+// "Esqueceu a senha?": o servidor envia um link de uso único (30 min) pelo e-mail da imobiliária. A resposta
+// é sempre a mesma, exista ou não a conta (src/lib/redefinir-senha.functions.ts).
+function FormEsqueci({ emailInicial, onVoltar }: { emailInicial: string; onVoltar: () => void }) {
+  const solicitar = useServerFn(solicitarRedefinicaoSenha);
+  const [email, setEmail] = useState(emailInicial);
+  const [enviando, setEnviando] = useState(false);
+  const [erro, setErro] = useState<string | null>(null);
+  const [mensagem, setMensagem] = useState<string | null>(null);
+
+  async function enviar(e: FormEvent) {
+    e.preventDefault();
+    setErro(null);
+    setEnviando(true);
+    try {
+      const r = await solicitar({ data: { email } });
+      setMensagem(r.mensagem);
+    } catch (err) {
+      setErro(err instanceof Error ? err.message : "Não foi possível enviar o pedido.");
+    } finally {
+      setEnviando(false);
+    }
+  }
+
+  return (
+    <LoginCard
+      onSubmit={enviar}
+      titulo="Esqueceu a senha?"
+      sub="Informe o seu e-mail de acesso. Enviaremos um link para você criar uma nova senha."
+    >
+      <Campo id="esqueci-email" label="E-mail" icon={<Mail className="h-[15px] w-[15px]" />}>
+        <input
+          id="esqueci-email"
+          type="email"
+          autoComplete="username"
+          placeholder="seu@empresa.com.br"
+          autoFocus
+          value={email}
+          disabled={!!mensagem}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            setErro(null);
+          }}
+          className={inputCls}
+        />
+      </Campo>
+
+      {erro && <Aviso>{erro}</Aviso>}
+      {mensagem && (
+        <div className="rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-[9px] text-[12.5px] leading-normal text-emerald-800">
+          {mensagem} Confira também a caixa de spam.
+        </div>
+      )}
+
+      {!mensagem && (
+        <button type="submit" disabled={enviando || !email} className={submitCls}>
+          {enviando && <Loader2 className="h-4 w-4 animate-spin" />}
+          {enviando ? "Enviando…" : "Enviar link"}
+        </button>
+      )}
+      <button
+        type="button"
+        onClick={onVoltar}
+        className="inline-flex items-center justify-center gap-1.5 self-center text-[12.5px] font-semibold text-primary hover:underline"
+      >
+        <ArrowLeft className="h-3.5 w-3.5" /> Voltar para o login
+      </button>
+    </LoginCard>
+  );
+}
+
+function FormLogin({ onEsqueci }: { onEsqueci: (email: string) => void }) {
   const navigate = useNavigate();
   const entrarNoServidor = useServerFn(login);
   const [loading, setLoading] = useState(false);
@@ -107,6 +183,14 @@ function FormLogin() {
           setErro(null);
         }}
       />
+
+      <button
+        type="button"
+        onClick={() => onEsqueci(email.trim())}
+        className="-mt-1.5 self-end text-[12.5px] font-semibold text-primary hover:underline"
+      >
+        Esqueceu a senha?
+      </button>
 
       {erro && <Aviso>{erro}</Aviso>}
 
