@@ -36,6 +36,8 @@ import { Route as AuthenticatedRelatoriosIndexRouteImport } from './routes/_auth
 import { Route as AuthenticatedRelatoriosCampanhaIdRouteImport } from './routes/_authenticated/relatorios.$campanhaId'
 import { Route as AuthenticatedTreinamentoIndexRouteImport } from './routes/_authenticated/treinamento.index'
 import { Route as AuthenticatedTreinamentoDisparoEmMassaRouteImport } from './routes/_authenticated/treinamento.disparo-em-massa'
+import { Route as AuthenticatedTreinamentoTutorialBoletoRouteImport } from './routes/_authenticated/treinamento.tutorial-boleto'
+import { Route as AuthenticatedTreinamentoTutorialDocusignRouteImport } from './routes/_authenticated/treinamento.tutorial-docusign'
 import { Route as AuthenticatedDisparoNovoIndexRouteImport } from './routes/_authenticated/disparo.novo.index'
 import { Route as AuthenticatedDisparoNovoAssinaturaRouteImport } from './routes/_authenticated/disparo.novo.assinatura'
 import { Route as AuthenticatedDisparoNovoCompradoresRouteImport } from './routes/_authenticated/disparo.novo.compradores'
@@ -199,6 +201,18 @@ const AuthenticatedTreinamentoDisparoEmMassaRoute =
     path: '/treinamento/disparo-em-massa',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedTreinamentoTutorialBoletoRoute =
+  AuthenticatedTreinamentoTutorialBoletoRouteImport.update({
+    id: '/treinamento/tutorial-boleto',
+    path: '/treinamento/tutorial-boleto',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedTreinamentoTutorialDocusignRoute =
+  AuthenticatedTreinamentoTutorialDocusignRouteImport.update({
+    id: '/treinamento/tutorial-docusign',
+    path: '/treinamento/tutorial-docusign',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDisparoNovoIndexRoute =
   AuthenticatedDisparoNovoIndexRouteImport.update({
     id: '/',
@@ -278,6 +292,8 @@ export interface FileRoutesByFullPath {
   '/regua-cobranca/templates': typeof AuthenticatedReguaCobrancaTemplatesRoute
   '/relatorios/$campanhaId': typeof AuthenticatedRelatoriosCampanhaIdRoute
   '/treinamento/disparo-em-massa': typeof AuthenticatedTreinamentoDisparoEmMassaRoute
+  '/treinamento/tutorial-boleto': typeof AuthenticatedTreinamentoTutorialBoletoRoute
+  '/treinamento/tutorial-docusign': typeof AuthenticatedTreinamentoTutorialDocusignRoute
   '/regua-cobranca/': typeof AuthenticatedReguaCobrancaIndexRoute
   '/relatorios/': typeof AuthenticatedRelatoriosIndexRoute
   '/treinamento/': typeof AuthenticatedTreinamentoIndexRoute
@@ -314,6 +330,8 @@ export interface FileRoutesByTo {
   '/regua-cobranca/templates': typeof AuthenticatedReguaCobrancaTemplatesRoute
   '/relatorios/$campanhaId': typeof AuthenticatedRelatoriosCampanhaIdRoute
   '/treinamento/disparo-em-massa': typeof AuthenticatedTreinamentoDisparoEmMassaRoute
+  '/treinamento/tutorial-boleto': typeof AuthenticatedTreinamentoTutorialBoletoRoute
+  '/treinamento/tutorial-docusign': typeof AuthenticatedTreinamentoTutorialDocusignRoute
   '/regua-cobranca': typeof AuthenticatedReguaCobrancaIndexRoute
   '/relatorios': typeof AuthenticatedRelatoriosIndexRoute
   '/treinamento': typeof AuthenticatedTreinamentoIndexRoute
@@ -353,6 +371,8 @@ export interface FileRoutesById {
   '/_authenticated/regua-cobranca/templates': typeof AuthenticatedReguaCobrancaTemplatesRoute
   '/_authenticated/relatorios/$campanhaId': typeof AuthenticatedRelatoriosCampanhaIdRoute
   '/_authenticated/treinamento/disparo-em-massa': typeof AuthenticatedTreinamentoDisparoEmMassaRoute
+  '/_authenticated/treinamento/tutorial-boleto': typeof AuthenticatedTreinamentoTutorialBoletoRoute
+  '/_authenticated/treinamento/tutorial-docusign': typeof AuthenticatedTreinamentoTutorialDocusignRoute
   '/_authenticated/regua-cobranca/': typeof AuthenticatedReguaCobrancaIndexRoute
   '/_authenticated/relatorios/': typeof AuthenticatedRelatoriosIndexRoute
   '/_authenticated/treinamento/': typeof AuthenticatedTreinamentoIndexRoute
@@ -392,6 +412,8 @@ export interface FileRouteTypes {
     | '/regua-cobranca/templates'
     | '/relatorios/$campanhaId'
     | '/treinamento/disparo-em-massa'
+    | '/treinamento/tutorial-boleto'
+    | '/treinamento/tutorial-docusign'
     | '/regua-cobranca/'
     | '/relatorios/'
     | '/treinamento/'
@@ -428,6 +450,8 @@ export interface FileRouteTypes {
     | '/regua-cobranca/templates'
     | '/relatorios/$campanhaId'
     | '/treinamento/disparo-em-massa'
+    | '/treinamento/tutorial-boleto'
+    | '/treinamento/tutorial-docusign'
     | '/regua-cobranca'
     | '/relatorios'
     | '/treinamento'
@@ -466,6 +490,8 @@ export interface FileRouteTypes {
     | '/_authenticated/regua-cobranca/templates'
     | '/_authenticated/relatorios/$campanhaId'
     | '/_authenticated/treinamento/disparo-em-massa'
+    | '/_authenticated/treinamento/tutorial-boleto'
+    | '/_authenticated/treinamento/tutorial-docusign'
     | '/_authenticated/regua-cobranca/'
     | '/_authenticated/relatorios/'
     | '/_authenticated/treinamento/'
@@ -678,6 +704,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTreinamentoDisparoEmMassaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/treinamento/tutorial-boleto': {
+      id: '/_authenticated/treinamento/tutorial-boleto'
+      path: '/treinamento/tutorial-boleto'
+      fullPath: '/treinamento/tutorial-boleto'
+      preLoaderRoute: typeof AuthenticatedTreinamentoTutorialBoletoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/treinamento/tutorial-docusign': {
+      id: '/_authenticated/treinamento/tutorial-docusign'
+      path: '/treinamento/tutorial-docusign'
+      fullPath: '/treinamento/tutorial-docusign'
+      preLoaderRoute: typeof AuthenticatedTreinamentoTutorialDocusignRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/disparo/novo/': {
       id: '/_authenticated/disparo/novo/'
       path: '/'
@@ -794,6 +834,8 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedReguaCobrancaTemplatesRoute: typeof AuthenticatedReguaCobrancaTemplatesRoute
   AuthenticatedRelatoriosCampanhaIdRoute: typeof AuthenticatedRelatoriosCampanhaIdRoute
   AuthenticatedTreinamentoDisparoEmMassaRoute: typeof AuthenticatedTreinamentoDisparoEmMassaRoute
+  AuthenticatedTreinamentoTutorialBoletoRoute: typeof AuthenticatedTreinamentoTutorialBoletoRoute
+  AuthenticatedTreinamentoTutorialDocusignRoute: typeof AuthenticatedTreinamentoTutorialDocusignRoute
   AuthenticatedReguaCobrancaIndexRoute: typeof AuthenticatedReguaCobrancaIndexRoute
   AuthenticatedRelatoriosIndexRoute: typeof AuthenticatedRelatoriosIndexRoute
   AuthenticatedTreinamentoIndexRoute: typeof AuthenticatedTreinamentoIndexRoute
@@ -832,6 +874,10 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedRelatoriosCampanhaIdRoute,
   AuthenticatedTreinamentoDisparoEmMassaRoute:
     AuthenticatedTreinamentoDisparoEmMassaRoute,
+  AuthenticatedTreinamentoTutorialBoletoRoute:
+    AuthenticatedTreinamentoTutorialBoletoRoute,
+  AuthenticatedTreinamentoTutorialDocusignRoute:
+    AuthenticatedTreinamentoTutorialDocusignRoute,
   AuthenticatedReguaCobrancaIndexRoute: AuthenticatedReguaCobrancaIndexRoute,
   AuthenticatedRelatoriosIndexRoute: AuthenticatedRelatoriosIndexRoute,
   AuthenticatedTreinamentoIndexRoute: AuthenticatedTreinamentoIndexRoute,

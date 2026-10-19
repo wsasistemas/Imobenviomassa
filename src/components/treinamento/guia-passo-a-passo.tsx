@@ -1,12 +1,29 @@
 import { useState } from "react";
-import { AlertTriangle, Download, ImageOff, Info, Lightbulb, Loader2, MapPin, UserRound } from "lucide-react";
+import {
+  AlertTriangle,
+  Download,
+  ImageOff,
+  Info,
+  Lightbulb,
+  Loader2,
+  MapPin,
+  UserRound,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "@tanstack/react-router";
 import { PageHead, Panel, Selo } from "@/components/page";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { baixarGuiaHtml } from "@/lib/treinamento/guia-html";
-import { ROTULO_ALERTA, urlDoPrint, type Alerta, type Exemplo, type Guia, type Passo, type Print } from "@/lib/treinamento/tipos";
+import {
+  ROTULO_ALERTA,
+  urlDoPrint,
+  type Alerta,
+  type Exemplo,
+  type Guia,
+  type Passo,
+  type Print,
+} from "@/lib/treinamento/tipos";
 import { cn } from "@/lib/utils";
 import wsaLogo from "@/assets/wsa-logo.png";
 
@@ -22,7 +39,9 @@ export function GuiaPassoAPasso({ guia }: { guia: Guia }) {
           description: `${semPrint} imagem(ns) aparecem como espaço reservado no arquivo.`,
         });
       } else {
-        toast.success("Guia baixado.", { description: "Arquivo único, abre em qualquer navegador sem o portal." });
+        toast.success("Guia baixado.", {
+          description: "Arquivo único, abre em qualquer navegador sem o portal.",
+        });
       }
     } catch {
       toast.error("Não foi possível gerar o arquivo do guia.");
@@ -51,8 +70,13 @@ export function GuiaPassoAPasso({ guia }: { guia: Guia }) {
       </PageHead>
 
       <div className="grid items-start gap-5 lg:grid-cols-[220px_minmax(0,1fr)]">
-        <nav aria-label="Neste guia" className="rounded-[10px] border bg-card px-3 py-3 lg:sticky lg:top-0">
-          <p className="mb-2 px-1 text-[10.5px] font-bold uppercase tracking-[0.08em] text-muted-foreground">Neste guia</p>
+        <nav
+          aria-label="Neste guia"
+          className="rounded-[10px] border bg-card px-3 py-3 lg:sticky lg:top-0"
+        >
+          <p className="mb-2 px-1 text-[10.5px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
+            Neste guia
+          </p>
           <ol className="flex flex-col gap-0.5">
             {guia.passos.map((p, i) => (
               <li key={p.id}>
@@ -86,7 +110,10 @@ export function GuiaPassoAPasso({ guia }: { guia: Guia }) {
             <PassoCard key={p.id} passo={p} numero={i + 1} slug={guia.slug} />
           ))}
 
-          <Panel className="scroll-mt-4" title={<span id="problemas">Problemas comuns e quem acionar</span>}>
+          <Panel
+            className="scroll-mt-4"
+            title={<span id="problemas">Problemas comuns e quem acionar</span>}
+          >
             <div className="overflow-auto rounded-[10px] border">
               <table className="w-full text-[12.5px]">
                 <thead className="bg-muted text-left">
@@ -158,7 +185,9 @@ function PassoCard({ passo, numero, slug }: { passo: Passo; numero: number; slug
         <PrintDaTela key={pr.arquivo} print={pr} slug={slug} />
       ))}
 
-      {passo.alertas?.map((a) => <CaixaAlerta key={a.titulo} alerta={a} />)}
+      {passo.alertas?.map((a) => (
+        <CaixaAlerta key={a.titulo} alerta={a} />
+      ))}
       {passo.exemplo && <CaixaExemplo exemplo={passo.exemplo} />}
     </section>
   );
@@ -183,7 +212,13 @@ function PrintDaTela({ print, slug }: { print: Print; slug: string }) {
           className="block w-full cursor-zoom-in overflow-hidden rounded-lg border bg-muted/30"
           aria-label={`Ampliar: ${print.legenda}`}
         >
-          <img src={src} alt={print.legenda} loading="lazy" onError={() => setFalhou(true)} className="block w-full" />
+          <img
+            src={src}
+            alt={print.legenda}
+            loading="lazy"
+            onError={() => setFalhou(true)}
+            className="block w-full"
+          />
         </button>
       )}
       <figcaption className="mt-1.5 text-[12px] text-muted-foreground">{print.legenda}</figcaption>
