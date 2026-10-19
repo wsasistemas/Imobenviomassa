@@ -38,3 +38,6 @@ dist-ssr
 
 # Supabase CLI
 supabase/.temp
+
+# Prints e snapshots do Playwright (testes locais)
+.playwright-mcp/
