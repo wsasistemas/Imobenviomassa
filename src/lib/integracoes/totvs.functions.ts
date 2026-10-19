@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { exigirAal2, exigirPapel, imobiliariaDoContexto, temPapel } from "@/lib/authz";
+import { exigirPapel, imobiliariaDoContexto, temPapel } from "@/lib/authz";
 import type { RecursoRm, StatusRm } from "./rm.server";
 
 // ---------- Validação de entrada (auditoria de segurança, Fase 2 / N4) ----------
@@ -30,7 +30,11 @@ const credenciaisRmSchema = z.object({
     .min(1, "Informe o endpoint.")
     .max(500, "Endpoint muito longo.")
     .regex(/^https:\/\//i, "Informe o endpoint completo, começando com https://"),
-  usuario: z.string({ required_error: "Informe o usuário." }).trim().min(1, "Informe o usuário.").max(100, "Usuário muito longo."),
+  usuario: z
+    .string({ required_error: "Informe o usuário." })
+    .trim()
+    .min(1, "Informe o usuário.")
+    .max(100, "Usuário muito longo."),
   senha: z.string().max(200, "Senha muito longa.").optional(),
 });
 
@@ -94,10 +98,15 @@ type Contexto = {
   claims?: { email?: string };
 };
 
-const NAO_CONFIGURADO = "Integração TOTVS RM não configurada. Cadastre em Configurações → Integrações TOTVS RM.";
+const NAO_CONFIGURADO =
+  "Integração TOTVS RM não configurada. Cadastre em Configurações → Integrações TOTVS RM.";
 
 async function exigirAdmin(context: Contexto) {
-  await exigirPapel(context, ["admin", "super_admin"], "Só Admin e Super Admin usam as integrações com o TOTVS RM.");
+  await exigirPapel(
+    context,
+    ["admin", "super_admin"],
+    "Só Admin e Super Admin usam as integrações com o TOTVS RM.",
+  );
 }
 
 // Os dados do RM trazem CPF, telefone e e-mail dos compradores: contas sem papel de
@@ -167,9 +176,24 @@ function pickFromMap(map: Map<string, unknown>, keys: string[], fallback = ""): 
 function mapEmpreendimentos(rows: Record<string, unknown>[]): EmpreendimentoTotvs[] {
   return rows.map((r, i) => {
     const m = normalizeRow(r);
-    const codigo = pickFromMap(m, ["codigo", "cod", "codcoligada", "codobra", "idobra", "id", "codemp"]);
+    const codigo = pickFromMap(m, [
+      "codigo",
+      "cod",
+      "codcoligada",
+      "codobra",
+      "idobra",
+      "id",
+      "codemp",
+    ]);
     const nome = pickFromMap(m, ["nome", "descricao", "nomeobra", "empreendimento", "razaosocial"]);
-    const subtitulo = pickFromMap(m, ["subtitulo", "complemento", "fantasia", "grupo", "cidade", "bairro"]);
+    const subtitulo = pickFromMap(m, [
+      "subtitulo",
+      "complemento",
+      "fantasia",
+      "grupo",
+      "cidade",
+      "bairro",
+    ]);
     return {
       id: codigo || String(i + 1),
       codigo: codigo || String(i + 1),
@@ -210,7 +234,8 @@ export const EXTRAS_RM_PERMITIDOS = [
 // /tipo.*(cliente|comprador|pessoa)|papel|funcao/) mas não estão na lista fixa acima. Nunca inclui
 // colunas de dado pessoal (ex.: "cpftitular", "nometitular", "emailtitular").
 const PADRAO_EXTRA_PRINCIPAL = /principal|titular|tipo.*(cliente|comprador|pessoa)|papel|funcao/;
-const PADRAO_DADO_PESSOAL = /cpf|cnpj|nome|mail|fone|telef|celular|whats|doc|rg$|nasc|ender|cep|renda|salario/;
+const PADRAO_DADO_PESSOAL =
+  /cpf|cnpj|nome|mail|fone|telef|celular|whats|doc|rg$|nasc|ender|cep|renda|salario/;
 const EXTRA_VALOR_MAX = 60;
 
 function extraPermitido(chave: string): boolean {
@@ -223,17 +248,75 @@ function mapContratos(rows: Record<string, unknown>[], empreendimentoId: string)
     const m = normalizeRow(r);
     const extras: Record<string, string> = {};
     for (const [k, v] of m.entries()) {
-      if (v !== null && v !== undefined && extraPermitido(k)) extras[k] = String(v).trim().slice(0, EXTRA_VALOR_MAX);
+      if (v !== null && v !== undefined && extraPermitido(k))
+        extras[k] = String(v).trim().slice(0, EXTRA_VALOR_MAX);
     }
     return {
-      id: pickFromMap(m, ["idcontrato", "contrato", "id", "codcontrato", "numerocontrato", "nrcontrato"]) || `T-${empreendimentoId}-${i}`,
-      nome: pickFromMap(m, ["nome", "comprador", "cliente", "razaosocial", "nomecliente", "nomecomprador"]),
-      cpf: pickFromMap(m, ["cpf", "cnpjcpf", "cpfcnpj", "cpf_cnpj", "documento", "numerocpf", "nrcpf", "nrocpf", "cpfcliente", "documentocliente"]),
-      telefone: pickFromMap(m, ["telefone", "celular", "whatsapp", "fone", "numerotelefone", "numerocelular", "telefonecelular", "telefone1"]),
+      id:
+        pickFromMap(m, [
+          "idcontrato",
+          "contrato",
+          "id",
+          "codcontrato",
+          "numerocontrato",
+          "nrcontrato",
+        ]) || `T-${empreendimentoId}-${i}`,
+      nome: pickFromMap(m, [
+        "nome",
+        "comprador",
+        "cliente",
+        "razaosocial",
+        "nomecliente",
+        "nomecomprador",
+      ]),
+      cpf: pickFromMap(m, [
+        "cpf",
+        "cnpjcpf",
+        "cpfcnpj",
+        "cpf_cnpj",
+        "documento",
+        "numerocpf",
+        "nrcpf",
+        "nrocpf",
+        "cpfcliente",
+        "documentocliente",
+      ]),
+      telefone: pickFromMap(m, [
+        "telefone",
+        "celular",
+        "whatsapp",
+        "fone",
+        "numerotelefone",
+        "numerocelular",
+        "telefonecelular",
+        "telefone1",
+      ]),
       email: pickFromMap(m, ["email", "e-mail", "emailcliente"]),
-      empreendimento: pickFromMap(m, ["empreendimento", "nomeobra", "obra", "nomeempreendimento", "descricaoempreendimento", "descricao", "nomecomercial", "nomeprojeto", "projeto", "obra_nome", "nome_obra"]),
+      empreendimento: pickFromMap(m, [
+        "empreendimento",
+        "nomeobra",
+        "obra",
+        "nomeempreendimento",
+        "descricaoempreendimento",
+        "descricao",
+        "nomecomercial",
+        "nomeprojeto",
+        "projeto",
+        "obra_nome",
+        "nome_obra",
+      ]),
       bloco: pickFromMap(m, ["bloco", "torre", "nrbloco", "numerobloco", "codbloco"]),
-      unidade: pickFromMap(m, ["unidade", "apto", "apartamento", "numero", "nrunidade", "numerounidade", "numeroap", "numeroapt", "codunidade"]),
+      unidade: pickFromMap(m, [
+        "unidade",
+        "apto",
+        "apartamento",
+        "numero",
+        "nrunidade",
+        "numerounidade",
+        "numeroap",
+        "numeroapt",
+        "codunidade",
+      ]),
       situacao: pickFromMap(m, ["situacao", "status"], "Ativo"),
       dados_extras: extras,
     };
@@ -242,9 +325,15 @@ function mapContratos(rows: Record<string, unknown>[], empreendimentoId: string)
 
 export const listarEmpreendimentosTotvs = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => validar(z.object({ forceRefresh: z.boolean().optional() }).optional())(input) ?? {})
+  .inputValidator(
+    (input: unknown) =>
+      validar(z.object({ forceRefresh: z.boolean().optional() }).optional())(input) ?? {},
+  )
   .handler(
-    async ({ data, context }): Promise<{
+    async ({
+      data,
+      context,
+    }): Promise<{
       empreendimentos: EmpreendimentoTotvs[];
       error?: string;
       fetchedAt?: string;
@@ -260,18 +349,25 @@ export const listarEmpreendimentosTotvs = createServerFn({ method: "POST" })
 
         const cacheKey = `emp:${imob}:${cred.endpoint}:${cred.usuario}`;
         if (data?.forceRefresh) memCache.delete(cacheKey);
-        const cached = cacheGet<{ empreendimentos: EmpreendimentoTotvs[]; fetchedAt: string }>(cacheKey);
+        const cached = cacheGet<{ empreendimentos: EmpreendimentoTotvs[]; fetchedAt: string }>(
+          cacheKey,
+        );
         if (cached) {
           return { ...cached, fromCache: true, count: cached.empreendimentos.length };
         }
 
-        const empreendimentos = mapEmpreendimentos(extractRows(await rm.buscarNoRm(cred.endpoint, cred)));
+        const empreendimentos = mapEmpreendimentos(
+          extractRows(await rm.buscarNoRm(cred.endpoint, cred)),
+        );
         const fetchedAt = new Date().toISOString();
         cacheSet(cacheKey, { empreendimentos, fetchedAt });
         void rm.registrarConsultaRm(imob, "empreendimentos").catch(() => undefined);
         return { empreendimentos, fetchedAt, fromCache: false, count: empreendimentos.length };
       } catch (e) {
-        return { empreendimentos: [], error: e instanceof Error ? e.message : "Erro desconhecido ao consultar o TOTVS RM" };
+        return {
+          empreendimentos: [],
+          error: e instanceof Error ? e.message : "Erro desconhecido ao consultar o TOTVS RM",
+        };
       }
     },
   );
@@ -289,12 +385,18 @@ export const buscarCompradoresPorEmpreendimento = createServerFn({ method: "POST
       // GET {endpoint}?parameters=CODCOLIGADA={codigo do empreendimento}
       // `empreendimento_id` já passou pelo regex acima; rm.urlCompradores aplica encodeURIComponent
       // (não encodar aqui para não codificar duas vezes).
-      const payload = await rm.buscarNoRm(rm.urlCompradores(cred.endpoint, data.empreendimento_id), cred);
+      const payload = await rm.buscarNoRm(
+        rm.urlCompradores(cred.endpoint, data.empreendimento_id),
+        cred,
+      );
       const contratos = mapContratos(extractRows(payload), data.empreendimento_id);
       void rm.registrarConsultaRm(imob, "compradores").catch(() => undefined);
       return { contratos };
     } catch (e) {
-      return { contratos: [], error: e instanceof Error ? e.message : "Erro desconhecido ao consultar o TOTVS RM" };
+      return {
+        contratos: [],
+        error: e instanceof Error ? e.message : "Erro desconhecido ao consultar o TOTVS RM",
+      };
     }
   });
 
@@ -306,7 +408,10 @@ export const statusIntegracaoRm = createServerFn({ method: "GET" })
     await exigirAdmin(ctx);
     const imob = await imobiliariaDoContexto(ctx);
     const rm = await import("./rm.server");
-    const [status, superAdmin] = await Promise.all([rm.statusRm(imob), temPapel(ctx, ["super_admin"])]);
+    const [status, superAdmin] = await Promise.all([
+      rm.statusRm(imob),
+      temPapel(ctx, ["super_admin"]),
+    ]);
     return { status, superAdmin };
   });
 
@@ -327,7 +432,6 @@ export const salvarCredenciaisRm = createServerFn({ method: "POST" })
     if (!(await temPapel(ctx, ["super_admin"]))) {
       throw new Error("Só um Super Admin altera as credenciais do TOTVS RM.");
     }
-    await exigirAal2(ctx); // segundo fator (TOTP) obrigatório para mexer em credenciais
     const imob = await imobiliariaDoContexto(ctx);
     const rm = await import("./rm.server");
     if (!rm.ehRecursoRm(data.recurso)) throw new Error("Integração desconhecida.");
@@ -342,7 +446,9 @@ export const salvarCredenciaisRm = createServerFn({ method: "POST" })
       .filter(Boolean);
     if (hostsPermitidos.length > 0) {
       if (!hostsPermitidos.includes(host)) {
-        throw new Error(`O host "${host}" não está na lista de hosts permitidos do TOTVS RM (RM_HOSTS_PERMITIDOS).`);
+        throw new Error(
+          `O host "${host}" não está na lista de hosts permitidos do TOTVS RM (RM_HOSTS_PERMITIDOS).`,
+        );
       }
     } else {
       const outrosHosts = ((await rm.statusRm(imob)) ?? [])
@@ -399,14 +505,23 @@ export const testarConexaoRm = createServerFn({ method: "POST" })
     if (!rm.ehRecursoRm(data.recurso)) return { ok: false, msg: "Integração desconhecida." };
     try {
       const cred = await rm.credencialRm(imob, data.recurso);
-      if (!cred) return { ok: false, msg: "Cadastre o endpoint, o usuário e a senha desta integração antes de testar." };
+      if (!cred)
+        return {
+          ok: false,
+          msg: "Cadastre o endpoint, o usuário e a senha desta integração antes de testar.",
+        };
 
       let url = cred.endpoint;
       if (data.recurso === "compradores") {
         const emp = await rm.credencialRm(imob, "empreendimentos");
-        if (!emp) return { ok: false, msg: "Cadastre primeiro a integração de empreendimentos: o teste usa um deles como exemplo." };
+        if (!emp)
+          return {
+            ok: false,
+            msg: "Cadastre primeiro a integração de empreendimentos: o teste usa um deles como exemplo.",
+          };
         const primeiro = mapEmpreendimentos(extractRows(await rm.buscarNoRm(emp.endpoint, emp)))[0];
-        if (!primeiro) return { ok: false, msg: "O RM não devolveu nenhum empreendimento para usar no teste." };
+        if (!primeiro)
+          return { ok: false, msg: "O RM não devolveu nenhum empreendimento para usar no teste." };
         url = rm.urlCompradores(cred.endpoint, primeiro.codigo);
       }
 
@@ -419,6 +534,9 @@ export const testarConexaoRm = createServerFn({ method: "POST" })
         campos: rows[0] ? Object.keys(rows[0]).slice(0, 12) : [],
       };
     } catch (e) {
-      return { ok: false, msg: e instanceof Error ? e.message : "Erro desconhecido ao testar o TOTVS RM" };
+      return {
+        ok: false,
+        msg: e instanceof Error ? e.message : "Erro desconhecido ao testar o TOTVS RM",
+      };
     }
   });

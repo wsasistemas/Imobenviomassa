@@ -217,9 +217,8 @@ async function assertEnvelopeDoUsuario(ctx: DsCtx, envelopeId: string): Promise<
 // Credenciais (chave RSA, integration key…) só são alteradas por Super Admin — mesmo modelo das
 // credenciais do TOTVS RM.
 async function assertSuperAdmin(ctx: DsCtx) {
-  const { exigirPapel, exigirAal2 } = await import("@/lib/authz");
+  const { exigirPapel } = await import("@/lib/authz");
   await exigirPapel(ctx, ["super_admin"], "Só um Super Admin altera as credenciais do DocuSign.");
-  await exigirAal2(ctx); // segundo fator (TOTP) obrigatório para mexer em credenciais
 }
 
 function normalizeBaseUrl(url: string | null | undefined): string {

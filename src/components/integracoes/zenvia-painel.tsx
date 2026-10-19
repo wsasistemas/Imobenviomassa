@@ -207,9 +207,7 @@ export function ZenviaPainel() {
             )}
             <small className="text-[11.5px] text-muted-foreground">
               Guardado no Vault. Nunca volta para o navegador.{" "}
-              {st.podeTrocarToken
-                ? "Exige a verificação em duas etapas."
-                : "Só o Super Admin troca o token."}
+              {st.podeTrocarToken ? "" : "Só o Super Admin troca o token."}
             </small>
           </div>
           {st.testadoEm &&

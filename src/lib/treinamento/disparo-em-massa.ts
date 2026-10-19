@@ -22,7 +22,6 @@ export const guiaDisparoEmMassa: Guia = {
         "Clique em “Entrar”. Se tudo estiver certo, aparece o aviso “Bem-vindo!”.",
         "No primeiro acesso, o portal abre a tela “Defina uma nova senha”. Em “Senha atual”, digite a senha que você recebeu; depois digite a nova senha em “Nova senha” e repita em “Confirmar senha”.",
         "Clique em “Salvar e entrar”. A nova senha precisa ter de 12 a 128 caracteres e misturar pelo menos três tipos entre letra minúscula, letra maiúscula, número e símbolo.",
-        "Se você ativou a verificação em duas etapas (passo 10), digite também o código de 6 dígitos do aplicativo autenticador.",
       ],
       prints: [
         { arquivo: "01-login.png", legenda: "Tela “Acessar o sistema”: e-mail, senha e botão Entrar." },
@@ -310,28 +309,6 @@ export const guiaDisparoEmMassa: Guia = {
       ],
     },
     {
-      id: "seguranca",
-      titulo: "Proteger a sua conta com verificação em duas etapas",
-      resumo: "Ativar o código do aplicativo autenticador para entrar com mais segurança.",
-      onde: "Minha conta › Segurança",
-      perfil: "Todos os perfis (obrigatório para operações sensíveis do Super Admin)",
-      instrucoes: [
-        "Abra “Minha conta › Segurança” e clique em “Ativar verificação em duas etapas”.",
-        "No celular, abra um aplicativo autenticador (Google Authenticator, Microsoft Authenticator ou Authy) e leia o QR code. Se não conseguir, use o link “Não consegue ler o QR? Digite a chave”.",
-        "Digite o código de 6 dígitos que o aplicativo mostra e clique em “Confirmar e ativar”.",
-        "A partir do próximo login, o portal pede esse código depois da senha. Para desligar, clique em “Desativar” e confirme com o código atual.",
-      ],
-      prints: [{ arquivo: "15-seguranca.png", legenda: "Tela “Segurança da conta”." }],
-      alertas: [
-        {
-          tipo: "atencao",
-          titulo: "Super Admin precisa do 2º fator",
-          texto:
-            "Para alterar credenciais, usuários ou anonimizar dados, o portal exige a verificação em duas etapas ativa. Sem ela, aparece o aviso para ativar e entrar de novo.",
-        },
-      ],
-    },
-    {
       id: "administracao",
       titulo: "Para administradores: usuários, integrações e privacidade",
       resumo: "Cadastrar pessoas, testar as integrações e atender pedidos de LGPD.",
@@ -354,7 +331,7 @@ export const guiaDisparoEmMassa: Guia = {
           tipo: "critico",
           titulo: "Anonimizar é irreversível",
           texto:
-            "“Anonimizar este titular” e “Anonimizar campanha” apagam os dados pessoais para sempre. Só o Super Admin com verificação em duas etapas ativa consegue executar.",
+            "“Anonimizar este titular” e “Anonimizar campanha” apagam os dados pessoais para sempre. Só o Super Admin consegue executar.",
         },
         {
           tipo: "atencao",

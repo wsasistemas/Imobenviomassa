@@ -27,7 +27,6 @@ import { Route as AuthenticatedConfiguracoesEmailRouteImport } from './routes/_a
 import { Route as AuthenticatedConfiguracoesGatewayRouteImport } from './routes/_authenticated/configuracoes/gateway'
 import { Route as AuthenticatedConfiguracoesIntegracoesRouteImport } from './routes/_authenticated/configuracoes/integracoes'
 import { Route as AuthenticatedConfiguracoesZenviaRouteImport } from './routes/_authenticated/configuracoes/zenvia'
-import { Route as AuthenticatedContaSegurancaRouteImport } from './routes/_authenticated/conta/seguranca'
 import { Route as AuthenticatedDisparoNovoRouteImport } from './routes/_authenticated/disparo.novo'
 import { Route as AuthenticatedReguaCobrancaIndexRouteImport } from './routes/_authenticated/regua-cobranca.index'
 import { Route as AuthenticatedReguaCobrancaConfiguracoesRouteImport } from './routes/_authenticated/regua-cobranca.configuracoes'
@@ -144,12 +143,6 @@ const AuthenticatedConfiguracoesZenviaRoute =
   AuthenticatedConfiguracoesZenviaRouteImport.update({
     id: '/configuracoes/zenvia',
     path: '/configuracoes/zenvia',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedContaSegurancaRoute =
-  AuthenticatedContaSegurancaRouteImport.update({
-    id: '/conta/seguranca',
-    path: '/conta/seguranca',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedDisparoNovoRoute =
@@ -279,7 +272,6 @@ export interface FileRoutesByFullPath {
   '/configuracoes/gateway': typeof AuthenticatedConfiguracoesGatewayRoute
   '/configuracoes/integracoes': typeof AuthenticatedConfiguracoesIntegracoesRoute
   '/configuracoes/zenvia': typeof AuthenticatedConfiguracoesZenviaRoute
-  '/conta/seguranca': typeof AuthenticatedContaSegurancaRoute
   '/disparo/novo': typeof AuthenticatedDisparoNovoRouteWithChildren
   '/regua-cobranca/configuracoes': typeof AuthenticatedReguaCobrancaConfiguracoesRoute
   '/regua-cobranca/novo': typeof AuthenticatedReguaCobrancaNovoRoute
@@ -317,7 +309,6 @@ export interface FileRoutesByTo {
   '/configuracoes/gateway': typeof AuthenticatedConfiguracoesGatewayRoute
   '/configuracoes/integracoes': typeof AuthenticatedConfiguracoesIntegracoesRoute
   '/configuracoes/zenvia': typeof AuthenticatedConfiguracoesZenviaRoute
-  '/conta/seguranca': typeof AuthenticatedContaSegurancaRoute
   '/regua-cobranca/configuracoes': typeof AuthenticatedReguaCobrancaConfiguracoesRoute
   '/regua-cobranca/novo': typeof AuthenticatedReguaCobrancaNovoRoute
   '/regua-cobranca/templates': typeof AuthenticatedReguaCobrancaTemplatesRoute
@@ -356,7 +347,6 @@ export interface FileRoutesById {
   '/_authenticated/configuracoes/gateway': typeof AuthenticatedConfiguracoesGatewayRoute
   '/_authenticated/configuracoes/integracoes': typeof AuthenticatedConfiguracoesIntegracoesRoute
   '/_authenticated/configuracoes/zenvia': typeof AuthenticatedConfiguracoesZenviaRoute
-  '/_authenticated/conta/seguranca': typeof AuthenticatedContaSegurancaRoute
   '/_authenticated/disparo/novo': typeof AuthenticatedDisparoNovoRouteWithChildren
   '/_authenticated/regua-cobranca/configuracoes': typeof AuthenticatedReguaCobrancaConfiguracoesRoute
   '/_authenticated/regua-cobranca/novo': typeof AuthenticatedReguaCobrancaNovoRoute
@@ -396,7 +386,6 @@ export interface FileRouteTypes {
     | '/configuracoes/gateway'
     | '/configuracoes/integracoes'
     | '/configuracoes/zenvia'
-    | '/conta/seguranca'
     | '/disparo/novo'
     | '/regua-cobranca/configuracoes'
     | '/regua-cobranca/novo'
@@ -434,7 +423,6 @@ export interface FileRouteTypes {
     | '/configuracoes/gateway'
     | '/configuracoes/integracoes'
     | '/configuracoes/zenvia'
-    | '/conta/seguranca'
     | '/regua-cobranca/configuracoes'
     | '/regua-cobranca/novo'
     | '/regua-cobranca/templates'
@@ -472,7 +460,6 @@ export interface FileRouteTypes {
     | '/_authenticated/configuracoes/gateway'
     | '/_authenticated/configuracoes/integracoes'
     | '/_authenticated/configuracoes/zenvia'
-    | '/_authenticated/conta/seguranca'
     | '/_authenticated/disparo/novo'
     | '/_authenticated/regua-cobranca/configuracoes'
     | '/_authenticated/regua-cobranca/novo'
@@ -626,13 +613,6 @@ declare module '@tanstack/react-router' {
       path: '/configuracoes/zenvia'
       fullPath: '/configuracoes/zenvia'
       preLoaderRoute: typeof AuthenticatedConfiguracoesZenviaRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/conta/seguranca': {
-      id: '/_authenticated/conta/seguranca'
-      path: '/conta/seguranca'
-      fullPath: '/conta/seguranca'
-      preLoaderRoute: typeof AuthenticatedContaSegurancaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/disparo/novo': {
@@ -808,7 +788,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedConfiguracoesGatewayRoute: typeof AuthenticatedConfiguracoesGatewayRoute
   AuthenticatedConfiguracoesIntegracoesRoute: typeof AuthenticatedConfiguracoesIntegracoesRoute
   AuthenticatedConfiguracoesZenviaRoute: typeof AuthenticatedConfiguracoesZenviaRoute
-  AuthenticatedContaSegurancaRoute: typeof AuthenticatedContaSegurancaRoute
   AuthenticatedDisparoNovoRoute: typeof AuthenticatedDisparoNovoRouteWithChildren
   AuthenticatedReguaCobrancaConfiguracoesRoute: typeof AuthenticatedReguaCobrancaConfiguracoesRoute
   AuthenticatedReguaCobrancaNovoRoute: typeof AuthenticatedReguaCobrancaNovoRoute
@@ -843,7 +822,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedConfiguracoesIntegracoesRoute:
     AuthenticatedConfiguracoesIntegracoesRoute,
   AuthenticatedConfiguracoesZenviaRoute: AuthenticatedConfiguracoesZenviaRoute,
-  AuthenticatedContaSegurancaRoute: AuthenticatedContaSegurancaRoute,
   AuthenticatedDisparoNovoRoute: AuthenticatedDisparoNovoRouteWithChildren,
   AuthenticatedReguaCobrancaConfiguracoesRoute:
     AuthenticatedReguaCobrancaConfiguracoesRoute,

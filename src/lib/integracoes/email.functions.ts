@@ -3,7 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
   exigirPapel,
-  exigirSuperAdminComMfa,
+  exigirSuperAdmin,
   imobiliariaDoContexto,
   temPapel,
   type ContextoAutenticado,
@@ -207,7 +207,7 @@ export const salvarConfigEmail = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-/** API key do Resend ou senha do SMTP (Zenvia E-mail usa o token da aba Zenvia). Só Super Admin com MFA. */
+/** API key do Resend ou senha do SMTP (Zenvia E-mail usa o token da aba Zenvia). Só Super Admin. */
 export const salvarCredencialEmail = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(
@@ -219,7 +219,7 @@ export const salvarCredencialEmail = createServerFn({ method: "POST" })
     ),
   )
   .handler(async ({ data, context }) => {
-    await exigirSuperAdminComMfa(ctx(context));
+    await exigirSuperAdmin(ctx(context), "Só o Super Admin troca as credenciais de e-mail.");
     const imob = await imobiliariaDoContexto(ctx(context));
     const { gravarSegredo } = await import("./segredos.server");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");

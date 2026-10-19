@@ -13,8 +13,8 @@ export type Papel = "super_admin" | "admin" | "operadora";
 export type ContextoAutenticado = {
   supabase: any;
   userId: string;
-  /** Claims do JWT (middleware requireSupabaseAuth → `data.claims`); `aal` indica o nível MFA da sessão. */
-  claims?: Record<string, unknown> & { aal?: string };
+  /** Claims do JWT (middleware requireSupabaseAuth → `data.claims`). */
+  claims?: Record<string, unknown>;
 };
 
 export type AcessoDoUsuario = {
@@ -80,7 +80,10 @@ export async function exigirPapel(
 }
 
 /** Permissão do menu-registry (mesma regra do front: src/lib/acesso/policy.ts). */
-export async function temPermissao(context: ContextoAutenticado, id: PermissionId): Promise<boolean> {
+export async function temPermissao(
+  context: ContextoAutenticado,
+  id: PermissionId,
+): Promise<boolean> {
   const acesso = await acessoDoUsuario(context);
   if (!acesso || acesso.trocarSenha) return false;
   return computePermissions(acesso.perfil, acesso.regras, false)[id] === true;
@@ -94,19 +97,10 @@ export async function exigirPermissao(
   if (!(await temPermissao(context, id))) throw new Error(mensagem);
 }
 
-export const MSG_EXIGE_MFA =
-  "Esta operação exige a verificação em duas etapas. Ative em Minha conta → Segurança e entre novamente.";
-
-/**
- * Exige sessão com 2º fator verificado (claim `aal` = "aal2" no JWT). O nível vem do próprio token
- * emitido pelo GoTrue após mfa.verify — o cliente não consegue forjá-lo. Sem claims = sem acesso.
- */
-export async function exigirAal2(context: ContextoAutenticado, mensagem = MSG_EXIGE_MFA): Promise<void> {
-  if (context.claims?.aal !== "aal2") throw new Error(mensagem);
-}
-
-/** Super Admin com MFA: perfil super_admin + sessão em aal2 (operações sensíveis: credenciais e usuários). */
-export async function exigirSuperAdminComMfa(context: ContextoAutenticado): Promise<void> {
-  await exigirPapel(context, ["super_admin"]);
-  await exigirAal2(context);
+/** Só o Super Admin (credenciais das integrações, usuários e operações irreversíveis da LGPD). */
+export async function exigirSuperAdmin(
+  context: ContextoAutenticado,
+  mensagem = "Só o Super Admin faz esta operação.",
+): Promise<void> {
+  await exigirPapel(context, ["super_admin"], mensagem);
 }

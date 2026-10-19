@@ -1,9 +1,14 @@
-import { createFileRoute, Navigate, Outlet, redirect, useRouterState } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Navigate,
+  Outlet,
+  redirect,
+  useRouterState,
+} from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { sairDoPortal } from "@/lib/sessao";
-import { precisaDeDesafioMfa } from "@/components/mfa-challenge";
 import { AppShell } from "@/components/app-shell";
 import { conferirAcessoApp } from "@/lib/app-access";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -19,7 +24,9 @@ export const Route = createFileRoute("/_authenticated")({
     const { data: acesso, error: acessoErr } = await supabase.rpc("meu_acesso");
     if (acessoErr) {
       await sairDoPortal({ redirecionar: false });
-      toast.error("Não foi possível validar seu acesso.", { description: "Tente novamente em instantes." });
+      toast.error("Não foi possível validar seu acesso.", {
+        description: "Tente novamente em instantes.",
+      });
       throw redirect({ to: "/auth" });
     }
     const membro = Array.isArray(acesso) ? acesso[0] : null;
@@ -33,11 +40,6 @@ export const Route = createFileRoute("/_authenticated")({
     if (membro.trocar_senha === true) throw redirect({ to: "/trocar-senha" });
     // Central de acessos do ikvj (Permissões por aplicativo): bloqueado não entra nem continua.
     if (!(await conferirAcessoApp())) throw redirect({ to: "/auth" });
-    // Sessão parcial (senha ok, 2º fator pendente) não entra: volta ao login para concluir o desafio.
-    if (await precisaDeDesafioMfa()) {
-      await sairDoPortal({ redirecionar: false });
-      throw redirect({ to: "/auth" });
-    }
     return { user: data.user };
   },
   component: AuthenticatedLayout,

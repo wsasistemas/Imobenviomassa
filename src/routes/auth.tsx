@@ -5,8 +5,15 @@ import { useState, type FormEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2, Mail } from "lucide-react";
-import { Aviso, Campo, CampoSenha, LoginCard, LoginLayout, inputCls, submitCls } from "@/components/login-layout";
-import { MfaChallenge, precisaDeDesafioMfa } from "@/components/mfa-challenge";
+import {
+  Aviso,
+  Campo,
+  CampoSenha,
+  LoginCard,
+  LoginLayout,
+  inputCls,
+  submitCls,
+} from "@/components/login-layout";
 import { login } from "@/lib/auth.functions";
 
 export const Route = createFileRoute("/auth")({
@@ -33,8 +40,6 @@ function FormLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [erro, setErro] = useState<string | null>(null);
-  // Sessão em aal1 com fator TOTP cadastrado: mostra o desafio antes de entrar (Fase 3 da auditoria).
-  const [desafioMfa, setDesafioMfa] = useState<{ trocarSenha: boolean } | null>(null);
 
   function concluir(trocarSenha: boolean) {
     setLoading(false);
@@ -49,7 +54,6 @@ function FormLogin() {
     setLoading(true);
     setErro(null);
     let trocarSenha = false;
-    let pedirMfa = false;
     try {
       const sessao = await entrarNoServidor({ data: { email, password } });
       trocarSenha = sessao.trocar_senha;
@@ -63,34 +67,20 @@ function FormLogin() {
         setLoading(false);
         return;
       }
-      pedirMfa = await precisaDeDesafioMfa();
     } catch (err) {
       setLoading(false);
       setErro(err instanceof Error ? err.message : "Não foi possível entrar.");
       return;
     }
-    if (pedirMfa) {
-      setDesafioMfa({ trocarSenha });
-      return;
-    }
     concluir(trocarSenha);
   }
 
-  if (desafioMfa) {
-    return (
-      <MfaChallenge
-        onOk={() => concluir(desafioMfa.trocarSenha)}
-        onCancelar={() => {
-          setDesafioMfa(null);
-          setLoading(false);
-          setPassword("");
-        }}
-      />
-    );
-  }
-
   return (
-    <LoginCard onSubmit={entrar} titulo="Acessar o sistema" sub="Utilize suas credenciais corporativas">
+    <LoginCard
+      onSubmit={entrar}
+      titulo="Acessar o sistema"
+      sub="Utilize suas credenciais corporativas"
+    >
       <Campo id="login-email" label="E-mail" icon={<Mail className="h-[15px] w-[15px]" />}>
         <input
           id="login-email"

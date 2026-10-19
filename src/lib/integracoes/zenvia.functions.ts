@@ -3,14 +3,14 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
   exigirPapel,
-  exigirSuperAdminComMfa,
+  exigirSuperAdmin,
   imobiliariaDoContexto,
   temPapel,
   type ContextoAutenticado,
 } from "@/lib/authz";
 
 // Integrações › Zenvia WhatsApp (PRD 5.2). Admin consulta, testa, cria assinaturas, sincroniza templates e ajusta
-// os números; só Super Admin com MFA troca o token (mesma regra das outras credenciais). O token fica no Vault.
+// os números; só Super Admin troca o token (mesma regra das outras credenciais). O token fica no Vault.
 // Os módulos *.server.ts entram com import dinâmico: este arquivo também vai para o bundle do navegador.
 
 function validar<T extends z.ZodTypeAny>(schema: T, msgPadrao = "Dados inválidos.") {
@@ -168,7 +168,7 @@ export const salvarTokenZenvia = createServerFn({ method: "POST" })
     ),
   )
   .handler(async ({ data, context }) => {
-    await exigirSuperAdminComMfa(ctx(context));
+    await exigirSuperAdmin(ctx(context), "Só o Super Admin troca o token da Zenvia.");
     const imob = await imobiliariaDoContexto(ctx(context));
     const { gravarSegredo, existeSegredo } = await import("./segredos.server");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");

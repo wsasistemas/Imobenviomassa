@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { exigirAal2, exigirPapel, imobiliariaDoContexto, type ContextoAutenticado } from "@/lib/authz";
+import { exigirPapel, imobiliariaDoContexto, type ContextoAutenticado } from "@/lib/authz";
 
 // Gateway de APIs — escrita em api_registry só pelo SERVIDOR (auditoria de segurança 2026-10-01,
 // item A11). Uma API cadastrada apontando para outro host receberia as credenciais do RM, por isso
@@ -24,7 +24,11 @@ const registrarSchema = z.object({
     .refine((v) => !v || /^https:\/\//i.test(v), "A URL base precisa começar com https://")
     .nullable()
     .optional(),
-  endpoint: z.string().trim().min(1, "Informe o endpoint.").max(300, "Endpoint com no máximo 300 caracteres."),
+  endpoint: z
+    .string()
+    .trim()
+    .min(1, "Informe o endpoint.")
+    .max(300, "Endpoint com no máximo 300 caracteres."),
   method: z.enum(["GET", "POST", "PUT", "DELETE"]),
   description: textoOpc(500),
   source: z.enum(["rest", "soap", "webhook", "endpoint"]).nullable().optional(),
@@ -45,8 +49,11 @@ const registrarSchema = z.object({
 export type RegistrarApiGatewayInput = z.input<typeof registrarSchema>;
 
 async function exigirSuperAdmin(context: unknown) {
-  await exigirPapel(context as ContextoAutenticado, ["super_admin"], "Só um Super Admin cadastra APIs no gateway.");
-  await exigirAal2(context as ContextoAutenticado); // segundo fator (TOTP) obrigatório
+  await exigirPapel(
+    context as ContextoAutenticado,
+    ["super_admin"],
+    "Só um Super Admin cadastra APIs no gateway.",
+  );
 }
 
 async function admin() {
@@ -69,7 +76,8 @@ function vazioParaNull<T extends Record<string, unknown>>(obj: T): T {
 export const registrarApiGateway = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => {
-    const bruto = typeof input === "object" && input ? vazioParaNull(input as Record<string, unknown>) : input;
+    const bruto =
+      typeof input === "object" && input ? vazioParaNull(input as Record<string, unknown>) : input;
     const r = registrarSchema.safeParse(bruto);
     if (!r.success) throw new Error(r.error.issues[0]?.message ?? "Dados da API inválidos.");
     return r.data;
@@ -101,7 +109,12 @@ export const registrarApiGateway = createServerFn({ method: "POST" })
       })
       .select("id")
       .single();
-    if (error || !criado) throw await erroGenerico("gateway.registrar", error ?? "sem retorno", "Não foi possível registrar a API.");
+    if (error || !criado)
+      throw await erroGenerico(
+        "gateway.registrar",
+        error ?? "sem retorno",
+        "Não foi possível registrar a API.",
+      );
 
     await auditar({
       userId: ctx.userId,
@@ -122,7 +135,9 @@ export const registrarApiGateway = createServerFn({ method: "POST" })
 
 export const removerApiGateway = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ id: z.string().uuid("API inválida.") }).parse(input))
+  .inputValidator((input: unknown) =>
+    z.object({ id: z.string().uuid("API inválida.") }).parse(input),
+  )
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
     await exigirSuperAdmin(context);
     const ctx = context as ContextoAutenticado;
@@ -138,8 +153,13 @@ export const removerApiGateway = createServerFn({ method: "POST" })
       .maybeSingle();
     if (!existente) throw new Error("API não encontrada.");
 
-    const { error } = await sb.from("api_registry").delete().eq("id", data.id).eq("imobiliaria_id", imob);
-    if (error) throw await erroGenerico("gateway.remover", error, "Não foi possível remover a API.");
+    const { error } = await sb
+      .from("api_registry")
+      .delete()
+      .eq("id", data.id)
+      .eq("imobiliaria_id", imob);
+    if (error)
+      throw await erroGenerico("gateway.remover", error, "Não foi possível remover a API.");
 
     await auditar({
       userId: ctx.userId,

@@ -289,8 +289,8 @@ const definitions = [
   // ===== Rodapé da sidebar =====
   {
     id: "conta_seguranca",
-    label: "Alterar senha e MFA",
-    path: "/conta/seguranca",
+    label: "Alterar senha",
+    path: "/trocar-senha",
     icon: ShieldCheck,
     group: "rodape",
     alwaysVisible: true,

@@ -306,7 +306,7 @@ export function EmailPainel() {
               <small className="text-[11.5px] text-muted-foreground">
                 {mudouTipo
                   ? "Salve a troca de provedor antes de cadastrar a credencial."
-                  : "Guardada no Vault; nunca volta para o navegador. Só o Super Admin troca (com verificação em duas etapas)."}
+                  : "Guardada no Vault; nunca volta para o navegador. Só o Super Admin troca."}
               </small>
             </div>
             <div className="flex flex-col gap-1.5">
