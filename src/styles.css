@@ -154,3 +154,24 @@
 @utility shadow-brand {
   box-shadow: 0 6px 16px -6px oklch(0.55 0.19 5 / 0.55);
 }
+
+/* Telas de entrada (login, esqueci/redefinir e troca de senha): paleta da logo WSA Sistemas IA.
+ * Azul do "WSA" como cor de ação, laranja → vermelho da seta como destaque. Só vale dentro de .tema-wsa;
+ * o restante do portal continua no design system do imobdocerias. */
+.tema-wsa {
+  --wsa-azul: #1663c7;
+  --wsa-azul-escuro: #0b3a86;
+  --wsa-marinho: #071f4d;
+  --wsa-azul-claro: #2b8be6;
+  --wsa-laranja: #f7931e;
+  --wsa-vermelho: #e53935;
+  --primary: var(--wsa-azul);
+  --primary-dark: var(--wsa-azul-escuro);
+  --primary-soft: #e8f1fc;
+  --primary-foreground: #ffffff;
+  --ring: var(--wsa-azul);
+  --background: #f4f7fc;
+}
+.tema-wsa .shadow-brand {
+  box-shadow: 0 6px 16px -6px rgb(22 99 199 / 0.55);
+}

@@ -74,7 +74,13 @@ function TrocarSenhaPage() {
           value={senhaAtual}
           onChange={setSenhaAtual}
         />
-        <CampoSenha id="nova-senha" label="Nova senha" autoComplete="new-password" value={senha} onChange={setSenha} />
+        <CampoSenha
+          id="nova-senha"
+          label="Nova senha"
+          autoComplete="new-password"
+          value={senha}
+          onChange={setSenha}
+        />
         <CampoSenha
           id="nova-senha-2"
           label="Confirmar senha"
@@ -86,14 +92,24 @@ function TrocarSenhaPage() {
         {erro && <Aviso>{erro}</Aviso>}
 
         <p className="text-center text-xs text-muted-foreground">
-          {SENHA_REGRAS_TEXTO} A nova senha precisa ser diferente da atual. Ao salvar, as suas outras sessões são encerradas.
+          {SENHA_REGRAS_TEXTO} A nova senha precisa ser diferente da atual. Ao salvar, as suas
+          outras sessões são encerradas.
         </p>
 
-        <button type="submit" disabled={enviando || !senhaAtual || !senha || !confirmacao} className={submitCls}>
+        <button
+          type="submit"
+          disabled={enviando || !senhaAtual || !senha || !confirmacao}
+          className={submitCls}
+        >
           {enviando && <Loader2 className="h-4 w-4 animate-spin" />}
           {enviando ? "Salvando…" : "Salvar e entrar"}
         </button>
-        <button type="button" onClick={() => void sair()} disabled={enviando} className="self-center text-[12.5px] text-[#b3262e] hover:underline">
+        <button
+          type="button"
+          onClick={() => void sair()}
+          disabled={enviando}
+          className="self-center text-[12.5px] font-semibold text-primary hover:underline"
+        >
           Sair
         </button>
       </LoginCard>

@@ -4,7 +4,12 @@
 //   09 resultado gravado em regua_tentativa (payload sem o PDF, resposta do provedor, horário)
 
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { enviarEmail, type MensagemEmail, type TipoProvedor } from "@/lib/integracoes/email.server";
+import {
+  enviarEmail,
+  resendDominio,
+  type MensagemEmail,
+  type TipoProvedor,
+} from "@/lib/integracoes/email.server";
 import { lerSegredo } from "@/lib/integracoes/segredos.server";
 import { enviarTemplateWhatsapp } from "@/lib/integracoes/zenvia.server";
 import {
@@ -52,7 +57,24 @@ export async function remetenteEmailPronto(
     throw new Error("O provedor de e-mail está desativado (Integrações › E-mail).");
   const tipo = p.tipo as TipoProvedor;
   if (!p.remetente_email) throw new Error("Informe o e-mail do remetente em Integrações › E-mail.");
+  const credencial = await lerSegredo(
+    tipo === "resend" ? "resend_apikey" : tipo === "smtp" ? "smtp_senha" : "zenvia_token",
+    imob,
+  );
+  if (!credencial) throw new Error("A credencial do provedor de e-mail não está cadastrada.");
   if (tipo === "resend") {
+    // O status gravado só muda quando alguém clica em "Verificar DNS": se não está verified, consulta o Resend
+    // agora (GET, não reinicia a checagem) e atualiza a tela de Integrações › E-mail.
+    if (p.status_dominio !== "verified" && p.dominio_id_provedor) {
+      const atual = await resendDominio(credencial, p.dominio_id_provedor);
+      if (atual.ok && atual.status !== p.status_dominio) {
+        await supabaseAdmin
+          .from("email_provedor")
+          .update({ status_dominio: atual.status as never })
+          .eq("imobiliaria_id", imob);
+        p.status_dominio = atual.status as never;
+      }
+    }
     if (p.status_dominio !== "verified" || !p.dominio) {
       throw new Error(
         "O domínio do Resend ainda não está verified. Verifique o DNS em Integrações › E-mail.",
@@ -61,11 +83,6 @@ export async function remetenteEmailPronto(
     if (!p.remetente_email.toLowerCase().endsWith("@" + p.dominio))
       throw new Error(`O remetente precisa ser do domínio ${p.dominio}.`);
   }
-  const credencial = await lerSegredo(
-    tipo === "resend" ? "resend_apikey" : tipo === "smtp" ? "smtp_senha" : "zenvia_token",
-    imob,
-  );
-  if (!credencial) throw new Error("A credencial do provedor de e-mail não está cadastrada.");
   const nome = p.remetente_nome?.replace(/[<>"]/g, "") ?? null;
   return {
     provedor: {

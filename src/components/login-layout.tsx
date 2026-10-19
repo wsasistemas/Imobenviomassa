@@ -12,29 +12,41 @@ const RECURSOS = [
   { icon: ShieldCheck, texto: "Controle de acesso por perfil" },
 ];
 
-/** Tela de entrada (login e troca de senha): painel framboesa à esquerda, cartão à direita. */
+/** Tela de entrada (login, senha): painel nas cores da logo WSA à esquerda, cartão à direita (tema .tema-wsa em styles.css). */
 export function LoginLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="grid min-h-screen grid-cols-1 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+    <div className="tema-wsa grid min-h-screen grid-cols-1 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
       {/* ===== Painel escuro (esquerda) ===== */}
-      <aside className="flex flex-col bg-[radial-gradient(120%_140%_at_100%_0%,oklch(0.62_0.19_3)_0%,oklch(0.42_0.15_5)_60%,oklch(0.3_0.08_15)_100%)] px-4 py-6 text-white md:px-[clamp(20px,3vw,40px)] md:pb-4">
+      <aside className="relative flex flex-col overflow-hidden bg-[radial-gradient(120%_140%_at_100%_0%,var(--wsa-azul-claro)_0%,var(--wsa-azul)_38%,var(--wsa-azul-escuro)_70%,var(--wsa-marinho)_100%)] px-4 py-6 text-white md:px-[clamp(20px,3vw,40px)] md:pb-4">
+        <span
+          aria-hidden
+          className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[var(--wsa-laranja)] via-[var(--wsa-vermelho)] to-[var(--wsa-azul-claro)]"
+        />
         <img
           src={wsaLogo}
           alt="WSA Sistemas IA"
-          className="block h-16 w-16 self-start rounded-full shadow-[0_8px_24px_-8px_rgba(0,0,0,0.45)] md:h-20 md:w-20"
+          className="block h-16 w-16 self-start rounded-full ring-2 ring-white/70 shadow-[0_8px_24px_-8px_rgba(0,0,0,0.45)] md:h-20 md:w-20"
         />
 
         <div className="flex max-w-[440px] flex-1 flex-col justify-center pt-6 md:py-8">
-          <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white/70">WSA Sistemas</p>
-          <h1 className="mb-2.5 text-[clamp(26px,2.6vw,34px)] font-extrabold tracking-[-0.02em]">Disparo em Massa</h1>
+          <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.18em] text-[#ffc27a]">
+            WSA Sistemas IA
+          </p>
+          <h1 className="mb-2.5 text-[clamp(26px,2.6vw,34px)] font-extrabold tracking-[-0.02em]">
+            Disparo em Massa
+          </h1>
+          <span
+            aria-hidden
+            className="mb-3.5 block h-1 w-16 rounded-full bg-gradient-to-r from-[var(--wsa-laranja)] to-[var(--wsa-vermelho)]"
+          />
           <p className="text-sm leading-relaxed text-white/80 md:border-b md:border-white/15 md:pb-5 md:text-[13.5px]">
-            Plataforma corporativa para envio de documentos para assinatura via DocuSign, com gestão centralizada das
-            campanhas.
+            Plataforma corporativa para envio de documentos para assinatura via DocuSign, com gestão
+            centralizada das campanhas.
           </p>
           <ul className="mt-5 hidden flex-col gap-2.5 text-[13px] text-white/90 md:flex">
             {RECURSOS.map(({ icon: Icon, texto }) => (
               <li key={texto} className="flex items-center gap-2.5">
-                <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[9px] border border-white/20 bg-white/10 text-white">
+                <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[9px] border border-white/20 bg-white/10 text-[#ffb35c]">
                   <Icon className="h-[15px] w-[15px]" />
                 </span>
                 {texto}
@@ -49,7 +61,9 @@ export function LoginLayout({ children }: { children: ReactNode }) {
       {/* ===== Formulário (direita) ===== */}
       <main className="flex flex-col items-center justify-center gap-4 bg-background px-4 pb-8 pt-6 md:px-5 md:py-8">
         {children}
-        <p className="text-center text-[11.5px] text-dimmer">© {ANO} WSA Sistemas. Todos os direitos reservados.</p>
+        <p className="text-center text-[11.5px] text-dimmer">
+          © {ANO} WSA Sistemas. Todos os direitos reservados.
+        </p>
       </main>
     </div>
   );
@@ -86,7 +100,17 @@ export function LoginCard({
   );
 }
 
-export function Campo({ id, label, icon, children }: { id: string; label: string; icon: ReactNode; children: ReactNode }) {
+export function Campo({
+  id,
+  label,
+  icon,
+  children,
+}: {
+  id: string;
+  label: string;
+  icon: ReactNode;
+  children: ReactNode;
+}) {
   return (
     <div className="flex flex-col gap-1.5">
       <label htmlFor={id} className="text-[12.5px] font-semibold text-foreground">
@@ -140,7 +164,7 @@ export function CampoSenha({
 
 export function Aviso({ children }: { children: ReactNode }) {
   return (
-    <div className="rounded-lg border border-primary bg-primary-soft px-3 py-[9px] text-[12.5px] leading-normal text-primary-dark">
+    <div className="rounded-lg border border-[#f5b5b3] bg-[#fdecea] px-3 py-[9px] text-[12.5px] leading-normal text-[#b3261e]">
       {children}
     </div>
   );
