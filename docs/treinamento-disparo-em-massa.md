@@ -23,7 +23,7 @@ existe, a tela mostra um espaço reservado e o HTML baixado faz o mesmo.
 
 1. **Texto**: edite `src/lib/treinamento/disparo-em-massa.ts`. Os rótulos de botões e limites vêm do código das
    telas; se uma tela mudar, ajuste o passo correspondente.
-2. **Prints**: substitua o arquivo em `public/guias/disparo-em-massa/` mantendo o nome. Use 1440×900, sem
+2. **Prints**: capture no portal atual (sem marca de outra empresa) e substitua o arquivo em `public/guias/disparo-em-massa/` mantendo o nome. Use 1440×900, sem
    dados pessoais reais (veja as regras abaixo).
 3. **Novo guia**: crie `src/lib/treinamento/<nome>.ts` (tipo `Guia`), uma rota `treinamento.<nome>.tsx` e um
    cartão em `treinamento.index.tsx`.
@@ -38,19 +38,19 @@ existe, a tela mostra um espaço reservado e o HTML baixado faz o mesmo.
 
 ## Prompt (versão para o Disparo em Massa)
 
-> Base: prompt do guia do Portal de Pesagem. Mudanças: contexto, estrutura, cor (o portal usa `#D6293B`, com
-> `#A91D2C` no hover/escuro e grafite `#17181C` — os mesmos tokens de `src/styles.css`), e prints reais do próprio
+> Base: prompt do guia do Portal de Pesagem. Mudanças: contexto, estrutura, cor (o portal usa o azul ameno da logo WSA
+> com abóbora clarinho de destaque — os mesmos tokens de `src/styles.css`), e prints reais do próprio
 > portal.
 
 ```text
-Crie um guia passo a passo chamado "Como usar o Disparo em Massa – Calper",
+Crie um guia passo a passo chamado "Como usar o Disparo em Massa – WSA Sistemas",
 destinado aos analistas, à equipe administrativa e aos administradores do portal.
 Linguagem simples, direta, em português, para quem não é da área de TI. Não use
 termos técnicos como "envelope", "API", "JWT" ou "polling": para o usuário, o
 sistema envia documentos para assinatura em massa.
 
 CONTEXTO DO SISTEMA
-- Portal web interno da Calper (login com e-mail corporativo e senha). Envia
+- Portal web da WSA Sistemas (login com e-mail corporativo e senha). Envia
   documentos para assinatura (DocuSign) a vários compradores de empreendimentos de
   uma só vez, por WhatsApp e/ou e-mail, e acompanha cada assinatura.
 - Primeiro acesso: o administrador entrega uma senha inicial; o portal obriga a
@@ -105,7 +105,7 @@ FORMATO
   origem antes de continuar; não compartilhar CSV/prints com dados de compradores).
 - Use um exemplo prático com dados fictícios (planilha de 4 compradores: um com
   telefone incompleto, um sem bloco) para mostrar o que cada etapa aprova ou bloqueia.
-- Identidade visual Calper: vermelho #D6293B como cor principal, neutros em grafite.
+- Identidade visual WSA Sistemas: azul ameno da logo como cor principal, abóbora clarinho de destaque, neutros frios.
 - Ao final, gere também uma versão HTML autocontida (imagens em base64) para salvar
   nos favoritos ou numa pasta de rede.
 

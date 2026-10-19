@@ -14,7 +14,7 @@ export const SENHA_MAX = 128;
 
 export const SENHA_REGRAS_TEXTO = `Pelo menos ${SENHA_MIN} caracteres, com três destes quatro tipos: letra minúscula, letra maiúscula, número e símbolo.`;
 
-const SEQUENCIAS_PROIBIDAS = ["123456", "abcdef", "qwerty", "senha", "password", "calper"];
+const SEQUENCIAS_PROIBIDAS = ["123456", "abcdef", "qwerty", "senha", "password", "calper", "wsasistemas", "imobsystem"];
 
 /** Devolve a mensagem de erro, ou null se a senha atende à política. */
 export function validarPoliticaSenha(senha: unknown): string | null {

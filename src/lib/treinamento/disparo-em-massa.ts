@@ -5,7 +5,7 @@ import type { Guia } from "./tipos";
 
 export const guiaDisparoEmMassa: Guia = {
   slug: "disparo-em-massa",
-  titulo: "Como usar o Disparo em Massa – Calper",
+  titulo: "Como usar o Disparo em Massa – WSA Sistemas",
   subtitulo:
     "Do primeiro acesso ao acompanhamento das assinaturas: escolha os compradores, o modelo do documento e quem assina, confira e dispare.",
   publico: "Para analistas, equipe administrativa e administradores do portal",
@@ -24,15 +24,15 @@ export const guiaDisparoEmMassa: Guia = {
         "Clique em “Salvar e entrar”. A nova senha precisa ter de 12 a 128 caracteres e misturar pelo menos três tipos entre letra minúscula, letra maiúscula, número e símbolo.",
       ],
       prints: [
-        { arquivo: "01-login.png", legenda: "Tela “Acessar o sistema”: e-mail, senha e botão Entrar." },
+        { arquivo: "01-login.png", legenda: "Tela “Acessar o sistema”: e-mail, senha, link “Esqueceu a senha?” e botão Entrar." },
         { arquivo: "02-trocar-senha.png", legenda: "Tela “Defina uma nova senha”, exibida no primeiro acesso." },
       ],
       alertas: [
         {
-          tipo: "critico",
-          titulo: "Não existe “esqueci minha senha”",
+          tipo: "dica",
+          titulo: "Esqueceu a senha?",
           texto:
-            "Se perder a senha, peça a um Super Admin para gerar uma nova. Você será obrigado a trocá-la no próximo acesso.",
+            "Na tela de login, clique em “Esqueceu a senha?” e informe o seu e-mail. Chega um link que vale por 30 minutos e uma única vez para criar a nova senha. Se o e-mail não chegar (confira o spam), peça a um Super Admin para gerar uma nova senha.",
         },
         {
           tipo: "atencao",
@@ -44,7 +44,7 @@ export const guiaDisparoEmMassa: Guia = {
           tipo: "dica",
           titulo: "Escolha uma senha forte",
           texto:
-            "Não use “senha”, “calper”, sequências como 123456 ou qwerty, nem um único caractere repetido. Uma frase longa com números e símbolos funciona bem.",
+            "Não use “senha”, o nome da empresa, sequências como 123456 ou qwerty, nem um único caractere repetido. Uma frase longa com números e símbolos funciona bem.",
         },
       ],
     },
@@ -404,5 +404,5 @@ export const guiaDisparoEmMassa: Guia = {
     },
   ],
   suporte:
-    "Se o problema continuar, acione a TI da Calper informando o horário, a tela e o texto exato da mensagem de erro. Nunca envie senhas, nem prints ou arquivos com dados de compradores, por e-mail ou chat.",
+    "Se o problema continuar, acione o suporte da WSA Sistemas informando o horário, a tela e o texto exato da mensagem de erro. Nunca envie senhas, nem prints ou arquivos com dados de compradores, por e-mail ou chat.",
 };
