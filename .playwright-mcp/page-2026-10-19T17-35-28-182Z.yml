@@ -1,0 +1,26 @@
+- generic [ref=f24e1]:
+  - generic [ref=f24e2]:
+    - complementary [ref=f24e3]:
+      - img "WSA Sistemas IA" [ref=f24e4]
+      - generic [ref=f24e5]:
+        - paragraph [ref=f24e6]: WSA Sistemas
+        - heading "Disparo em Massa" [level=1] [ref=f24e7]
+        - paragraph [ref=f24e8]: Plataforma corporativa para envio de documentos para assinatura via DocuSign, com gestão centralizada das campanhas.
+        - list [ref=f24e9]:
+          - listitem [ref=f24e10]: Envio de documentos em massa via DocuSign
+          - listitem [ref=f24e15]: Acompanhamento das assinaturas em tempo real
+          - listitem [ref=f24e19]: Controle de acesso por perfil
+      - paragraph [ref=f24e24]: © 2026 WSA Sistemas
+    - main [ref=f24e25]:
+      - generic [ref=f24e26]:
+        - generic [ref=f24e27]:
+          - heading "Esqueceu a senha?" [level=2] [ref=f24e28]
+          - paragraph [ref=f24e29]: Informe o seu e-mail de acesso. Enviaremos um link para você criar uma nova senha.
+        - generic [ref=f24e30]:
+          - generic [ref=f24e31]: E-mail
+          - textbox "E-mail" [active] [ref=f24e36]:
+            - /placeholder: seu@empresa.com.br
+        - button "Enviar link" [disabled] [ref=f24e37]
+        - button "Voltar para o login" [ref=f24e38]
+      - paragraph [ref=f24e41]: © 2026 WSA Sistemas. Todos os direitos reservados.
+  - region "Notifications alt+T"
