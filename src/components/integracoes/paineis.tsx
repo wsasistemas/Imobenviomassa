@@ -126,7 +126,7 @@ export function TotvsForm() {
       )}
 
       {status === null && (
-        <div className="rounded-lg border border-[#e2c37c] bg-warning-soft px-3 py-2.5 text-[12.5px] text-[#8a5c14]">
+        <div className="rounded-lg border border-warning/40 bg-warning-soft px-3 py-2.5 text-[12.5px] text-warning">
           As integrações ainda não estão disponíveis no banco. Rode a migração{" "}
           <code>20260929120000_rm_credenciais_privado.sql</code> no Supabase.
         </div>

@@ -1,7 +1,8 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
-import { ChevronRight, Home, LogOut, Menu } from "lucide-react";
+import { ChevronRight, Home, LogOut, Menu, Moon, Sun } from "lucide-react";
+import { useTema } from "@/lib/tema";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { sairDoPortal } from "@/lib/sessao";
 import { cn } from "@/lib/utils";
@@ -119,6 +120,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <span className="hidden whitespace-nowrap text-xs text-muted-foreground lg:inline">
               {hojeLabel}
             </span>
+            <BotaoTema />
             <div
               className="inline-flex items-center gap-2.5 rounded-full border bg-card py-1 pl-1 pr-1.5 sm:pr-2"
               title={`${nome} · ${role}${imobiliariaNome ? ` · ${imobiliariaNome}` : ""}${email ? ` · ${email}` : ""}`}
@@ -363,5 +365,26 @@ function Sidebar({
         </button>
       </div>
     </aside>
+  );
+}
+
+/** Sol/lua: alterna entre o tema claro e o escuro (fica salvo neste navegador). */
+function BotaoTema() {
+  const [tema, setTema] = useTema();
+  const escuro = tema === "escuro";
+  return (
+    <button
+      type="button"
+      onClick={() => setTema(escuro ? "claro" : "escuro")}
+      aria-label={escuro ? "Usar tema claro" : "Usar tema escuro"}
+      title={escuro ? "Tema claro" : "Tema escuro"}
+      className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border bg-card text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+    >
+      {escuro ? (
+        <Sun className="h-[17px] w-[17px] text-abobora" />
+      ) : (
+        <Moon className="h-[17px] w-[17px] text-primary" />
+      )}
+    </button>
   );
 }

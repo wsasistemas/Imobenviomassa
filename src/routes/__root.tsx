@@ -19,6 +19,7 @@ import "@fontsource/ibm-plex-mono/600.css";
 
 import appCss from "../styles.css?url";
 import { Toaster } from "@/components/ui/sonner";
+import { SCRIPT_TEMA } from "@/lib/tema";
 import { supabase } from "@/integrations/supabase/client";
 import { AppAccessDenied } from "@/components/app-access-denied";
 import { conferirAcessoApp } from "@/lib/app-access";
@@ -52,9 +53,7 @@ function ErrorComponent({ error, reset }: { error: unknown; reset: () => void })
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          Algo deu errado
-        </h1>
+        <h1 className="text-xl font-semibold tracking-tight text-foreground">Algo deu errado</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Não conseguimos carregar esta página. Tente novamente ou volte para o início.
         </p>
@@ -100,9 +99,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Portal de Disparo em Massa via WhatsApp" },
-      { name: "description", content: "Plataforma web para envio em massa de documentos para assinatura via WhatsApp." },
-      { property: "og:description", content: "Plataforma web para envio em massa de documentos para assinatura via WhatsApp." },
-      { name: "twitter:description", content: "Plataforma web para envio em massa de documentos para assinatura via WhatsApp." },
+      {
+        name: "description",
+        content: "Plataforma web para envio em massa de documentos para assinatura via WhatsApp.",
+      },
+      {
+        property: "og:description",
+        content: "Plataforma web para envio em massa de documentos para assinatura via WhatsApp.",
+      },
+      {
+        name: "twitter:description",
+        content: "Plataforma web para envio em massa de documentos para assinatura via WhatsApp.",
+      },
       { property: "og:image", content: "/og-image.png" },
       { name: "twitter:image", content: "/og-image.png" },
     ],
@@ -119,8 +127,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="pt-BR">
+    <html lang="pt-BR" suppressHydrationWarning>
       <head>
+        {/* aplica o tema escolhido (claro/escuro) antes de pintar — src/lib/tema.ts */}
+        <script dangerouslySetInnerHTML={{ __html: SCRIPT_TEMA }} />
         <HeadContent />
       </head>
       <body>
@@ -136,7 +146,9 @@ function RootComponent() {
   const router = useRouter();
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
       // Central de acessos: renovação de token reconfere (bloqueio com o portal aberto).
       if (event === "TOKEN_REFRESHED" && session) {
         setTimeout(() => {

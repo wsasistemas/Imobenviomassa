@@ -2,7 +2,7 @@
 @source "../src";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:where(.dark, .dark *));
 
 /*
  * Design system
@@ -138,6 +138,76 @@
   --sidebar-ring: oklch(0.55 0.11 250);
 }
 
+/* Tema escuro (botão sol/lua no cabeçalho, src/lib/tema.ts): marinho frio com o mesmo azul e abóbora,
+ * um pouco mais claros para manter o contraste. Vermelho só em erro, como no claro. */
+.dark {
+  color-scheme: dark;
+  --background: oklch(0.19 0.02 255);
+  --foreground: oklch(0.94 0.01 250);
+  --card: oklch(0.23 0.025 255);
+  --card-foreground: oklch(0.94 0.01 250);
+  --popover: oklch(0.23 0.025 255);
+  --popover-foreground: oklch(0.94 0.01 250);
+
+  --primary: oklch(0.64 0.11 250);
+  --primary-foreground: oklch(0.99 0.005 250);
+  --primary-dark: oklch(0.72 0.1 250);
+  --primary-soft: oklch(0.3 0.05 250);
+  --abobora: oklch(0.78 0.11 62);
+  --abobora-soft: oklch(0.31 0.05 60);
+  --abobora-dark: oklch(0.86 0.09 65);
+
+  --secondary: oklch(0.27 0.025 255);
+  --secondary-foreground: oklch(0.92 0.01 250);
+  --muted: oklch(0.27 0.025 255);
+  --muted-foreground: oklch(0.72 0.02 255);
+  --dimmer: oklch(0.58 0.02 255);
+  --accent: oklch(0.3 0.045 60);
+  --accent-foreground: oklch(0.95 0.01 250);
+
+  --destructive: oklch(0.66 0.19 25);
+  --destructive-foreground: oklch(0.99 0.01 60);
+  --success: oklch(0.72 0.13 150);
+  --success-foreground: oklch(0.18 0.02 150);
+  --success-soft: oklch(0.3 0.05 150);
+  --warning: oklch(0.78 0.13 75);
+  --warning-foreground: oklch(0.2 0.03 75);
+  --warning-soft: oklch(0.32 0.05 75);
+  --info: oklch(0.72 0.09 225);
+  --info-foreground: oklch(0.18 0.02 225);
+  --info-soft: oklch(0.3 0.04 225);
+
+  --border: oklch(0.32 0.025 255);
+  --border-strong: oklch(0.4 0.025 255);
+  --input: oklch(0.4 0.025 255);
+  --ring: oklch(0.64 0.11 250);
+
+  --chart-1: oklch(0.66 0.11 250);
+  --chart-2: oklch(0.76 0.12 60);
+  --chart-3: oklch(0.7 0.09 180);
+  --chart-4: oklch(0.58 0.07 260);
+  --chart-5: oklch(0.72 0.12 35);
+
+  --sidebar: oklch(0.165 0.02 255);
+  --sidebar-foreground: oklch(0.76 0.02 255);
+  --sidebar-primary: oklch(0.6 0.11 250);
+  --sidebar-primary-foreground: oklch(0.99 0.005 250);
+  --sidebar-accent: oklch(0.28 0.045 60);
+  --sidebar-accent-foreground: oklch(0.95 0.01 250);
+  --sidebar-border: oklch(0.27 0.025 255);
+  --sidebar-ring: oklch(0.64 0.11 250);
+}
+.dark .shadow-card {
+  box-shadow:
+    0 1px 2px oklch(0 0 0 / 0.3),
+    0 8px 24px -14px oklch(0 0 0 / 0.6);
+}
+.dark .tema-entrada .shadow-card {
+  box-shadow:
+    0 1px 2px oklch(0.3 0.04 255 / 0.05),
+    0 8px 24px -14px oklch(0.3 0.05 255 / 0.14);
+}
+
 @layer base {
   * {
     border-color: var(--color-border);
@@ -180,6 +250,20 @@
   --muted-foreground: #3c516b;
   --dimmer: #9aa9bc;
   --border-strong: #d7e0ea;
+  /* a entrada é sempre clara, mesmo com o tema escuro escolhido */
+  color-scheme: light;
+  color: var(--foreground);
+  background-color: var(--background);
+  --card: #ffffff;
+  --card-foreground: #0e2a47;
+  --popover: #ffffff;
+  --popover-foreground: #0e2a47;
+  --secondary: #eef2f7;
+  --muted: #eef2f7;
+  --border: #e3e9f0;
+  --input: #d7e0ea;
+  --accent: #eef2f7;
+  --accent-foreground: #0e2a47;
 }
 .tema-entrada .shadow-brand {
   box-shadow: 0 8px 20px -6px rgb(14 92 74 / 0.5);
