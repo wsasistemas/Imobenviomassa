@@ -107,7 +107,7 @@ function HomePage() {
       </div>
 
       {tiposDisparo.length > 0 && (
-        <div className="flex flex-wrap items-center justify-between gap-5 rounded-2xl bg-[radial-gradient(120%_140%_at_100%_0%,oklch(0.62_0.19_3)_0%,oklch(0.42_0.15_5)_60%,oklch(0.3_0.08_15)_100%)] px-7 py-6 text-white">
+        <div className="flex flex-wrap items-center justify-between gap-5 rounded-2xl bg-[radial-gradient(120%_140%_at_100%_0%,oklch(0.62_0.1_245)_0%,oklch(0.46_0.1_252)_60%,oklch(0.33_0.07_258)_100%)] px-7 py-6 text-white">
           <div>
             <h2 className="text-[22px] font-extrabold tracking-[-0.02em]">
               Escolha o tipo de disparo
@@ -222,7 +222,7 @@ function ModuleCard({ item }: { item: MenuItem }) {
   return (
     <Link
       to={item.path}
-      className="group flex flex-col items-start gap-2 rounded-xl border bg-card p-5 shadow-card transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-[0_14px_30px_-14px_oklch(0.4_0.1_10/0.35)]"
+      className="group flex flex-col items-start gap-2 rounded-xl border bg-card p-5 shadow-card transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-[0_14px_30px_-14px_oklch(0.4_0.08_255/0.3)]"
     >
       <IconeDoMenu id={item.id} icon={item.icon} tamanho={30} />
       <div>

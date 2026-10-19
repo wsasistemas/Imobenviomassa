@@ -33,7 +33,7 @@ export const tutorialDocusign: Tutorial = {
       dica: "Também dá para entrar pelo menu: Disparo em Massa › DocuSign › Novo Disparo.",
       tela: () => (
         <MJanela trilha="Início" titulo="Boa tarde, Ana" menu="Página Inicial">
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-[radial-gradient(120%_140%_at_100%_0%,oklch(0.62_0.19_3)_0%,oklch(0.42_0.15_5)_60%,oklch(0.3_0.08_15)_100%)] p-3.5 text-white">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-[radial-gradient(120%_140%_at_100%_0%,oklch(0.62_0.1_245)_0%,oklch(0.46_0.1_252)_60%,oklch(0.33_0.07_258)_100%)] p-3.5 text-white">
             <div>
               <b className="text-[14px]">Escolha o tipo de disparo</b>
               <p className="text-[10.5px] text-white/85">

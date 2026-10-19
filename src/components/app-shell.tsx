@@ -79,7 +79,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex h-screen bg-background">
       {mobileOpen && (
-        <div className="fixed inset-0 z-30 bg-[oklch(0.22_0.02_20/0.45)] md:hidden" onClick={() => setMobileOpen(false)} />
+        <div className="fixed inset-0 z-30 bg-[oklch(0.24_0.03_255/0.45)] md:hidden" onClick={() => setMobileOpen(false)} />
       )}
 
       <Sidebar

@@ -1,0 +1,22 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Paleta azul WSA</title>
+<style>
+:root{--bg:oklch(0.985 0.004 250);--fg:oklch(0.24 0.03 255);--p:oklch(0.55 0.11 250);--pd:oklch(0.46 0.1 252);--ps:oklch(0.95 0.022 250);--side:oklch(0.975 0.007 250);--sidefg:oklch(0.45 0.03 255);--sacc:oklch(0.94 0.02 250);--bd:oklch(0.91 0.01 250);--lar:oklch(0.74 0.12 60)}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--fg);display:flex;min-height:100vh}
+aside{width:280px;background:var(--side);border-right:1px solid var(--bd);padding:16px 12px}
+.sec{font-size:11px;font-weight:700;letter-spacing:.12em;color:var(--sidefg);margin:18px 8px 8px}
+.it{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:10px;color:var(--sidefg);font-size:14.5px;margin-bottom:2px}
+.it.on{background:var(--p);color:#fff;font-weight:600;box-shadow:0 6px 16px -6px oklch(0.55 0.11 250/.45)}.it.hov{background:var(--sacc);color:var(--fg)}
+main{flex:1;padding:24px}
+.ban{border-radius:16px;padding:28px;color:#fff;background:radial-gradient(120% 140% at 100% 0%,oklch(0.62 0.1 245) 0%,oklch(0.46 0.1 252) 60%,oklch(0.33 0.07 258) 100%)}
+.ban h2{margin:0 0 6px}.btn{display:inline-block;margin-top:14px;padding:9px 16px;border-radius:9px;background:#fff;color:var(--pd);font-weight:600}
+.row{display:flex;gap:12px;margin-top:20px}.b{padding:9px 16px;border-radius:9px;font-weight:600;font-size:14px}
+.b1{background:var(--p);color:#fff}.b2{background:var(--ps);color:var(--pd)}.b3{border:1px solid var(--bd);background:#fff}.sel{background:var(--ps);color:var(--pd);border-radius:999px;padding:3px 10px;font-size:12px;font-weight:600}
+.lar{background:oklch(0.96 0.04 70);color:oklch(0.5 0.11 55)}
+</style></head><body>
+<aside><b>Disparo em Massa</b><div class="sec">MENU PRINCIPAL</div>
+<div class="it on">🏠 Página Inicial</div><div class="it">✈️ Disparo em Massa</div><div class="it">🎓 Centro de Treinamento</div>
+<div class="sec">CONFIGURAÇÕES</div><div class="it">👥 Usuários</div><div class="it">🔑 Perfis e permissões</div><div class="it hov">🔒 Permissões por aplicativo (hover)</div><div class="it">⚙️ Integrações</div></aside>
+<main><div class="ban"><h2>Escolha o tipo de disparo</h2>Boletos (régua de cobrança) ou documentos para assinatura (DocuSign).<br><span class="btn">Novo disparo</span></div>
+<div class="row"><span class="b b1">Botão principal</span><span class="b b2">Secundário</span><span class="b b3">Contorno</span></div>
+<div class="row"><span class="sel">Selo azul</span><span class="sel lar">Destaque laranja</span></div></main>
+</body></html>

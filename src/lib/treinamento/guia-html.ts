@@ -23,7 +23,7 @@ export async function imagemParaDataUrl(url: string): Promise<string | null> {
 }
 
 const CSS = `
-:root{--p:#c8234f;--pd:#9b1c3d;--ps:#fbe9ee;--g:#2f1712;--m:#7a6660;--b:#ece2dc;--bg:#fdf9f6;--ok:#2f7d4f;--oks:#e2f3e8;--w:#a9741e;--ws:#fbf0dc;--i:#2c4a77;--is:#e8eef7}
+:root{--p:#3d6faf;--pd:#2c5a92;--ps:#e8eff8;--g:#1d2a3d;--m:#5f6f85;--b:#dfe6ef;--bg:#f7f9fc;--ok:#2f7d4f;--oks:#e2f3e8;--w:#a9741e;--ws:#fbf0dc;--i:#2c4a77;--is:#e8eef7}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--g);font:15px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 header.topo{background:var(--g);color:#fff;padding:28px 20px}
