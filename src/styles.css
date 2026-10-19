@@ -155,23 +155,33 @@
   box-shadow: 0 6px 16px -6px oklch(0.55 0.19 5 / 0.55);
 }
 
-/* Telas de entrada (login, esqueci/redefinir e troca de senha): paleta da logo WSA Sistemas IA.
- * Azul do "WSA" como cor de ação, laranja → vermelho da seta como destaque. Só vale dentro de .tema-wsa;
- * o restante do portal continua no design system do imobdocerias. */
-.tema-wsa {
-  --wsa-azul: #1663c7;
-  --wsa-azul-escuro: #0b3a86;
-  --wsa-marinho: #071f4d;
-  --wsa-azul-claro: #2b8be6;
-  --wsa-laranja: #f7931e;
-  --wsa-vermelho: #e53935;
-  --primary: var(--wsa-azul);
-  --primary-dark: var(--wsa-azul-escuro);
-  --primary-soft: #e8f1fc;
+/* Telas de entrada (login, esqueci/redefinir e troca de senha): paleta da entrada do portal Anglo-Americano
+ * (angloamericano/src/routes/auth.tsx) — marinho no painel, verde como ação, dourado de destaque, fundo papel.
+ * Só as cores; as fontes continuam as do portal. Vale só dentro de .tema-entrada. */
+.tema-entrada {
+  --ent-navy-900: #0a2036;
+  --ent-navy-800: #0e2a47;
+  --ent-verde-400: #13805f;
+  --ent-dourado: #c9a227;
+  --primary: #0e5c4a;
+  --primary-dark: #0b4e3f;
+  --primary-soft: #e7f0ed;
   --primary-foreground: #ffffff;
-  --ring: var(--wsa-azul);
-  --background: #f4f7fc;
+  --ring: #0e5c4a;
+  --background: #f5f8fc;
+  --foreground: #0e2a47;
+  --muted-foreground: #3c516b;
+  --dimmer: #9aa9bc;
+  --border-strong: #d7e0ea;
 }
-.tema-wsa .shadow-brand {
-  box-shadow: 0 6px 16px -6px rgb(22 99 199 / 0.55);
+.tema-entrada .shadow-brand {
+  box-shadow: 0 8px 20px -6px rgb(14 92 74 / 0.5);
+}
+.tema-entrada-grade {
+  opacity: 0.06;
+  background-image:
+    linear-gradient(to right, #fff 1px, transparent 1px),
+    linear-gradient(to bottom, #fff 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse at center, #000 30%, transparent 80%);
 }

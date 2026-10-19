@@ -12,41 +12,45 @@ const RECURSOS = [
   { icon: ShieldCheck, texto: "Controle de acesso por perfil" },
 ];
 
-/** Tela de entrada (login, senha): painel nas cores da logo WSA à esquerda, cartão à direita (tema .tema-wsa em styles.css). */
+/** Tela de entrada (login, senha): painel marinho à esquerda, cartão à direita (paleta .tema-entrada em styles.css). */
 export function LoginLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="tema-wsa grid min-h-screen grid-cols-1 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+    <div className="tema-entrada grid min-h-screen grid-cols-1 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
       {/* ===== Painel escuro (esquerda) ===== */}
-      <aside className="relative flex flex-col overflow-hidden bg-[radial-gradient(120%_140%_at_100%_0%,var(--wsa-azul-claro)_0%,var(--wsa-azul)_38%,var(--wsa-azul-escuro)_70%,var(--wsa-marinho)_100%)] px-4 py-6 text-white md:px-[clamp(20px,3vw,40px)] md:pb-4">
+      <aside className="relative flex flex-col overflow-hidden bg-[radial-gradient(120%_120%_at_15%_10%,#17457a_0%,var(--ent-navy-800)_42%,var(--ent-navy-900)_100%)] px-4 py-6 text-white md:px-[clamp(20px,3vw,40px)] md:pb-4">
+        {/* brilhos e textura em grade, como na entrada do portal Anglo-Americano */}
         <span
           aria-hidden
-          className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[var(--wsa-laranja)] via-[var(--wsa-vermelho)] to-[var(--wsa-azul-claro)]"
+          className="pointer-events-none absolute -left-24 -top-20 h-[420px] w-[420px] rounded-full bg-[#1e4e86] opacity-40 blur-[80px]"
         />
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -bottom-28 -right-20 h-[360px] w-[360px] rounded-full bg-[var(--ent-verde-400)] opacity-[0.28] blur-[80px]"
+        />
+        <span aria-hidden className="tema-entrada-grade pointer-events-none absolute inset-0" />
+
         <img
           src={wsaLogo}
           alt="WSA Sistemas IA"
-          className="block h-16 w-16 self-start rounded-full ring-2 ring-white/70 shadow-[0_8px_24px_-8px_rgba(0,0,0,0.45)] md:h-20 md:w-20"
+          className="relative block h-16 w-16 self-start rounded-full border border-white/40 shadow-[0_8px_24px_rgba(0,0,0,0.25)] md:h-20 md:w-20"
         />
 
-        <div className="flex max-w-[440px] flex-1 flex-col justify-center pt-6 md:py-8">
-          <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.18em] text-[#ffc27a]">
+        <div className="relative flex max-w-[440px] flex-1 flex-col justify-center pt-6 md:py-8">
+          <p className="mb-2 inline-flex items-center gap-2.5 text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--ent-dourado)]">
+            <span aria-hidden className="inline-block h-px w-[22px] bg-[var(--ent-dourado)]" />
             WSA Sistemas IA
           </p>
-          <h1 className="mb-2.5 text-[clamp(26px,2.6vw,34px)] font-extrabold tracking-[-0.02em]">
+          <h1 className="mb-2.5 text-[clamp(26px,2.6vw,34px)] font-extrabold tracking-[-0.02em] text-[#f3f7fc]">
             Disparo em Massa
           </h1>
-          <span
-            aria-hidden
-            className="mb-3.5 block h-1 w-16 rounded-full bg-gradient-to-r from-[var(--wsa-laranja)] to-[var(--wsa-vermelho)]"
-          />
-          <p className="text-sm leading-relaxed text-white/80 md:border-b md:border-white/15 md:pb-5 md:text-[13.5px]">
+          <p className="text-sm leading-relaxed text-[#b7c6d9] md:border-b md:border-white/15 md:pb-5 md:text-[13.5px]">
             Plataforma corporativa para envio de documentos para assinatura via DocuSign, com gestão
             centralizada das campanhas.
           </p>
-          <ul className="mt-5 hidden flex-col gap-2.5 text-[13px] text-white/90 md:flex">
+          <ul className="mt-5 hidden flex-col gap-2.5 text-[13px] text-[#dce6f2] md:flex">
             {RECURSOS.map(({ icon: Icon, texto }) => (
               <li key={texto} className="flex items-center gap-2.5">
-                <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[9px] border border-white/20 bg-white/10 text-[#ffb35c]">
+                <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[9px] border border-white/15 bg-white/[0.08] text-[var(--ent-dourado)] backdrop-blur-sm">
                   <Icon className="h-[15px] w-[15px]" />
                 </span>
                 {texto}
@@ -55,7 +59,9 @@ export function LoginLayout({ children }: { children: ReactNode }) {
           </ul>
         </div>
 
-        <p className="hidden text-[11.5px] text-white/60 md:block">© {ANO} WSA Sistemas</p>
+        <p className="relative hidden text-[11.5px] text-[#9fb2c9] md:block">
+          © {ANO} WSA Sistemas
+        </p>
       </aside>
 
       {/* ===== Formulário (direita) ===== */}
@@ -72,7 +78,7 @@ export function LoginLayout({ children }: { children: ReactNode }) {
 export const inputCls =
   "h-full min-w-0 flex-1 border-none bg-transparent text-[13.5px] text-foreground outline-none placeholder:text-dimmer";
 export const submitCls =
-  "inline-flex h-[38px] items-center justify-center gap-2 rounded-[9px] bg-primary text-[13.5px] font-semibold text-primary-foreground shadow-brand hover:bg-primary-dark disabled:opacity-55";
+  "inline-flex h-[38px] items-center justify-center gap-2 rounded-[9px] bg-primary bg-gradient-to-b from-[var(--ent-verde-400)] to-primary text-[13.5px] font-semibold text-primary-foreground shadow-brand transition hover:-translate-y-px hover:to-primary-dark disabled:translate-y-0 disabled:opacity-55";
 
 export function LoginCard({
   titulo,
@@ -164,7 +170,7 @@ export function CampoSenha({
 
 export function Aviso({ children }: { children: ReactNode }) {
   return (
-    <div className="rounded-lg border border-[#f5b5b3] bg-[#fdecea] px-3 py-[9px] text-[12.5px] leading-normal text-[#b3261e]">
+    <div className="rounded-lg border border-[#f4c7c3] bg-[#fdf0ef] px-3 py-[9px] text-[12.5px] leading-normal text-[#b42318]">
       {children}
     </div>
   );

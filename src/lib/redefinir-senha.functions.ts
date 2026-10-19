@@ -176,7 +176,7 @@ export const solicitarRedefinicaoSenha = createServerFn({ method: "POST" })
           `<div style="font-family:Arial,sans-serif;font-size:14px;color:#1f2937;line-height:1.5">` +
           `<p>Olá${nome ? `, ${nome}` : ""}.</p>` +
           `<p>Recebemos um pedido para redefinir a sua senha do <b>Disparo em Massa</b>.</p>` +
-          `<p><a href="${escaparHtml(link)}" style="display:inline-block;background:#1663c7;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:bold">Redefinir senha</a></p>` +
+          `<p><a href="${escaparHtml(link)}" style="display:inline-block;background:#0e5c4a;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:bold">Redefinir senha</a></p>` +
           `<p style="font-size:12px;color:#6b7280">O link vale por ${VALIDADE_MIN} minutos e só pode ser usado uma vez. ` +
           `A mesma conta também é usada no ImobSystem, Imobsuprimentos e ImobDoces.<br>` +
           `Se não foi você, ignore este e-mail: a senha atual continua valendo.</p></div>`;
