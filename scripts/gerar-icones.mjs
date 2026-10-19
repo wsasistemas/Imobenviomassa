@@ -65,6 +65,8 @@ const LUCIDE = [
   ["TrendingUp", "fluent-color:data-trending-24"],
   ["Users", "fluent-color:people-24"],
   ["XCircle", "fluent-color:dismiss-circle-24"],
+  ["Banknote", "flat-color-icons:money-transfer"],
+  ["FileSignature", "flat-color-icons:signature"],
   ["MessageCircle", "fluent-color:chat-24"],
   ["Globe", "fluent-color:globe-24"],
   ["Link2", "fluent-color:link-24"],

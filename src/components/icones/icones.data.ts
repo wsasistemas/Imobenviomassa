@@ -1,6 +1,6 @@
 // Gerado por scripts/gerar-icones.mjs (npm run icones). Não edite à mão.
 import type { IconifyIcon } from "@iconify/react";
-import { BarChart3, CalendarClock, CircleCheckBig, Clock, FileText, History, Info, LayoutDashboard, Lock, Mail, Megaphone, Send, ShieldCheck, TrendingUp, Users, XCircle, MessageCircle, Globe, Link2, KeyRound, Smartphone, ListChecks, AlertTriangle, Receipt, Building2, Settings2, type LucideIcon } from "lucide-react";
+import { BarChart3, CalendarClock, CircleCheckBig, Clock, FileText, History, Info, LayoutDashboard, Lock, Mail, Megaphone, Send, ShieldCheck, TrendingUp, Users, XCircle, Banknote, FileSignature, MessageCircle, Globe, Link2, KeyRound, Smartphone, ListChecks, AlertTriangle, Receipt, Building2, Settings2, type LucideIcon } from "lucide-react";
 
 /** Ícone colorido de cada item do menu, pelo id do menu-registry. */
 export const ICONE_DO_MENU: Record<string, string> = {
@@ -59,6 +59,8 @@ export const COLORIDO_DE = new Map<LucideIcon, string>([
   [TrendingUp, "fluent-color:data-trending-24"],
   [Users, "fluent-color:people-24"],
   [XCircle, "fluent-color:dismiss-circle-24"],
+  [Banknote, "flat-color-icons:money-transfer"],
+  [FileSignature, "flat-color-icons:signature"],
   [MessageCircle, "fluent-color:chat-24"],
   [Globe, "fluent-color:globe-24"],
   [Link2, "fluent-color:link-24"],
