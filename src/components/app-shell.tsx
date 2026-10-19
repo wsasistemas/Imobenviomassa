@@ -40,13 +40,21 @@ export function formatarNome(name: string | null) {
     .trim()
     .toLocaleLowerCase("pt-BR")
     .split(" ")
-    .map((p, i) => (i > 0 && ["de", "da", "do", "das", "dos", "e"].includes(p) ? p : p.charAt(0).toLocaleUpperCase("pt-BR") + p.slice(1)))
+    .map((p, i) =>
+      i > 0 && ["de", "da", "do", "das", "dos", "e"].includes(p)
+        ? p
+        : p.charAt(0).toLocaleUpperCase("pt-BR") + p.slice(1),
+    )
     .join(" ");
 }
 
 export function iniciais(name: string | null) {
-  const partes = formatarNome(name).split(" ").filter((p) => p.length > 2 || p === p.toLocaleUpperCase("pt-BR"));
-  return ((partes[0]?.[0] ?? "U") + (partes.length > 1 ? partes[partes.length - 1][0] : "")).toLocaleUpperCase("pt-BR");
+  const partes = formatarNome(name)
+    .split(" ")
+    .filter((p) => p.length > 2 || p === p.toLocaleUpperCase("pt-BR"));
+  return (
+    (partes[0]?.[0] ?? "U") + (partes.length > 1 ? partes[partes.length - 1][0] : "")
+  ).toLocaleUpperCase("pt-BR");
 }
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -79,7 +87,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex h-screen bg-background">
       {mobileOpen && (
-        <div className="fixed inset-0 z-30 bg-[oklch(0.24_0.03_255/0.45)] md:hidden" onClick={() => setMobileOpen(false)} />
+        <div
+          className="fixed inset-0 z-30 bg-[oklch(0.24_0.03_255/0.45)] md:hidden"
+          onClick={() => setMobileOpen(false)}
+        />
       )}
 
       <Sidebar
@@ -105,12 +116,14 @@ export function AppShell({ children }: { children: ReactNode }) {
           </button>
           <Breadcrumb items={trilhaDe(pathname)} />
           <div className="ml-auto flex shrink-0 items-center gap-3">
-            <span className="hidden whitespace-nowrap text-xs text-muted-foreground lg:inline">{hojeLabel}</span>
+            <span className="hidden whitespace-nowrap text-xs text-muted-foreground lg:inline">
+              {hojeLabel}
+            </span>
             <div
               className="inline-flex items-center gap-2.5 rounded-full border bg-card py-1 pl-1 pr-1.5 sm:pr-2"
               title={`${nome} · ${role}${imobiliariaNome ? ` · ${imobiliariaNome}` : ""}${email ? ` · ${email}` : ""}`}
             >
-              <span className="flex h-[30px] w-[30px] items-center justify-center rounded-full bg-primary-soft text-[11.5px] font-bold text-primary-dark">
+              <span className="flex h-[30px] w-[30px] items-center justify-center rounded-full bg-abobora-soft text-[11.5px] font-bold text-abobora-dark ring-1 ring-abobora/50">
                 {iniciais(fullName)}
               </span>
               <span className="hidden flex-col leading-tight sm:flex">
@@ -131,7 +144,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         </header>
 
         <main className="min-h-0 flex-1 overflow-y-auto">
-          <div className="mx-auto flex w-full max-w-[1280px] flex-col gap-5 px-4 pb-10 pt-5 sm:px-6 sm:pt-6">{children}</div>
+          <div className="mx-auto flex w-full max-w-[1280px] flex-col gap-5 px-4 pb-10 pt-5 sm:px-6 sm:pt-6">
+            {children}
+          </div>
         </main>
       </div>
     </div>
@@ -140,10 +155,16 @@ export function AppShell({ children }: { children: ReactNode }) {
 
 function Breadcrumb({ items }: { items: string[] }) {
   return (
-    <nav aria-label="breadcrumb" className="flex min-w-0 items-center gap-1.5 truncate text-[12.5px] text-muted-foreground">
+    <nav
+      aria-label="breadcrumb"
+      className="flex min-w-0 items-center gap-1.5 truncate text-[12.5px] text-muted-foreground"
+    >
       <Home className="h-3.5 w-3.5 shrink-0" />
       {items.map((item, i) => (
-        <span key={`${i}-${item}`} className={cn("truncate", i === items.length - 1 && "font-semibold text-foreground")}>
+        <span
+          key={`${i}-${item}`}
+          className={cn("truncate", i === items.length - 1 && "font-semibold text-foreground")}
+        >
           {i > 0 && <span className="mr-1.5 font-normal text-dimmer">/</span>}
           {item}
         </span>
@@ -162,7 +183,15 @@ interface SidebarProps {
   onSignOut: () => void;
 }
 
-function Sidebar({ pathname, canOpen, collapsed, mobileOpen, onCollapse, onNavigate, onSignOut }: SidebarProps) {
+function Sidebar({
+  pathname,
+  canOpen,
+  collapsed,
+  mobileOpen,
+  onCollapse,
+  onNavigate,
+  onSignOut,
+}: SidebarProps) {
   const ativo = menuItemForPath(pathname);
   const cadeiaAtiva = new Set(ativo ? ancestorsOf(ativo.id).map((m) => m.id) : []);
 
@@ -177,14 +206,21 @@ function Sidebar({ pathname, canOpen, collapsed, mobileOpen, onCollapse, onNavig
     });
 
   /** Subitens visíveis na sidebar (sem as seções, que são abas da tela do pai). */
-  const filhos = (item: MenuItem) => menuChildrenOf(item.id).filter((c) => !c.section && canOpen(c.id));
+  const filhos = (item: MenuItem) =>
+    menuChildrenOf(item.id).filter((c) => !c.section && canOpen(c.id));
 
   const itemCls = (on: boolean, depth: number, grupoAtivo = false) =>
     cn(
       "flex w-full items-center gap-2.5 rounded-lg py-2 text-left text-[13.5px] font-medium transition-colors",
-      collapsed ? "justify-center px-0" : depth === 0 ? "px-2.5" : depth === 1 ? "pl-8 pr-2.5 text-[13px]" : "pl-[52px] pr-2.5 text-[13px]",
+      collapsed
+        ? "justify-center px-0"
+        : depth === 0
+          ? "px-2.5"
+          : depth === 1
+            ? "pl-8 pr-2.5 text-[13px]"
+            : "pl-[52px] pr-2.5 text-[13px]",
       on
-        ? "bg-sidebar-primary font-semibold text-sidebar-primary-foreground shadow-brand"
+        ? "bg-sidebar-primary bg-gradient-to-r from-sidebar-primary from-55% to-abobora font-semibold text-sidebar-primary-foreground shadow-brand"
         : grupoAtivo
           ? "font-semibold text-sidebar-accent-foreground hover:bg-sidebar-accent"
           : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
@@ -211,9 +247,18 @@ function Sidebar({ pathname, canOpen, collapsed, mobileOpen, onCollapse, onNavig
           >
             <IconeDoMenu id={item.id} icon={item.icon} tamanho={tamanho} />
             <span className="flex-1 truncate">{item.label}</span>
-            <ChevronRight className={cn("h-3.5 w-3.5 shrink-0 opacity-50 transition-transform", aberto && "rotate-90")} />
+            <ChevronRight
+              className={cn(
+                "h-3.5 w-3.5 shrink-0 opacity-50 transition-transform",
+                aberto && "rotate-90",
+              )}
+            />
           </button>
-          {aberto && <ul className="mt-0.5 flex flex-col gap-0.5">{sub.map((c) => renderItem(c, depth + 1))}</ul>}
+          {aberto && (
+            <ul className="mt-0.5 flex flex-col gap-0.5">
+              {sub.map((c) => renderItem(c, depth + 1))}
+            </ul>
+          )}
         </li>
       );
     }
@@ -224,7 +269,10 @@ function Sidebar({ pathname, canOpen, collapsed, mobileOpen, onCollapse, onNavig
           to={item.path}
           onClick={onNavigate}
           title={item.label}
-          className={itemCls(ativo?.id === item.id || (cadeiaAtiva.has(item.id) && !!ativo?.section), collapsed ? 0 : depth)}
+          className={itemCls(
+            ativo?.id === item.id || (cadeiaAtiva.has(item.id) && !!ativo?.section),
+            collapsed ? 0 : depth,
+          )}
         >
           <IconeDoMenu id={item.id} icon={item.icon} tamanho={tamanho} />
           {!collapsed && <span className="flex-1 truncate">{item.label}</span>}
@@ -248,12 +296,21 @@ function Sidebar({ pathname, canOpen, collapsed, mobileOpen, onCollapse, onNavig
       <Link
         to="/home"
         onClick={onNavigate}
-        className={cn("flex h-16 shrink-0 items-center gap-2.5 px-4", collapsed && "md:justify-center md:px-0")}
+        className={cn(
+          "flex h-16 shrink-0 items-center gap-2.5 px-4",
+          collapsed && "md:justify-center md:px-0",
+        )}
       >
-        <img src={wsaLogo} alt="WSA Sistemas IA" className="h-10 w-10 shrink-0 rounded-full shadow-card" />
+        <img
+          src={wsaLogo}
+          alt="WSA Sistemas IA"
+          className="h-10 w-10 shrink-0 rounded-full shadow-card"
+        />
         {!collapsed && (
           <span className="leading-tight">
-            <strong className="block text-[15px] font-extrabold tracking-[-0.01em]">Disparo em Massa</strong>
+            <strong className="block text-[15px] font-extrabold tracking-[-0.01em]">
+              Disparo em Massa
+            </strong>
             <small className="block text-[10.5px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
               WSA Sistemas
             </small>
@@ -280,12 +337,22 @@ function Sidebar({ pathname, canOpen, collapsed, mobileOpen, onCollapse, onNavig
       </nav>
 
       <div className="flex shrink-0 flex-col gap-0.5 border-t border-sidebar-border px-3 py-2.5">
-        <button type="button" onClick={onCollapse} className={cn(itemCls(false, 0), "hidden md:flex")} title="Recolher menu">
+        <button
+          type="button"
+          onClick={onCollapse}
+          className={cn(itemCls(false, 0), "hidden md:flex")}
+          title="Recolher menu"
+        >
           <IconeDoMenu id={collapsed ? "rodape_expandir" : "rodape_recolher"} tamanho={20} />
           {!collapsed && <span>{collapsed ? "Expandir menu" : "Recolher menu"}</span>}
         </button>
         {seguranca?.path && (
-          <Link to={seguranca.path} onClick={onNavigate} title={seguranca.label} className={itemCls(ativo?.id === seguranca.id, 0)}>
+          <Link
+            to={seguranca.path}
+            onClick={onNavigate}
+            title={seguranca.label}
+            className={itemCls(ativo?.id === seguranca.id, 0)}
+          >
             <IconeDoMenu id={seguranca.id} icon={seguranca.icon} tamanho={20} />
             {!collapsed && <span>{seguranca.label}</span>}
           </Link>

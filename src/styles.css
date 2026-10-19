@@ -30,6 +30,9 @@
   --color-primary-foreground: var(--primary-foreground);
   --color-primary-dark: var(--primary-dark);
   --color-primary-soft: var(--primary-soft);
+  --color-abobora: var(--abobora);
+  --color-abobora-soft: var(--abobora-soft);
+  --color-abobora-dark: var(--abobora-dark);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
@@ -84,8 +87,10 @@
   --primary-foreground: oklch(0.99 0.005 250);
   --primary-dark: oklch(0.46 0.1 252);
   --primary-soft: oklch(0.95 0.022 250);
-  /* Destaque — laranja da logo, suave */
-  --accent-laranja: oklch(0.74 0.12 60);
+  /* Destaque — abóbora clarinho (laranja da logo, suave): mistura alegre com o azul no menu e nos realces */
+  --abobora: oklch(0.8 0.11 62);
+  --abobora-soft: oklch(0.965 0.032 68);
+  --abobora-dark: oklch(0.5 0.11 50);
 
   --secondary: oklch(0.965 0.008 250);
   --secondary-foreground: oklch(0.3 0.03 255);
@@ -94,7 +99,7 @@
   --muted-foreground: oklch(0.5 0.025 255);
   --dimmer: oklch(0.66 0.02 255);
 
-  --accent: oklch(0.945 0.02 250);
+  --accent: oklch(0.965 0.032 68);
   --accent-foreground: oklch(0.3 0.03 255);
 
   --destructive: oklch(0.577 0.245 27.325);
@@ -127,7 +132,7 @@
   --sidebar-foreground: oklch(0.45 0.03 255);
   --sidebar-primary: oklch(0.55 0.11 250);
   --sidebar-primary-foreground: oklch(0.99 0.005 250);
-  --sidebar-accent: oklch(0.94 0.02 250);
+  --sidebar-accent: oklch(0.96 0.035 68);
   --sidebar-accent-foreground: oklch(0.24 0.03 255);
   --sidebar-border: oklch(0.91 0.01 250);
   --sidebar-ring: oklch(0.55 0.11 250);

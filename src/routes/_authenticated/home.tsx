@@ -107,7 +107,11 @@ function HomePage() {
       </div>
 
       {tiposDisparo.length > 0 && (
-        <div className="flex flex-wrap items-center justify-between gap-5 rounded-2xl bg-[radial-gradient(120%_140%_at_100%_0%,oklch(0.62_0.1_245)_0%,oklch(0.46_0.1_252)_60%,oklch(0.33_0.07_258)_100%)] px-7 py-6 text-white">
+        <div className="flex flex-wrap items-center justify-between gap-5 relative overflow-hidden rounded-2xl bg-[radial-gradient(120%_140%_at_100%_0%,oklch(0.62_0.1_245)_0%,oklch(0.46_0.1_252)_60%,oklch(0.33_0.07_258)_100%)] px-7 py-6 text-white">
+          <span
+            aria-hidden
+            className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-transparent via-abobora to-abobora"
+          />
           <div>
             <h2 className="text-[22px] font-extrabold tracking-[-0.02em]">
               Escolha o tipo de disparo
@@ -123,7 +127,7 @@ function HomePage() {
             onClick={() =>
               tiposDisparo.length === 1 ? navigate({ to: tiposDisparo[0].to }) : setEscolher(true)
             }
-            className="inline-flex h-10 items-center gap-2 rounded-[9px] bg-white px-4 text-[13.5px] font-semibold text-foreground hover:bg-white/90"
+            className="inline-flex h-10 items-center gap-2 rounded-[9px] bg-abobora px-4 text-[13.5px] font-semibold text-[oklch(0.28_0.05_50)] shadow-[0_6px_16px_-6px_oklch(0.6_0.12_60/0.6)] hover:bg-[oklch(0.84_0.1_65)]"
           >
             <IconeIlustrativo icon={Send} size={16} />
             Novo disparo
