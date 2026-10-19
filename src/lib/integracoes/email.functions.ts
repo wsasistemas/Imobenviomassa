@@ -383,7 +383,11 @@ export const verificarDominioResend = createServerFn({ method: "POST" })
       entidadeId: imob,
       detalhes: { dominio: p.dominio, status: r.status },
     });
-    return { ok: true, status: r.status };
+    return {
+      ok: true,
+      status: r.status,
+      pediuVerificacao: "pediuVerificacao" in r ? r.pediuVerificacao : false,
+    };
   });
 
 export const enviarEmailTeste = createServerFn({ method: "POST" })

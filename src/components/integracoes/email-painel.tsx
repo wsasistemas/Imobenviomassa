@@ -405,7 +405,14 @@ export function EmailPainel() {
                 acao(
                   "verificar",
                   () => verificar(),
-                  (r) => `Status do domínio: ${(r as { status: string }).status}.`,
+                  (r) => {
+                    const x = r as { status: string; pediuVerificacao: boolean };
+                    return x.status === "verified"
+                      ? "Domínio verificado."
+                      : x.pediuVerificacao
+                        ? `O Resend está conferindo o DNS (${x.status}). Clique de novo em alguns minutos.`
+                        : `Status do domínio: ${x.status}.`;
+                  },
                 )
               }
             >
@@ -467,8 +474,9 @@ export function EmailPainel() {
           )}
           <p className="rounded-lg bg-secondary px-2.5 py-2 text-[11.5px] text-muted-foreground">
             Crie os registros no DNS do domínio (para imobsystems.com.br, o DNS fica na Vercel) e
-            clique em <b>Verificar DNS</b>. Status possíveis: not_started, pending, verified,
-            failed, temporary_failure.
+            clique em <b>Verificar DNS</b>. Se aparecer pending, o Resend ainda está conferindo:
+            espere alguns minutos e clique de novo. Status possíveis: not_started, pending,
+            verified, failed, temporary_failure.
           </p>
         </section>
       )}

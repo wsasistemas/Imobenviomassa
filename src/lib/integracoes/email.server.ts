@@ -120,11 +120,19 @@ export async function resendDominio(apiKey: string, id: string) {
   };
 }
 
+/**
+ * Lê o status atual; só pede nova verificação (POST /verify) se o domínio ainda não estiver `verified`.
+ * O POST /verify reinicia a checagem no Resend: logo depois dele o domínio volta como `pending` até a checagem
+ * terminar (alguns minutos). Chamar sempre deixava a tela em `pending` mesmo com o domínio verificado no Resend.
+ */
 export async function resendVerificarDominio(apiKey: string, id: string) {
+  const atual = await resendDominio(apiKey, id);
+  if (!atual.ok || atual.status === "verified") return { ...atual, pediuVerificacao: false };
   const v = await resend(apiKey, `/domains/${encodeURIComponent(id)}/verify`, { method: "POST" });
   if (!v.ok)
     return { ok: false as const, erro: v.erro ?? "O Resend não aceitou o pedido de verificação." };
-  return resendDominio(apiKey, id);
+  const depois = await resendDominio(apiKey, id);
+  return depois.ok ? { ...depois, pediuVerificacao: true } : depois;
 }
 
 export interface MensagemEmail {
