@@ -150,7 +150,7 @@ function DashboardPage() {
               <CheckCircle2 className="h-10 w-10 text-muted-foreground" />
               <p className="mt-3 text-sm font-medium">Nenhuma campanha ainda</p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Comece criando seu primeiro disparo em massa.
+                Comece criando seu primeiro disparo.
               </p>
               <Button asChild variant="outline" size="sm" className="mt-4">
                 <Link to="/disparo/novo">Criar disparo</Link>

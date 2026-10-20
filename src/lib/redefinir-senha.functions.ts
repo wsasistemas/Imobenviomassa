@@ -168,14 +168,14 @@ export const solicitarRedefinicaoSenha = createServerFn({ method: "POST" })
         const nome = escaparHtml(membro.nome || "");
         const texto =
           `Olá${membro.nome ? `, ${membro.nome}` : ""}.\n\n` +
-          `Recebemos um pedido para redefinir a sua senha do Disparo em Massa.\n` +
+          `Recebemos um pedido para redefinir a sua senha do Disparo de Cobranças e Documentos.\n` +
           `Abra o link abaixo em até ${VALIDADE_MIN} minutos:\n\n${link}\n\n` +
           `A mesma conta também é usada no ImobSystem, Imobsuprimentos e ImobDoces.\n` +
           `Se não foi você, ignore este e-mail: a senha atual continua valendo.`;
         const html =
           `<div style="font-family:Arial,sans-serif;font-size:14px;color:#1f2937;line-height:1.5">` +
           `<p>Olá${nome ? `, ${nome}` : ""}.</p>` +
-          `<p>Recebemos um pedido para redefinir a sua senha do <b>Disparo em Massa</b>.</p>` +
+          `<p>Recebemos um pedido para redefinir a sua senha do <b>Disparo de Cobranças e Documentos</b>.</p>` +
           `<p><a href="${escaparHtml(link)}" style="display:inline-block;background:#0e5c4a;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:bold">Redefinir senha</a></p>` +
           `<p style="font-size:12px;color:#6b7280">O link vale por ${VALIDADE_MIN} minutos e só pode ser usado uma vez. ` +
           `A mesma conta também é usada no ImobSystem, Imobsuprimentos e ImobDoces.<br>` +
@@ -186,7 +186,7 @@ export const solicitarRedefinicaoSenha = createServerFn({ method: "POST" })
           fromNome: r.fromNome,
           replyTo: r.replyTo,
           to: data.email,
-          assunto: "Redefinição de senha — Disparo em Massa",
+          assunto: "Redefinição de senha — Disparo de Cobranças e Documentos",
           html,
           texto,
         });

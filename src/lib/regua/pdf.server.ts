@@ -137,7 +137,7 @@ export async function gerarBoletoPdf(d: DadosBoletoPdf, senha: string): Promise<
   const pdf = await PDFDocument.create();
   pdf.setTitle(`Boleto ${d.numero}`);
   pdf.setAuthor(d.beneficiario);
-  pdf.setProducer("Disparo em Massa · Régua de Cobrança");
+  pdf.setProducer("Disparo de Cobranças e Documentos · Régua de Cobrança");
   const page = pdf.addPage([595.28, 841.89]); // A4
   const fonte = await pdf.embedFont(StandardFonts.Helvetica);
   const negrito = await pdf.embedFont(StandardFonts.HelveticaBold);

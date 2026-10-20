@@ -188,7 +188,7 @@ function HomePage() {
       )}
 
       {menuGroups.map((g) => {
-        // Na Página Inicial cada ramo de primeiro nível vira uma seção (ex.: "Disparo em Massa").
+        // Na Página Inicial cada ramo de primeiro nível vira uma seção (ex.: "Disparo de Cobranças e Documentos").
         const ramos = menuItemsByGroup(g.id).filter((m) => m.id !== "home");
         const secoes =
           g.id === "principal"

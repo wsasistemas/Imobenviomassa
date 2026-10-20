@@ -99,7 +99,7 @@ function CentroDeTreinamentoPage() {
               </div>
               <Selo tom="success">Disponível</Selo>
             </div>
-            <h3 className="mb-1 text-[15px] font-bold">Como usar o Disparo em Massa</h3>
+            <h3 className="mb-1 text-[15px] font-bold">Como usar o Disparo de Cobranças e Documentos</h3>
             <p className="mb-3 text-[13px] leading-normal text-muted-foreground">
               Do primeiro acesso ao acompanhamento das assinaturas: escolher os compradores, o
               modelo do documento, quem assina, conferir e disparar.

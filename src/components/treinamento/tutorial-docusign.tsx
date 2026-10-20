@@ -15,7 +15,7 @@ import {
 // Tutorial ilustrado — Envio de documentos para assinatura (DocuSign). Dados fictícios.
 
 const PASSOS = ["Origem", "Compradores", "Modelo", "Verificação", "Assinatura", "Revisão"];
-const TRILHA = "Início / Disparo em Massa / DocuSign / Novo Disparo";
+const TRILHA = "Início / Disparo de Cobranças e Documentos / DocuSign / Novo Disparo";
 
 export const tutorialDocusign: Tutorial = {
   slug: "tutorial-docusign",
@@ -30,7 +30,7 @@ export const tutorialDocusign: Tutorial = {
       explicacao:
         "Na Página Inicial, clique em Novo disparo e escolha DocuSign para enviar documentos para assinatura em lote.",
       acoes: ["Clique em “Novo disparo”.", "Escolha “DocuSign”: abre o assistente de 6 etapas."],
-      dica: "Também dá para entrar pelo menu: Disparo em Massa › DocuSign › Novo Disparo.",
+      dica: "Também dá para entrar pelo menu: Disparo de Cobranças e Documentos › DocuSign › Novo Disparo.",
       tela: () => (
         <MJanela trilha="Início" titulo="Boa tarde, Ana" menu="Página Inicial">
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-[radial-gradient(120%_140%_at_100%_0%,oklch(0.62_0.1_245)_0%,oklch(0.46_0.1_252)_60%,oklch(0.33_0.07_258)_100%)] p-3.5 text-white">

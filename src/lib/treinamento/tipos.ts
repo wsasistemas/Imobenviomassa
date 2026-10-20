@@ -30,7 +30,7 @@ export interface Passo {
   resumo: string;
   /** Quem executa: perfil mínimo exigido no portal. */
   perfil?: string;
-  /** Menu do portal onde a tela fica, ex.: "Disparo em Massa › Novo Disparo". */
+  /** Menu do portal onde a tela fica, ex.: "Disparo de Cobranças e Documentos › Novo Disparo". */
   onde?: string;
   /** Frases numeradas: o que fazer. */
   instrucoes: string[];

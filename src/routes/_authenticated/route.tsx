@@ -33,7 +33,7 @@ export const Route = createFileRoute("/_authenticated")({
     if (!membro || membro.ativo === false) {
       await sairDoPortal({ redirecionar: false });
       toast.error("Sua conta não tem acesso a este portal.", {
-        description: "Peça ao administrador da sua imobiliária para liberar o Envio em Massa.",
+        description: "Peça ao administrador da sua imobiliária para liberar o Disparo de Cobranças e Documentos.",
       });
       throw redirect({ to: "/auth" });
     }

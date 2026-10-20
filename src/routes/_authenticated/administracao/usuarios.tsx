@@ -201,7 +201,7 @@ function Usuarios() {
           </>
         }
       >
-        Quem tem acesso ao portal Disparo em Massa e com qual perfil. O login é o e-mail da própria pessoa: a senha inicial
+        Quem tem acesso ao portal Disparo de Cobranças e Documentos e com qual perfil. O login é o e-mail da própria pessoa: a senha inicial
         é gerada pelo sistema (aqui ou em "Gerar nova senha"), mostrada uma única vez, e a pessoa troca no próximo acesso.
       </PageHead>
 

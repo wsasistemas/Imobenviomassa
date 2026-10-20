@@ -54,14 +54,14 @@ export const DESCRICAO_NIVEL: Record<Nivel, string> = {
 };
 
 /** Seções da matriz da tela Perfis, na ordem em que aparecem. */
-export const GRUPOS_PERMISSAO = ["Disparo em Massa", "Configurações", "Administração"] as const;
+export const GRUPOS_PERMISSAO = ["Disparo de Cobranças e Documentos", "Configurações", "Administração"] as const;
 export type GrupoPermissao = (typeof GRUPOS_PERMISSAO)[number];
 
 export const PERMISSAO_INFO: Record<Permissao, { rotulo: string; grupo: GrupoPermissao }> = {
-  verDashboard: { rotulo: "Ver o Dashboard dos disparos", grupo: "Disparo em Massa" },
-  criarDisparo: { rotulo: "Criar novo disparo (consulta compradores no TOTVS RM)", grupo: "Disparo em Massa" },
-  verHistorico: { rotulo: "Consultar o histórico de campanhas", grupo: "Disparo em Massa" },
-  verRelatorios: { rotulo: "Ver relatórios de assinaturas", grupo: "Disparo em Massa" },
+  verDashboard: { rotulo: "Ver o Dashboard dos disparos", grupo: "Disparo de Cobranças e Documentos" },
+  criarDisparo: { rotulo: "Criar novo disparo (consulta compradores no TOTVS RM)", grupo: "Disparo de Cobranças e Documentos" },
+  verHistorico: { rotulo: "Consultar o histórico de campanhas", grupo: "Disparo de Cobranças e Documentos" },
+  verRelatorios: { rotulo: "Ver relatórios de assinaturas", grupo: "Disparo de Cobranças e Documentos" },
   integracoes: { rotulo: "Consultar e testar as integrações TOTVS RM e DocuSign", grupo: "Configurações" },
   credenciais: { rotulo: "Cadastrar e trocar credenciais das integrações", grupo: "Configurações" },
   gateway: { rotulo: "Usar o Gateway de APIs", grupo: "Configurações" },

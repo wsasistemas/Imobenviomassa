@@ -215,7 +215,7 @@ export function MJanela({
 }) {
   const itens = [
     "Página Inicial",
-    "Disparo em Massa",
+    "Disparo de Cobranças e Documentos",
     "DocuSign",
     "Régua de Cobrança",
     "Centro de Treinamento",
@@ -236,7 +236,7 @@ export function MJanela({
       </div>
       <div className="flex">
         <div className="hidden w-[150px] shrink-0 flex-col gap-0.5 border-r bg-sidebar p-2 md:flex">
-          <b className="mb-1.5 px-1.5 text-[11.5px]">Disparo em Massa</b>
+          <b className="mb-1.5 px-1.5 text-[11.5px]">Disparo de Cobranças e Documentos</b>
           {itens.map((t) => (
             <span
               key={t}

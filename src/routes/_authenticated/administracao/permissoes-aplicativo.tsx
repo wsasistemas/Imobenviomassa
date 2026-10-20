@@ -685,7 +685,7 @@ function AdicionarApp({ onFechar, onAdicionado }: { onFechar: () => void; onAdic
             <AppWindow className="h-[18px] w-[18px]" /> Adicionar aplicativo
           </DialogTitle>
           <DialogDescription>
-            Para sistemas que dividem um schema com outros (ex.: o Disparo em Massa e o Financeiro usam o{" "}
+            Para sistemas que dividem um schema com outros (ex.: o Disparo de Cobranças e Documentos e o Financeiro usam o{" "}
             <code>public</code>). Schemas próprios aparecem sozinhos na lista.
           </DialogDescription>
         </DialogHeader>

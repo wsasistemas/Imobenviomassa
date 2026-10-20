@@ -22,7 +22,7 @@ const PASSOS_LOTE = [
   "Pré-visualização",
   "Confirmação",
 ];
-const TRILHA = "Início / Disparo em Massa / Régua de Cobrança / Novo lote";
+const TRILHA = "Início / Disparo de Cobranças e Documentos / Régua de Cobrança / Novo lote";
 
 export const tutorialRegua: Tutorial = {
   slug: "tutorial-boleto",
@@ -40,7 +40,7 @@ export const tutorialRegua: Tutorial = {
         "Clique em “Novo disparo”.",
         "Na janela, escolha “Boleto”: abre o passo a passo do Novo lote da Régua de Cobrança.",
       ],
-      dica: "Também dá para entrar pelo menu: Disparo em Massa › Régua de Cobrança › Novo lote.",
+      dica: "Também dá para entrar pelo menu: Disparo de Cobranças e Documentos › Régua de Cobrança › Novo lote.",
       tela: () => (
         <MJanela trilha="Início" titulo="Boa tarde, Ana" menu="Página Inicial">
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-[radial-gradient(120%_140%_at_100%_0%,oklch(0.62_0.1_245)_0%,oklch(0.46_0.1_252)_60%,oklch(0.33_0.07_258)_100%)] p-3.5 text-white">

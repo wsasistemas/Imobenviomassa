@@ -1,5 +1,5 @@
 import { useState, type FormEvent, type ReactNode } from "react";
-import { BarChart3, Eye, EyeOff, Lock, Send, ShieldCheck } from "lucide-react";
+import { BarChart3, Eye, EyeOff, Lock, MessageCircle, Send, ShieldCheck } from "lucide-react";
 import wsaLogo from "@/assets/wsa-logo.png";
 
 // Layout e campos da tela de entrada — padrão do Portal DP e do Gestão de Contratos.
@@ -8,7 +8,8 @@ const ANO = new Date().getFullYear();
 
 const RECURSOS = [
   { icon: Send, texto: "Envio de documentos em massa via DocuSign" },
-  { icon: BarChart3, texto: "Acompanhamento das assinaturas em tempo real" },
+  { icon: MessageCircle, texto: "Régua de cobrança por WhatsApp e e-mail" },
+  { icon: BarChart3, texto: "Acompanhamento das assinaturas e cobranças em tempo real" },
   { icon: ShieldCheck, texto: "Controle de acesso por perfil" },
 ];
 
@@ -41,11 +42,11 @@ export function LoginLayout({ children }: { children: ReactNode }) {
             WSA Sistemas IA
           </p>
           <h1 className="mb-2.5 text-[clamp(26px,2.6vw,34px)] font-extrabold tracking-[-0.02em] text-[#f3f7fc]">
-            Disparo em Massa
+            Disparo de Cobranças e Documentos
           </h1>
           <p className="text-sm leading-relaxed text-[#b7c6d9] md:border-b md:border-white/15 md:pb-5 md:text-[13.5px]">
-            Plataforma corporativa para envio de documentos para assinatura via DocuSign, com gestão
-            centralizada das campanhas.
+            Plataforma corporativa para envio de documentos para assinatura via DocuSign e da régua de
+            cobrança por WhatsApp e e-mail, com gestão centralizada das campanhas.
           </p>
           <ul className="mt-5 hidden flex-col gap-2.5 text-[13px] text-[#dce6f2] md:flex">
             {RECURSOS.map(({ icon: Icon, texto }) => (

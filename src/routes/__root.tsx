@@ -84,13 +84,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Portal de Disparo em Massa via WhatsApp" },
+      { title: "Disparo de Cobranças e Documentos" },
       {
         name: "description",
         content:
           "Envie documentos para assinatura via WhatsApp a múltiplos compradores de empreendimentos com acompanhamento em tempo real.",
       },
-      { property: "og:title", content: "Portal de Disparo em Massa via WhatsApp" },
+      { property: "og:title", content: "Disparo de Cobranças e Documentos" },
       {
         property: "og:description",
         content:
@@ -98,18 +98,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Portal de Disparo em Massa via WhatsApp" },
+      { name: "twitter:title", content: "Disparo de Cobranças e Documentos" },
       {
         name: "description",
-        content: "Plataforma web para envio em massa de documentos para assinatura via WhatsApp.",
+        content: "Plataforma web para envio de cobranças e documentos para assinatura.",
       },
       {
         property: "og:description",
-        content: "Plataforma web para envio em massa de documentos para assinatura via WhatsApp.",
+        content: "Plataforma web para envio de cobranças e documentos para assinatura.",
       },
       {
         name: "twitter:description",
-        content: "Plataforma web para envio em massa de documentos para assinatura via WhatsApp.",
+        content: "Plataforma web para envio de cobranças e documentos para assinatura.",
       },
       { property: "og:image", content: "/og-image.png" },
       { name: "twitter:image", content: "/og-image.png" },

@@ -33,7 +33,7 @@ export type MenuGroup = "principal" | "configuracoes" | "rodape";
 export interface MenuItemDefinition {
   id: string;
   label: string;
-  /** Rota da tela. Item sem `path` é só um agrupador (ex.: Disparo em Massa, DocuSign). */
+  /** Rota da tela. Item sem `path` é só um agrupador (ex.: Disparo de Cobranças e Documentos, DocuSign). */
   path?: string;
   icon: LucideIcon;
   group: MenuGroup;
@@ -78,7 +78,7 @@ const definitions = [
   },
   {
     id: "disparos",
-    label: "Disparo em Massa",
+    label: "Disparo de Cobranças e Documentos",
     icon: Send,
     group: "principal",
     description: "Envio de documentos e cobranças em lote.",

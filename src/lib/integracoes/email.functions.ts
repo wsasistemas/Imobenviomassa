@@ -405,10 +405,10 @@ export const enviarEmailTeste = createServerFn({ method: "POST" })
       fromEmail: pronto.fromEmail,
       fromNome: pronto.fromNome,
       to: data.para,
-      assunto: "Teste de e-mail · Disparo em Massa",
-      html: "<p>Este é um e-mail de teste do <b>Disparo em Massa</b>. Se chegou, o provedor está configurado.</p>",
+      assunto: "Teste de e-mail · Disparo de Cobranças e Documentos",
+      html: "<p>Este é um e-mail de teste do <b>Disparo de Cobranças e Documentos</b>. Se chegou, o provedor está configurado.</p>",
       texto:
-        "Este é um e-mail de teste do Disparo em Massa. Se chegou, o provedor está configurado.",
+        "Este é um e-mail de teste do Disparo de Cobranças e Documentos. Se chegou, o provedor está configurado.",
       replyTo: pronto.replyTo,
     });
     await auditar({

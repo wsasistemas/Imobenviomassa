@@ -311,7 +311,7 @@ function Sidebar({
         {!collapsed && (
           <span className="leading-tight">
             <strong className="block text-[15px] font-extrabold tracking-[-0.01em]">
-              Disparo em Massa
+              Disparo de Cobranças e Documentos
             </strong>
             <small className="block text-[10.5px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
               WSA Sistemas

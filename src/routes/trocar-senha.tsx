@@ -65,7 +65,7 @@ function TrocarSenhaPage() {
       <LoginCard
         onSubmit={salvar}
         titulo="Defina uma nova senha"
-        sub={`Olá, ${nome}. Por segurança, troque a sua senha antes de acessar o portal Disparo em Massa.`}
+        sub={`Olá, ${nome}. Por segurança, troque a sua senha antes de acessar o portal Disparo de Cobranças e Documentos.`}
       >
         <CampoSenha
           id="senha-atual"

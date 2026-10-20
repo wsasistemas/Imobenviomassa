@@ -1,11 +1,11 @@
-// Conteúdo do guia "Como usar o Disparo em Massa". Os textos seguem o que o código do portal faz hoje
+// Conteúdo do guia "Como usar o Disparo de Cobranças e Documentos". Os textos seguem o que o código do portal faz hoje
 // (rótulos de botões, limites e validações); se uma tela mudar, atualize o passo correspondente.
 // Os prints ficam em public/guias/disparo-em-massa/ (veja docs/treinamento-disparo-em-massa.md).
 import type { Guia } from "./tipos";
 
 export const guiaDisparoEmMassa: Guia = {
   slug: "disparo-em-massa",
-  titulo: "Como usar o Disparo em Massa – WSA Sistemas",
+  titulo: "Como usar o Disparo de Cobranças e Documentos – WSA Sistemas",
   subtitulo:
     "Do primeiro acesso ao acompanhamento das assinaturas: escolha os compradores, o modelo do documento e quem assina, confira e dispare.",
   publico: "Para analistas, equipe administrativa e administradores do portal",
@@ -18,7 +18,7 @@ export const guiaDisparoEmMassa: Guia = {
       onde: "Tela de login",
       perfil: "Todos os perfis",
       instrucoes: [
-        "Abra o endereço do portal Disparo em Massa no navegador (Edge ou Chrome) e informe o seu e-mail corporativo e a senha que o administrador entregou.",
+        "Abra o endereço do portal Disparo de Cobranças e Documentos no navegador (Edge ou Chrome) e informe o seu e-mail corporativo e a senha que o administrador entregou.",
         "Clique em “Entrar”. Se tudo estiver certo, aparece o aviso “Bem-vindo!”.",
         "No primeiro acesso, o portal abre a tela “Defina uma nova senha”. Em “Senha atual”, digite a senha que você recebeu; depois digite a nova senha em “Nova senha” e repita em “Confirmar senha”.",
         "Clique em “Salvar e entrar”. A nova senha precisa ter de 12 a 128 caracteres e misturar pelo menos três tipos entre letra minúscula, letra maiúscula, número e símbolo.",
@@ -56,12 +56,12 @@ export const guiaDisparoEmMassa: Guia = {
       perfil: "Todos os perfis",
       instrucoes: [
         "Depois do login você chega à Página Inicial, com uma saudação e os cartões dos módulos que o seu perfil pode usar. O cartão “Novo Disparo” fica em destaque.",
-        "Na barra lateral (“Menu Principal”) ficam os grupos Disparo em Massa, Configurações, Administração, Centro de Treinamento e Minha conta. Clique no nome do grupo para abrir.",
+        "Na barra lateral (“Menu Principal”) ficam os grupos Disparo de Cobranças e Documentos, Configurações, Administração, Centro de Treinamento e Minha conta. Clique no nome do grupo para abrir.",
         "Use “Recolher menu” para ganhar espaço na tela. Para encerrar a sessão, clique em “Sair” (no menu lateral ou no ícone no canto superior direito).",
         "O que você vê depende do perfil: Analista usa Dashboard, Novo Disparo, Histórico e Relatórios. Admin soma consulta às Integrações, Gateway de APIs, Logs Gerais e Privacidade. Super Admin soma credenciais, Usuários e Perfis.",
         "Se abrir uma tela que o seu perfil não permite, o portal mostra “Acesso não liberado” e o link “Voltar ao início”.",
       ],
-      prints: [{ arquivo: "03-home.png", legenda: "Página Inicial com o menu lateral aberto no grupo Disparo em Massa." }],
+      prints: [{ arquivo: "03-home.png", legenda: "Página Inicial com o menu lateral aberto no grupo Disparo de Cobranças e Documentos." }],
       alertas: [
         {
           tipo: "atencao",
@@ -75,7 +75,7 @@ export const guiaDisparoEmMassa: Guia = {
       id: "origem",
       titulo: "Iniciar um novo disparo: origem dos compradores",
       resumo: "Dar um nome à campanha e escolher de onde vêm os compradores.",
-      onde: "Disparo em Massa › Novo Disparo › 1. Origem",
+      onde: "Disparo de Cobranças e Documentos › Novo Disparo › 1. Origem",
       perfil: "Todos os perfis",
       instrucoes: [
         "Clique em “Novo Disparo”, no menu lateral ou no botão do Dashboard. O assistente tem 6 etapas, mostradas no topo: Origem, Compradores, Modelo, Verificação, Assinatura e Revisão.",
@@ -118,7 +118,7 @@ export const guiaDisparoEmMassa: Guia = {
       id: "compradores",
       titulo: "Conferir e selecionar os compradores",
       resumo: "Escolher quem vai receber o documento. Linhas com problema ficam bloqueadas.",
-      onde: "Disparo em Massa › Novo Disparo › 2. Compradores",
+      onde: "Disparo de Cobranças e Documentos › Novo Disparo › 2. Compradores",
       perfil: "Todos os perfis",
       instrucoes: [
         "Use a busca (“Buscar por nome, telefone ou e-mail…”) para localizar alguém. Os selos mostram “Total”, “Válidos” e quantos estão selecionados.",
@@ -157,7 +157,7 @@ export const guiaDisparoEmMassa: Guia = {
       id: "modelo",
       titulo: "Escolher o modelo do documento e o canal de envio",
       resumo: "Definir qual documento será assinado e por onde o comprador será avisado.",
-      onde: "Disparo em Massa › Novo Disparo › 3. Modelo",
+      onde: "Disparo de Cobranças e Documentos › Novo Disparo › 3. Modelo",
       perfil: "Todos os perfis",
       instrucoes: [
         "O portal lista os modelos de documento cadastrados no DocuSign (os 20 primeiros). Clique no cartão do modelo desejado: aparece o selo “Selecionado”.",
@@ -184,7 +184,7 @@ export const guiaDisparoEmMassa: Guia = {
       id: "verificacao",
       titulo: "Verificação final dos destinatários",
       resumo: "Ver quem está pronto para receber e quem tem dado faltando.",
-      onde: "Disparo em Massa › Novo Disparo › 4. Verificação",
+      onde: "Disparo de Cobranças e Documentos › Novo Disparo › 4. Verificação",
       perfil: "Todos os perfis",
       instrucoes: [
         "Confira os selos “Prontos” e “Com erro”. A tabela mostra cada comprador com o status “pronto” ou “erro” e, na coluna “Erro”, o motivo.",
@@ -207,7 +207,7 @@ export const guiaDisparoEmMassa: Guia = {
       id: "assinatura",
       titulo: "Configurar a assinatura",
       resumo: "Definir o que acontece com o 2º comprador e confirmar prazos e idioma.",
-      onde: "Disparo em Massa › Novo Disparo › 5. Assinatura",
+      onde: "Disparo de Cobranças e Documentos › Novo Disparo › 5. Assinatura",
       perfil: "Todos os perfis",
       instrucoes: [
         "Em “Segundo comprador”, escolha uma opção: “Não há segundo comprador”, “Assina o documento” ou “Recebe apenas em cópia (CC)”.",
@@ -235,7 +235,7 @@ export const guiaDisparoEmMassa: Guia = {
       id: "revisao",
       titulo: "Revisar e disparar",
       resumo: "Conferir o resumo, ajustar a mensagem e enviar os documentos.",
-      onde: "Disparo em Massa › Novo Disparo › 6. Revisão",
+      onde: "Disparo de Cobranças e Documentos › Novo Disparo › 6. Revisão",
       perfil: "Todos os perfis",
       instrucoes: [
         "Se o canal inclui WhatsApp, escreva a “Mensagem” que vai junto com o documento (obrigatória, até 1.000 caracteres). Você pode usar {{nome}}, {{empreendimento}} e {{unidade}}, que o portal troca pelos dados de cada comprador. O cartão “Prévia” mostra como fica.",
@@ -276,7 +276,7 @@ export const guiaDisparoEmMassa: Guia = {
       id: "acompanhar",
       titulo: "Acompanhar as assinaturas e exportar",
       resumo: "Ver quem já assinou, reenviar para quem está pendente e baixar o relatório.",
-      onde: "Disparo em Massa › Dashboard, Histórico e Relatórios",
+      onde: "Disparo de Cobranças e Documentos › Dashboard, Histórico e Relatórios",
       perfil: "Todos os perfis",
       instrucoes: [
         "Dashboard: mostra “Disparos hoje”, “Documentos enviados”, “Aguardando assinatura” e “Com problema”, além das cinco “Últimas campanhas”.",
