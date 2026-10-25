@@ -103,7 +103,7 @@ Mockup aprovado em 24/10/2026: [`docs/mockups/login-imobdocerias.html`](mockups/
 - [x] 5.3 No navegador: sidebar (expandida, recolhida, item ativo), Página Inicial, Perfis e permissões, Régua (novo lote, templates, configurações) e Integrações, nos temas claro e escuro.
 - [x] 5.4 Console sem erro, sem requisição externa nova e CSP sem violação.
 - [x] 5.5 Busca por "imobili" nos textos de tela, para garantir que nenhum texto novo cite nicho.
-- [ ] 5.6 Commit por fase e deploy pelo push no `main` (Vercel automática).
+- [x] 5.6 Commit por fase e deploy pelo push no `main` (Vercel automática).
 
 ---
 
