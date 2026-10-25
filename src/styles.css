@@ -476,6 +476,10 @@
 @media (max-width: 900px) {
   .mpl-root { grid-template-columns: minmax(0, 1fr); align-content: start; }
   .mpl-visual { min-height: 0; height: 250px; padding: 20px; gap: 12px; }
+  /* faixa baixa: véu mais forte para a marca e o título não brigarem com o boleto */
+  .mpl-scrim {
+    background: linear-gradient(180deg, oklch(0.2 0.05 255 / 0.86) 0%, oklch(0.2 0.05 255 / 0.62) 45%, oklch(0.2 0.05 255 / 0.9) 100%);
+  }
   .mpl-titulo { margin-bottom: 0; font-size: 30px; }
   .mpl-tag { margin-bottom: 12px; }
   .mpl-texto,
@@ -526,7 +530,7 @@
 .ent-botao:hover:not(:disabled) { filter: brightness(0.94); transform: translateX(3px); }
 .ent-botao:hover:not(:disabled)::before { transform: translateX(100%); }
 .ent-botao:active:not(:disabled) { transform: scale(0.98); }
-.ent-botao:disabled { opacity: 0.6; cursor: default; }
+.ent-botao:disabled { opacity: 0.78; cursor: default; }
 .ent-botao:focus-visible { outline: 3px solid var(--ring); outline-offset: 2px; }
 
 /* Cena em tela cheia (BoletoIlustracao): fundo grafite, base laranja curva, boleto fictício e moedas.
