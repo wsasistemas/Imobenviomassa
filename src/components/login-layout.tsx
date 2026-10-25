@@ -75,7 +75,7 @@ export function LoginLayout({ children }: { children: ReactNode }) {
               </span>
             }
             valor="3 canais"
-            rotulo="WhatsApp · DocuSign · E-mail"
+            rotulo="Canais de envio"
           />
           <Numero
             icone={

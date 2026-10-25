@@ -5,33 +5,49 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Login final — Disparo de Cobranças</title>
 <style>
-  :root { --ink: oklch(0.24 0.03 255); --muted: oklch(0.47 0.025 255); --bg: oklch(0.972 0.016 40); --azul: oklch(0.55 0.11 250); --abobora: oklch(0.8 0.11 62); }
+  :root { --ink: oklch(0.24 0.03 255); --muted: oklch(0.47 0.025 255); --bg: oklch(0.972 0.016 40); --abobora: oklch(0.8 0.11 62); }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--ink); font-family: Inter, -apple-system, "Segoe UI", sans-serif; }
-  header { padding: 28px 32px 8px; max-width: 1520px; margin: 0 auto; }
+  header { padding: 28px 32px 8px; max-width: 1560px; margin: 0 auto; }
   header p { margin: 0; font-size: 12px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
   header h1 { margin: 8px 0 6px; font-size: 36px; font-weight: 800; letter-spacing: -.02em; }
   header span { font-size: 15px; color: var(--muted); }
-  main { max-width: 1520px; margin: 0 auto; padding: 16px 32px 48px; display: grid; gap: 28px; }
+  main { max-width: 1560px; margin: 0 auto; padding: 16px 32px 48px; display: grid; gap: 32px; }
   figure { margin: 0; }
   figcaption { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 14px; font-weight: 700; }
   figcaption b { background: var(--abobora); color: oklch(0.25 0.04 50); padding: 4px 10px; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; }
+  figcaption.ref b { background: oklch(0.88 0.02 255); color: var(--ink); }
   img { display: block; width: 100%; height: auto; border: 1px solid oklch(0.82 0.022 40); box-shadow: 0 18px 40px -24px rgb(0 0 0 / .35); }
+  .par { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
   .linha { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 28px; align-items: start; }
-  @media (max-width: 1000px) { .linha { grid-template-columns: 1fr; } }
+  table { border-collapse: collapse; font-size: 14px; background: #fff; }
+  th, td { border: 1px solid oklch(0.905 0.02 40); padding: 6px 12px; text-align: left; }
+  th { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  @media (max-width: 1100px) { .par, .linha { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
 <header>
-  <p>Resultado final · implementado</p>
+  <p>Para aprovação · implementado no sistema</p>
   <h1>Tela de entrada — Disparo de Cobranças</h1>
-  <span>Capturas do sistema rodando (localhost), sem sessão, zoom 100%. Design system da entrada do ImobDesk + cena do boleto.</span>
+  <span>Capturas do sistema rodando, sem sessão, a 100% (1440 × 900), ao lado da entrada do ImobDesk como referência.</span>
 </header>
 <main>
-  <figure><figcaption><b>1</b> Computador · Entrar (1440 × 900)</figcaption><img src="login-final/1-entrar.png" alt="Tela de entrada no computador"></figure>
-  <figure><figcaption><b>2</b> Computador · Senha errada</figcaption><img src="login-final/2-erro.png" alt="Aviso de e-mail ou senha incorretos"></figure>
+  <div class="par">
+    <figure><figcaption class="ref"><b>Referência</b> ImobDesk (imobdesk.imobsystems.com.br/login)</figcaption><img src="login-final/0-referencia-imobdesk.png" alt="Tela de entrada do ImobDesk"></figure>
+    <figure><figcaption><b>1</b> Disparo de Cobranças · Entrar</figcaption><img src="login-final/1-entrar.png" alt="Tela de entrada do Disparo de Cobranças"></figure>
+  </div>
+  <table>
+    <tr><th>Medida (px, 1440 × 900)</th><th>ImobDesk</th><th>Disparo de Cobranças</th></tr>
+    <tr><td>Etiqueta: topo / altura / fonte</td><td>268 / 28 / 12</td><td>270 / 28 / 12</td></tr>
+    <tr><td>Título: topo / altura / fonte</td><td>316 / 189 / 66</td><td>318 / 189 / 66</td></tr>
+    <tr><td>Descrição: topo / altura / fonte</td><td>523 / 77 / 17</td><td>525 / 77 / 17</td></tr>
+    <tr><td>Números: topo / altura</td><td>788 / 76</td><td>791 / 73</td></tr>
+    <tr><td>Campos: largura × altura</td><td>460 × 54</td><td>460 × 54</td></tr>
+  </table>
+  <figure><figcaption><b>2</b> Senha errada</figcaption><img src="login-final/2-erro.png" alt="Aviso de e-mail ou senha incorretos"></figure>
   <div class="linha">
-    <figure><figcaption><b>3</b> Computador · Recuperar senha</figcaption><img src="login-final/3-recuperar.png" alt="Tela de recuperar senha"></figure>
+    <figure><figcaption><b>3</b> Recuperar senha</figcaption><img src="login-final/3-recuperar.png" alt="Tela de recuperar senha"></figure>
     <figure><figcaption><b>4</b> Celular (390 px)</figcaption><img src="login-final/4-celular.png" alt="Tela de entrada no celular"></figure>
   </div>
 </main>
