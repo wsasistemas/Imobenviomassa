@@ -26,7 +26,7 @@ import {
 
 // Fonte única do portal (padrão menuRegistry do Portal_Atendimento): sidebar, breadcrumb, cards da Página Inicial,
 // guarda de rotas e matriz de Perfis e permissões saem daqui. O `id` é a permissão gravada no banco.
-// Menu novo = uma linha aqui (e o ícone colorido em scripts/gerar-icones.mjs).
+// Menu novo = uma linha aqui (e a cor do tile em src/components/icones/cores.ts).
 
 export type MenuGroup = "principal" | "configuracoes" | "rodape";
 

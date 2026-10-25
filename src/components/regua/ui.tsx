@@ -10,7 +10,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { Selo } from "@/components/page";
-import { IconeIlustrativo } from "@/components/icones/icone-colorido";
+import { IconeIlustrativo } from "@/components/icones/icone-hig";
 import {
   ROTULO_BOLETO,
   ROTULO_CONTATO,
@@ -120,9 +120,7 @@ export function Kpi({
 }) {
   return (
     <div className="flex flex-col gap-2.5 rounded-xl border bg-card p-4 shadow-card">
-      <div className="grid h-11 w-11 place-items-center rounded-[13px] bg-secondary">
-        <IconeIlustrativo icon={icone} size={26} />
-      </div>
+      <IconeIlustrativo icon={icone} size={44} />
       <div>
         <div className="text-[22px] font-extrabold leading-none tracking-[-0.02em]">{valor}</div>
         <div className="mt-1 text-[12px] font-medium text-muted-foreground">{rotulo}</div>
@@ -195,7 +193,7 @@ export function PreviaWhatsapp({
       <div className="rounded-[10px] bg-white px-2.5 pb-1.5 pt-2 text-[12.5px] leading-[1.45] text-[#222] shadow-sm">
         {documento && (
           <div className="mb-2 flex items-center gap-2 rounded-lg bg-[#f2ede8] p-2">
-            <IconeIlustrativo icon={FileText} size={26} />
+            <IconeIlustrativo icon={FileText} size={34} />
             <div className="min-w-0">
               <b className="block truncate text-[12px]">{documento}</b>
               <small className="text-[10.5px] text-[#8a7f76]">PDF · protegido por senha</small>
@@ -261,13 +259,12 @@ export function Aviso({
     danger: "bg-primary-soft",
     success: "bg-success-soft",
   }[tom];
-  const ic =
+  // Aviso: só o símbolo de linha (padrão HIG), na cor do texto do aviso.
+  const Ic =
     icone ?? { info: Info, warning: AlertTriangle, danger: XCircle, success: CircleCheckBig }[tom];
   return (
     <div className={cn("flex items-start gap-2.5 rounded-[10px] px-3.5 py-2.5 text-[13px]", bg)}>
-      <span className="mt-0.5 shrink-0">
-        <IconeIlustrativo icon={ic} size={18} />
-      </span>
+      <Ic className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
       <div>{children}</div>
     </div>
   );
@@ -284,7 +281,7 @@ export function Vazio({
 }) {
   return (
     <div className="flex flex-col items-center gap-2 px-6 py-12 text-center">
-      <IconeIlustrativo icon={icone} size={44} />
+      <IconeIlustrativo icon={icone} size={56} />
       <p className="text-[14px] font-semibold">{titulo}</p>
       {children && <p className="max-w-[440px] text-[12.5px] text-muted-foreground">{children}</p>}
     </div>

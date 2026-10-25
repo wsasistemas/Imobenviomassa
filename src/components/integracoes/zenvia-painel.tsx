@@ -24,7 +24,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Selo } from "@/components/page";
-import { IconeIlustrativo } from "@/components/icones/icone-colorido";
+import { IconeIlustrativo } from "@/components/icones/icone-hig";
 import { Aviso } from "@/components/regua/ui";
 import {
   criarAssinaturasZenvia,
@@ -54,9 +54,7 @@ function Bloco({
   return (
     <section className="flex flex-col gap-3.5 rounded-xl border bg-card px-5 py-4 shadow-card">
       <div className="flex items-center gap-3.5">
-        <div className="grid h-[46px] w-[46px] shrink-0 place-items-center rounded-xl bg-secondary">
-          <IconeIlustrativo icon={icon} size={28} />
-        </div>
+        <IconeIlustrativo icon={icon} size={46} />
         <div className="min-w-0">
           <h2 className="text-[16px] font-bold">{titulo}</h2>
           <p className="text-[12.5px] text-muted-foreground">{sub}</p>

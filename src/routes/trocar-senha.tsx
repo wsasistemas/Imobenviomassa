@@ -91,7 +91,7 @@ function TrocarSenhaPage() {
 
         {erro && <Aviso>{erro}</Aviso>}
 
-        <p className="text-center text-xs text-muted-foreground">
+        <p className="text-[13px] leading-relaxed text-muted-foreground">
           {SENHA_REGRAS_TEXTO} A nova senha precisa ser diferente da atual. Ao salvar, as suas
           outras sessões são encerradas.
         </p>
@@ -101,14 +101,16 @@ function TrocarSenhaPage() {
           disabled={enviando || !senhaAtual || !senha || !confirmacao}
           className={submitCls}
         >
-          {enviando && <Loader2 className="h-4 w-4 animate-spin" />}
-          {enviando ? "Salvando…" : "Salvar e entrar"}
+          <span className="inline-flex items-center gap-2">
+            {enviando && <Loader2 className="h-4 w-4 animate-spin" />}
+            {enviando ? "Salvando…" : "Salvar e entrar"}
+          </span>
         </button>
         <button
           type="button"
           onClick={() => void sair()}
           disabled={enviando}
-          className="self-center text-[12.5px] font-semibold text-primary hover:underline"
+          className="self-end py-2.5 text-[15px] font-semibold text-primary-dark underline underline-offset-4 hover:text-primary"
         >
           Sair
         </button>

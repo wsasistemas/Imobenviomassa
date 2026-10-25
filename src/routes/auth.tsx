@@ -4,14 +4,18 @@ import { useServerFn } from "@tanstack/react-start";
 import { useState, type FormEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, Mail } from "lucide-react";
+import { Loader2, Mail } from "lucide-react";
 import {
   Aviso,
   Campo,
   CampoSenha,
+  LinhaLembrar,
   LoginCard,
   LoginLayout,
+  NotaEntrada,
+  iconeCampo,
   inputCls,
+  linkEntradaCls,
   submitCls,
 } from "@/components/login-layout";
 import { login } from "@/lib/auth.functions";
@@ -65,15 +69,16 @@ function FormEsqueci({ emailInicial, onVoltar }: { emailInicial: string; onVolta
   return (
     <LoginCard
       onSubmit={enviar}
-      titulo="Esqueceu a senha?"
-      sub="Informe o seu e-mail de acesso. Enviaremos um link para você criar uma nova senha."
+      titulo="Recuperar senha"
+      sub={mensagem ? undefined : "Informe o seu e-mail de acesso. Enviaremos um link de uso único, válido por 30 minutos."}
     >
-      <Campo id="esqueci-email" label="E-mail" icon={<Mail className="h-[15px] w-[15px]" />}>
+      {mensagem && <Aviso tom="ok">{mensagem} Confira também a caixa de spam.</Aviso>}
+      <Campo id="esqueci-email" label="E-mail" icon={iconeCampo(Mail)}>
         <input
           id="esqueci-email"
           type="email"
           autoComplete="username"
-          placeholder="seu@empresa.com.br"
+          placeholder="voce@suaempresa.com.br"
           autoFocus
           value={email}
           disabled={!!mensagem}
@@ -86,38 +91,55 @@ function FormEsqueci({ emailInicial, onVoltar }: { emailInicial: string; onVolta
       </Campo>
 
       {erro && <Aviso>{erro}</Aviso>}
-      {mensagem && (
-        <div className="rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-[9px] text-[12.5px] leading-normal text-emerald-800">
-          {mensagem} Confira também a caixa de spam.
-        </div>
-      )}
 
       {!mensagem && (
         <button type="submit" disabled={enviando || !email} className={submitCls}>
-          {enviando && <Loader2 className="h-4 w-4 animate-spin" />}
-          {enviando ? "Enviando…" : "Enviar link"}
+          <span className="inline-flex items-center gap-2">
+            {enviando && <Loader2 className="h-4 w-4 animate-spin" />}
+            {enviando ? "Enviando…" : "Enviar link"}
+          </span>
         </button>
       )}
       <button
         type="button"
         onClick={onVoltar}
-        className="inline-flex items-center justify-center gap-1.5 self-center text-[12.5px] font-semibold text-primary hover:underline"
+        className="flex h-[52px] w-full items-center justify-between border border-foreground px-[18px] text-[17px] font-bold transition-colors hover:bg-foreground/5"
       >
-        <ArrowLeft className="h-3.5 w-3.5" /> Voltar para o login
+        Voltar para entrar <span aria-hidden="true">←</span>
       </button>
     </LoginCard>
   );
+}
+
+// "Lembrar meu e-mail": só o e-mail, no próprio navegador (nunca a senha). Sem armazenamento, segue sem lembrar.
+const CHAVE_EMAIL_LEMBRADO = "imobenviomassa:email-lembrado";
+function lerEmailLembrado(): string {
+  try {
+    return localStorage.getItem(CHAVE_EMAIL_LEMBRADO) ?? "";
+  } catch {
+    return "";
+  }
+}
+function guardarEmailLembrado(email: string) {
+  try {
+    if (email) localStorage.setItem(CHAVE_EMAIL_LEMBRADO, email);
+    else localStorage.removeItem(CHAVE_EMAIL_LEMBRADO);
+  } catch {
+    /* navegador sem armazenamento: não lembra */
+  }
 }
 
 function FormLogin({ onEsqueci }: { onEsqueci: (email: string) => void }) {
   const navigate = useNavigate();
   const entrarNoServidor = useServerFn(login);
   const [loading, setLoading] = useState(false);
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(lerEmailLembrado);
+  const [lembrar, setLembrar] = useState(() => lerEmailLembrado() !== "");
   const [password, setPassword] = useState("");
   const [erro, setErro] = useState<string | null>(null);
 
   function concluir(trocarSenha: boolean) {
+    guardarEmailLembrado(lembrar ? email.trim() : "");
     setLoading(false);
     toast.success("Bem-vindo!");
     navigate({ to: trocarSenha ? "/trocar-senha" : "/home" });
@@ -152,18 +174,15 @@ function FormLogin({ onEsqueci }: { onEsqueci: (email: string) => void }) {
   }
 
   return (
-    <LoginCard
-      onSubmit={entrar}
-      titulo="Acessar o sistema"
-      sub="Utilize suas credenciais corporativas"
-    >
-      <Campo id="login-email" label="E-mail" icon={<Mail className="h-[15px] w-[15px]" />}>
+    <LoginCard onSubmit={entrar} titulo="Entrar" sub="Acesse o sistema com o seu e-mail.">
+      {erro && <Aviso>{erro}</Aviso>}
+      <Campo id="login-email" label="E-mail" icon={iconeCampo(Mail)}>
         <input
           id="login-email"
           type="email"
           autoComplete="username"
-          placeholder="seu@empresa.com.br"
-          autoFocus
+          placeholder="voce@suaempresa.com.br"
+          autoFocus={!email}
           value={email}
           onChange={(e) => {
             setEmail(e.target.value);
@@ -184,25 +203,24 @@ function FormLogin({ onEsqueci }: { onEsqueci: (email: string) => void }) {
         }}
       />
 
-      <button
-        type="button"
-        onClick={() => onEsqueci(email.trim())}
-        className="-mt-1.5 self-end text-[12.5px] font-semibold text-primary hover:underline"
-      >
-        Esqueceu a senha?
-      </button>
-
-      {erro && <Aviso>{erro}</Aviso>}
+      <LinhaLembrar lembrar={lembrar} onLembrar={setLembrar}>
+        <button type="button" onClick={() => onEsqueci(email.trim())} className={linkEntradaCls}>
+          Esqueceu a senha?
+        </button>
+      </LinhaLembrar>
 
       <button type="submit" disabled={loading || !email || !password} className={submitCls}>
-        {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-        {loading ? "Entrando…" : "Entrar"}
+        <span className="inline-flex items-center gap-2">
+          {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+          {loading ? "Entrando…" : "Entrar"}
+        </span>
       </button>
 
       {/* Sem auto-cadastro: contas são criadas por um administrador (Administração → Usuários). */}
-      <p className="text-center text-xs text-muted-foreground">
-        Não tem acesso? Peça a um administrador para criar a sua conta.
-      </p>
+      <NotaEntrada>
+        O acesso é criado pelo administrador da sua empresa. O mesmo login vale nos outros sistemas da WSA que a
+        sua empresa usa.
+      </NotaEntrada>
     </LoginCard>
   );
 }

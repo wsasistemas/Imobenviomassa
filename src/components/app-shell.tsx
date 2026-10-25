@@ -17,7 +17,7 @@ import {
   type MenuItem,
   type PermissionId,
 } from "@/config/menu-registry";
-import { IconeDoMenu } from "@/components/icones/icone-colorido";
+import { IconeDoMenu } from "@/components/icones/icone-hig";
 import { toast } from "sonner";
 import wsaLogo from "@/assets/wsa-logo.png";
 
@@ -222,7 +222,7 @@ function Sidebar({
             ? "pl-8 pr-2.5 text-[13px]"
             : "pl-[52px] pr-2.5 text-[13px]",
       on
-        ? "bg-sidebar-primary bg-gradient-to-r from-sidebar-primary from-55% to-abobora font-semibold text-sidebar-primary-foreground shadow-brand"
+        ? "bg-sidebar-primary bg-gradient-to-r from-sidebar-primary from-55% to-abobora font-semibold text-sidebar-primary-foreground shadow-brand [&_.hig-tile]:shadow-[0_0_0_1.5px_rgb(255_255_255/0.75)]"
         : grupoAtivo
           ? "font-semibold text-sidebar-accent-foreground hover:bg-sidebar-accent"
           : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",

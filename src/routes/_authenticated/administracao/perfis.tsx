@@ -24,7 +24,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { IconeDoMenu } from "@/components/icones/icone-colorido";
+import { IconeDoMenu } from "@/components/icones/icone-hig";
 import { supabase } from "@/integrations/supabase/client";
 import { getPermission, menuGroups, permissionChildrenOf, permissionEntries, type PermissionEntry } from "@/config/menu-registry";
 import { ADMIN_ROLE, SUPER_ADMIN_ROLE } from "@/lib/acesso/policy";

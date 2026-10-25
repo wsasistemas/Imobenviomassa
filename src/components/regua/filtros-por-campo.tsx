@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { Filter, Loader2, Plus, RefreshCw, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { IconeIlustrativo } from "@/components/icones/icone-colorido";
+import { IconeIlustrativo } from "@/components/icones/icone-hig";
 import { Aviso } from "@/components/regua/ui";
 import { camposDaOrigemRm } from "@/lib/regua/lote.functions";
 import {
@@ -80,9 +80,7 @@ export function FiltrosPorCampo({
   return (
     <section className="flex flex-col gap-3.5 rounded-xl border bg-card px-5 py-4 shadow-card">
       <div className="flex flex-wrap items-center gap-3.5">
-        <div className="grid h-[46px] w-[46px] place-items-center rounded-xl bg-secondary">
-          <IconeIlustrativo icon={Filter} size={28} />
-        </div>
+        <IconeIlustrativo icon={Filter} size={46} />
         <div className="min-w-0 flex-1">
           <h2 className="text-[16px] font-bold">Filtros por campo (opcional)</h2>
           <p className="text-[12.5px] text-muted-foreground">

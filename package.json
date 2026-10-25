@@ -10,7 +10,6 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "icones": "node scripts/gerar-icones.mjs",
     "tipos": "node scripts/gerar-tipos-banco.mjs"
   },
   "dependencies": {
@@ -18,7 +17,6 @@
     "@fontsource/ibm-plex-mono": "^5.3.0",
     "@fontsource/inter": "^5.2.8",
     "@hookform/resolvers": "^5.2.2",
-    "@iconify/react": "^6.0.2",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.15",
     "@radix-ui/react-aspect-ratio": "^1.1.8",
@@ -78,8 +76,6 @@
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.10",
     "@eslint/js": "^9.32.0",
-    "@iconify-json/flat-color-icons": "^1.2.3",
-    "@iconify-json/fluent-color": "^1.2.21",
     "@types/node": "^22.16.5",
     "@types/nodemailer": "7.0.4",
     "@types/react": "^19.2.0",

@@ -20,7 +20,7 @@ import {
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useResumoDisparos } from "@/hooks/use-resumo-disparos";
 import { formatarNome } from "@/components/app-shell";
-import { IconeDoMenu, IconeIlustrativo } from "@/components/icones/icone-colorido";
+import { IconeDoMenu, IconeIlustrativo } from "@/components/icones/icone-hig";
 import {
   ancestorsOf,
   menuChildrenOf,
@@ -129,7 +129,7 @@ function HomePage() {
             }
             className="inline-flex h-10 items-center gap-2 rounded-[9px] bg-abobora px-4 text-[13.5px] font-semibold text-[oklch(0.28_0.05_50)] shadow-[0_6px_16px_-6px_oklch(0.6_0.12_60/0.6)] hover:bg-[oklch(0.84_0.1_65)]"
           >
-            <IconeIlustrativo icon={Send} size={16} />
+            <Send className="h-4 w-4" />
             Novo disparo
           </button>
         </div>
@@ -154,7 +154,7 @@ function HomePage() {
                 }}
                 className="flex flex-col gap-2 rounded-[13px] border-[1.5px] border-border bg-card p-4 text-left transition-colors hover:border-primary hover:bg-primary-soft"
               >
-                <IconeIlustrativo icon={t.icon} size={32} />
+                <IconeIlustrativo icon={t.icon} size={44} />
                 <b className="text-[15px]">{t.titulo}</b>
                 <span className="text-[12.5px] text-muted-foreground">{t.texto}</span>
                 <span className="mt-auto inline-flex items-center gap-1 text-[12.5px] font-semibold text-primary">
@@ -173,9 +173,7 @@ function HomePage() {
               key={k.label}
               className="flex items-center gap-3.5 rounded-xl border bg-card p-4 shadow-card"
             >
-              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[14px] bg-secondary">
-                <IconeIlustrativo icon={k.icon} size={28} />
-              </span>
+              <IconeIlustrativo icon={k.icon} size={48} />
               <div>
                 <div className="text-[26px] font-extrabold leading-none tracking-[-0.02em]">
                   {k.valor}
@@ -228,7 +226,7 @@ function ModuleCard({ item }: { item: MenuItem }) {
       to={item.path}
       className="group flex flex-col items-start gap-2 rounded-xl border bg-card p-5 shadow-card transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-[0_14px_30px_-14px_oklch(0.4_0.08_255/0.3)]"
     >
-      <IconeDoMenu id={item.id} icon={item.icon} tamanho={30} />
+      <IconeDoMenu id={item.id} icon={item.icon} tamanho={36} />
       <div>
         {origem && (
           <p className="text-[10.5px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">

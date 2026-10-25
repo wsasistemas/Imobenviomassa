@@ -112,17 +112,19 @@ function RedefinirSenhaPage() {
 
         {erro && <Aviso>{erro}</Aviso>}
 
-        <p className="text-center text-xs text-muted-foreground">
+        <p className="text-[13px] leading-relaxed text-muted-foreground">
           {SENHA_REGRAS_TEXTO} Ao salvar, todas as sessões abertas da conta são encerradas.
         </p>
 
         <button type="submit" disabled={enviando || !senha || !confirmacao} className={submitCls}>
-          {enviando && <Loader2 className="h-4 w-4 animate-spin" />}
-          {enviando ? "Salvando…" : "Salvar nova senha"}
+          <span className="inline-flex items-center gap-2">
+            {enviando && <Loader2 className="h-4 w-4 animate-spin" />}
+            {enviando ? "Salvando…" : "Salvar nova senha"}
+          </span>
         </button>
         <Link
           to="/auth"
-          className="self-center text-[12.5px] font-semibold text-primary hover:underline"
+          className="self-end py-2.5 text-[15px] font-semibold text-primary-dark underline underline-offset-4 hover:text-primary"
         >
           Voltar para o login
         </Link>

@@ -15,7 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Selo } from "@/components/page";
-import { IconeIlustrativo } from "@/components/icones/icone-colorido";
+import { IconeIlustrativo } from "@/components/icones/icone-hig";
 import { Aviso } from "@/components/regua/ui";
 import {
   cadastrarDominioResend,
@@ -67,9 +67,7 @@ function Cabecalho({
 }) {
   return (
     <div className="flex items-center gap-3.5">
-      <div className="grid h-[46px] w-[46px] shrink-0 place-items-center rounded-xl bg-secondary">
-        <IconeIlustrativo icon={icon} size={28} />
-      </div>
+      <IconeIlustrativo icon={icon} size={46} />
       <div className="min-w-0">
         <h2 className="text-[16px] font-bold">{titulo}</h2>
         <p className="text-[12.5px] text-muted-foreground">{sub}</p>
@@ -196,7 +194,7 @@ export function EmailPainel() {
                   : "border-border hover:border-border-strong",
               )}
             >
-              <IconeIlustrativo icon={p.icon} size={30} />
+              <IconeIlustrativo icon={p.icon} size={42} />
               <div>
                 <b className="block text-[14px]">{p.nome}</b>
                 <p className="text-[12px] text-muted-foreground">{p.texto}</p>

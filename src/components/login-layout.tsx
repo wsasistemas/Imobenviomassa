@@ -1,109 +1,139 @@
 import { useState, type FormEvent, type ReactNode } from "react";
-import { BarChart3, Eye, EyeOff, Lock, MessageCircle, Send, ShieldCheck } from "lucide-react";
+import { CalendarClock, CircleCheckBig, Eye, EyeOff, Lock, Mail, ShieldCheck, TriangleAlert } from "lucide-react";
 import wsaLogo from "@/assets/wsa-logo.png";
+import { SimboloDocuSign, SimboloWhatsApp } from "@/components/icones/marcas";
+import { BoletoIlustracao } from "@/components/login/boleto-ilustracao";
+import { cn } from "@/lib/utils";
 
-// Layout e campos da tela de entrada — padrão do Portal DP e do Gestão de Contratos.
+// Tela de entrada no design system da entrada do ImobDesk (imobdesk.imobsystems.com.br/login, 24/10/2026):
+// marca em duas linhas, etiqueta abóbora de cantos retos, título branco grande, campos retos de 54 px com ícone,
+// olho na senha, "Lembrar meu e-mail", botão em degradê azul → abóbora. A cena do boleto (BoletoIlustracao) ocupa
+// o painel da esquerda. Vale para /auth, /redefinir-senha e /trocar-senha. Estilos em styles.css (.tela-entrada, .ent-*).
 
 const ANO = new Date().getFullYear();
 
-const RECURSOS = [
-  { icon: Send, texto: "Envio de documentos em massa via DocuSign" },
-  { icon: MessageCircle, texto: "Régua de cobrança por WhatsApp e e-mail" },
-  { icon: BarChart3, texto: "Acompanhamento das assinaturas e cobranças em tempo real" },
-  { icon: ShieldCheck, texto: "Controle de acesso por perfil" },
-];
+const tileCor = (cor: string) => ({ ["--c" as string]: cor });
 
-/** Tela de entrada (login, senha): painel marinho à esquerda, cartão à direita (paleta .tema-entrada em styles.css). */
+function Numero({ icone, valor, rotulo }: { icone: ReactNode; valor: string; rotulo: string }) {
+  return (
+    <li>
+      <span>{icone}</span>
+      <b>{valor}</b>
+      <small>{rotulo}</small>
+    </li>
+  );
+}
+
+const tileCanal = "hig-tile h-8 w-8 rounded-lg shadow-[0_0_0_2px_oklch(0.2_0.05_255)]";
+
+/** Tela de entrada: cena do boleto à esquerda, formulário à direita (sempre clara). */
 export function LoginLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="tema-entrada grid min-h-screen grid-cols-1 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-      {/* ===== Painel escuro (esquerda) ===== */}
-      <aside className="relative flex flex-col overflow-hidden bg-[radial-gradient(120%_120%_at_15%_10%,#17457a_0%,var(--ent-navy-800)_42%,var(--ent-navy-900)_100%)] px-4 py-6 text-white md:px-[clamp(20px,3vw,40px)] md:pb-4">
-        {/* brilhos e textura em grade, como na entrada do portal Anglo-Americano */}
-        <span
-          aria-hidden
-          className="pointer-events-none absolute -left-24 -top-20 h-[420px] w-[420px] rounded-full bg-[#1e4e86] opacity-40 blur-[80px]"
-        />
-        <span
-          aria-hidden
-          className="pointer-events-none absolute -bottom-28 -right-20 h-[360px] w-[360px] rounded-full bg-[var(--ent-verde-400)] opacity-[0.28] blur-[80px]"
-        />
-        <span aria-hidden className="tema-entrada-grade pointer-events-none absolute inset-0" />
+    <div className="tela-entrada mpl-root">
+      {/* ===== Painel da esquerda (estrutura .mpl-* do ImobDesk; a cena do boleto no lugar da foto) ===== */}
+      <aside className="mpl-visual" aria-label="Disparo de Cobranças · WSA Sistemas">
+        <BoletoIlustracao className="absolute inset-0" />
+        <div className="mpl-scrim" aria-hidden="true" />
 
-        <img
-          src={wsaLogo}
-          alt="WSA Sistemas IA"
-          className="relative block h-16 w-16 self-start rounded-full border border-white/40 shadow-[0_8px_24px_rgba(0,0,0,0.25)] md:h-20 md:w-20"
-        />
-
-        <div className="relative flex max-w-[440px] flex-1 flex-col justify-center pt-6 md:py-8">
-          <p className="mb-2 inline-flex items-center gap-2.5 text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--ent-dourado)]">
-            <span aria-hidden className="inline-block h-px w-[22px] bg-[var(--ent-dourado)]" />
-            WSA Sistemas IA
-          </p>
-          <h1 className="mb-2.5 text-[clamp(26px,2.6vw,34px)] font-extrabold tracking-[-0.02em] text-[#f3f7fc]">
-            Disparo de Cobranças e Documentos
-          </h1>
-          <p className="text-sm leading-relaxed text-[#b7c6d9] md:border-b md:border-white/15 md:pb-5 md:text-[13.5px]">
-            Plataforma corporativa para envio de documentos para assinatura via DocuSign e da régua de
-            cobrança por WhatsApp e e-mail, com gestão centralizada das campanhas.
-          </p>
-          <ul className="mt-5 hidden flex-col gap-2.5 text-[13px] text-[#dce6f2] md:flex">
-            {RECURSOS.map(({ icon: Icon, texto }) => (
-              <li key={texto} className="flex items-center gap-2.5">
-                <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[9px] border border-white/15 bg-white/[0.08] text-[var(--ent-dourado)] backdrop-blur-sm">
-                  <Icon className="h-[15px] w-[15px]" />
-                </span>
-                {texto}
-              </li>
-            ))}
-          </ul>
+        <div className="mpl-brand">
+          <span className="mpl-mark">
+            <img src={wsaLogo} alt="" width={44} height={44} />
+          </span>
+          <span className="mpl-brand__nome">
+            Disparo de Cobranças
+            <small>WSA Sistemas</small>
+          </span>
         </div>
 
-        <p className="relative hidden text-[11.5px] text-[#9fb2c9] md:block">
-          © {ANO} WSA Sistemas
-        </p>
+        {/* No ImobDesk o bloco fica no meio; aqui desce para a base para não cobrir o boleto. */}
+        <div className="mpl-pitch mt-auto">
+          <span className="mpl-tag">Cobranças e documentos em lote</span>
+          <h1 className="mpl-titulo">Cobrança e assinatura no cliente certo.</h1>
+          <p className="mpl-texto">
+            Boletos por WhatsApp e e-mail com régua de 30, 60 e 90 dias, e documentos para assinatura pelo DocuSign
+            — tudo num painel só, com histórico completo.
+          </p>
+        </div>
+
+        <ul className="mpl-metrics">
+          <Numero
+            icone={
+              <span className="flex">
+                <span className={tileCanal} style={tileCor("var(--marca-whatsapp)")} title="WhatsApp">
+                  <SimboloWhatsApp size={17} />
+                </span>
+                <span
+                  className={cn(tileCanal, "-ml-1.5 text-[oklch(0.2_0.02_255)]")}
+                  style={tileCor("var(--marca-docusign)")}
+                  title="DocuSign"
+                >
+                  <SimboloDocuSign size={18} />
+                </span>
+                <span className={cn(tileCanal, "-ml-1.5")} style={tileCor("var(--sys-blue)")} title="E-mail">
+                  <Mail size={17} strokeWidth={2.2} />
+                </span>
+              </span>
+            }
+            valor="3 canais"
+            rotulo="WhatsApp · DocuSign · E-mail"
+          />
+          <Numero
+            icone={
+              <span className="hig-tile h-8 w-8 rounded-lg" style={tileCor("var(--sys-orange)")}>
+                <CalendarClock size={18} strokeWidth={2.2} />
+              </span>
+            }
+            valor="30·60·90"
+            rotulo="Faixas da régua"
+          />
+          <Numero
+            icone={
+              <span className="hig-tile h-8 w-8 rounded-lg" style={tileCor("var(--sys-green)")}>
+                <ShieldCheck size={18} strokeWidth={2.2} />
+              </span>
+            }
+            valor="100%"
+            rotulo="Envios auditados"
+          />
+        </ul>
       </aside>
 
-      {/* ===== Formulário (direita) ===== */}
-      <main className="flex flex-col items-center justify-center gap-4 bg-background px-4 pb-8 pt-6 md:px-5 md:py-8">
-        {children}
-        <p className="text-center text-[11.5px] text-dimmer">
-          © {ANO} WSA Sistemas. Todos os direitos reservados.
-        </p>
+      {/* ===== Acesso (direita) ===== */}
+      <main className="mpl-panel">
+        <div className="mpl-panel__conteudo">{children}</div>
+        <p className="mpl-legal">© {ANO} WSA Sistemas. Todos os direitos reservados.</p>
       </main>
     </div>
   );
 }
 
 export const inputCls =
-  "h-full min-w-0 flex-1 border-none bg-transparent text-[13.5px] text-foreground outline-none placeholder:text-dimmer";
-export const submitCls =
-  "inline-flex h-[38px] items-center justify-center gap-2 rounded-[9px] bg-primary bg-gradient-to-b from-[var(--ent-verde-400)] to-primary text-[13.5px] font-semibold text-primary-foreground shadow-brand transition hover:-translate-y-px hover:to-primary-dark disabled:translate-y-0 disabled:opacity-55";
+  "h-full w-full min-w-0 border border-[oklch(0.82_0.022_40)] bg-white pl-11 pr-3.5 text-[17px] text-foreground outline-none transition-[border-color,box-shadow] placeholder:text-[oklch(0.6_0.02_255)] hover:border-foreground/50 focus:border-primary focus:shadow-[0_0_0_4px_oklch(0.55_0.11_250/0.22)]";
+/** Botão principal da entrada: degradê azul → abóbora, 56 px, seta (.ent-botao em styles.css). */
+export const submitCls = "ent-botao";
 
 export function LoginCard({
   titulo,
   sub,
+  kicker = "Acesso do colaborador",
   onSubmit,
   children,
 }: {
   titulo: string;
-  sub: string;
+  sub?: string;
+  kicker?: string;
   onSubmit: (e: FormEvent) => void;
   children: ReactNode;
 }) {
   return (
-    <form
-      onSubmit={onSubmit}
-      noValidate
-      className="flex w-full max-w-[360px] flex-col gap-3.5 rounded-2xl border bg-card px-5 py-6 shadow-card md:px-7 md:py-7"
-    >
-      <div>
-        <h2 className="mb-1 text-[20px] font-extrabold tracking-[-0.01em]">{titulo}</h2>
-        <p className="text-[13px] text-muted-foreground">{sub}</p>
-      </div>
-      {children}
-    </form>
+    <div>
+      <p className="mpl-kicker">{kicker}</p>
+      <h2 className="mpl-entrar">{titulo}</h2>
+      {sub && <p className="mpl-sub">{sub}</p>}
+      <form onSubmit={onSubmit} noValidate className="mpl-form">
+        {children}
+      </form>
+    </div>
   );
 }
 
@@ -111,25 +141,32 @@ export function Campo({
   id,
   label,
   icon,
+  acao,
   children,
 }: {
   id: string;
   label: string;
   icon: ReactNode;
+  /** Botão dentro do campo, à direita (ex.: olho da senha). */
+  acao?: ReactNode;
   children: ReactNode;
 }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-[12.5px] font-semibold text-foreground">
+      <label htmlFor={id} className="text-[12px] font-bold uppercase tracking-[0.14em] text-foreground">
         {label}
       </label>
-      <div className="flex h-[38px] items-center gap-2 rounded-[7px] border border-border-strong bg-card px-[11px] text-muted-foreground focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/20">
-        {icon}
+      <div className="group relative h-[54px] text-[oklch(0.6_0.02_255)] focus-within:text-primary">
+        <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2">{icon}</span>
         {children}
+        {acao && <span className="absolute right-1 top-1/2 -translate-y-1/2">{acao}</span>}
       </div>
     </div>
   );
 }
+
+/** Ícone de linha do campo (cinza; azul quando o campo está em foco). */
+export const iconeCampo = (Icone: typeof Mail) => <Icone size={16} strokeWidth={2} aria-hidden="true" />;
 
 export function CampoSenha({
   id,
@@ -146,7 +183,22 @@ export function CampoSenha({
 }) {
   const [visivel, setVisivel] = useState(false);
   return (
-    <Campo id={id} label={label} icon={<Lock className="h-[15px] w-[15px]" />}>
+    <Campo
+      id={id}
+      label={label}
+      icon={iconeCampo(Lock)}
+      acao={
+        <button
+          type="button"
+          onClick={() => setVisivel((v) => !v)}
+          aria-controls={id}
+          aria-label={visivel ? "Ocultar senha" : "Mostrar senha"}
+          className="grid h-11 w-11 place-items-center text-[rgb(107_114_128)] hover:text-foreground"
+        >
+          {visivel ? <EyeOff size={16} /> : <Eye size={16} />}
+        </button>
+      }
+    >
       <input
         id={id}
         type={visivel ? "text" : "password"}
@@ -154,25 +206,65 @@ export function CampoSenha({
         placeholder="••••••••"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={inputCls}
+        className={cn(inputCls, "pr-[52px]")}
       />
-      <button
-        type="button"
-        tabIndex={-1}
-        onClick={() => setVisivel((v) => !v)}
-        aria-label={visivel ? "Ocultar senha" : "Mostrar senha"}
-        className="text-dimmer hover:text-muted-foreground"
-      >
-        {visivel ? <EyeOff className="h-[15px] w-[15px]" /> : <Eye className="h-[15px] w-[15px]" />}
-      </button>
     </Campo>
   );
 }
 
-export function Aviso({ children }: { children: ReactNode }) {
+/** Aviso da entrada: erro (vermelho, role=alert) ou confirmação (verde, role=status). */
+export function Aviso({ children, tom = "erro" }: { children: ReactNode; tom?: "erro" | "ok" }) {
+  const ok = tom === "ok";
+  const Icone = ok ? CircleCheckBig : TriangleAlert;
   return (
-    <div className="rounded-lg border border-[#f4c7c3] bg-[#fdf0ef] px-3 py-[9px] text-[12.5px] leading-normal text-[#b42318]">
+    <div
+      role={ok ? "status" : "alert"}
+      className={cn(
+        "flex items-start gap-2.5 border-l-[3px] px-3.5 py-3 text-[15px] font-semibold leading-snug",
+        ok
+          ? "border-success bg-success-soft text-[oklch(0.36_0.09_150)]"
+          : "border-destructive bg-[oklch(0.95_0.03_27)] text-[oklch(0.4_0.15_27)]",
+      )}
+    >
+      <Icone size={20} strokeWidth={2.2} className={cn("mt-px shrink-0", ok ? "text-success" : "text-destructive")} aria-hidden="true" />
+      <span>{children}</span>
+    </div>
+  );
+}
+
+/** Linha "Lembrar meu e-mail" + link à direita (ex.: "Esqueceu a senha?"). */
+export function LinhaLembrar({
+  lembrar,
+  onLembrar,
+  children,
+}: {
+  lembrar: boolean;
+  onLembrar: (v: boolean) => void;
+  children?: ReactNode;
+}) {
+  return (
+    <div className="flex min-h-11 flex-wrap items-center justify-between gap-x-3 gap-y-1">
+      <label className="inline-flex min-h-11 cursor-pointer items-center gap-2.5 text-[15px] text-[oklch(0.47_0.025_255)]">
+        <input
+          type="checkbox"
+          checked={lembrar}
+          onChange={(e) => onLembrar(e.target.checked)}
+          className="h-5 w-5 accent-primary"
+        />
+        Lembrar meu e-mail
+      </label>
       {children}
     </div>
+  );
+}
+
+/** Link da entrada (azul escuro sublinhado, área de toque de 44 px). */
+export const linkEntradaCls =
+  "min-h-11 text-[15px] font-semibold text-primary-dark underline underline-offset-4 hover:text-primary";
+
+/** Nota no pé do formulário. */
+export function NotaEntrada({ children }: { children: ReactNode }) {
+  return (
+    <p className="mpl-note">{children}</p>
   );
 }

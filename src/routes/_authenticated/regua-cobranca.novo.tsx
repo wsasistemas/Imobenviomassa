@@ -31,7 +31,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { IconeIlustrativo } from "@/components/icones/icone-colorido";
+import { IconeIlustrativo } from "@/components/icones/icone-hig";
+import { TileMarca } from "@/components/icones/marcas";
 import {
   Aviso,
   PreviaEmail,
@@ -481,7 +482,7 @@ function NovoLotePage() {
           </div>
           <div className="grid gap-3.5 md:grid-cols-2">
             <Opcao ativo={origem === "rm"} onClick={() => setOrigem("rm")}>
-              <IconeIlustrativo icon={PlugZap} size={32} />
+              <IconeIlustrativo icon={PlugZap} size={44} />
               <div>
                 <b className="mb-0.5 block text-[14.5px]">TOTVS RM</b>
                 <p className="text-[12.5px] text-muted-foreground">
@@ -493,7 +494,7 @@ function NovoLotePage() {
               </div>
             </Opcao>
             <Opcao ativo={origem === "planilha"} onClick={() => setOrigem("planilha")}>
-              <IconeIlustrativo icon={FileSpreadsheet} size={32} />
+              <IconeIlustrativo icon={FileSpreadsheet} size={44} />
               <div>
                 <b className="mb-0.5 block text-[14.5px]">Planilha (.xlsx ou .csv)</b>
                 <p className="text-[12.5px] text-muted-foreground">
@@ -535,9 +536,7 @@ function NovoLotePage() {
         <>
           <Card>
             <div className="flex items-center gap-3.5">
-              <div className="grid h-[46px] w-[46px] place-items-center rounded-xl bg-secondary">
-                <IconeIlustrativo icon={Receipt} size={28} />
-              </div>
+              <IconeIlustrativo icon={Receipt} size={46} />
               <div>
                 <h2 className="text-[16px] font-bold">Identificação da remessa</h2>
                 <p className="text-[12.5px] text-muted-foreground">
@@ -769,7 +768,7 @@ function NovoLotePage() {
                       setCanais(ativo ? canais.filter((x) => x !== c) : [...canais, c])
                     }
                   >
-                    <IconeIlustrativo icon={Icone} size={30} />
+                    <IconeIlustrativo icon={Icone} size={42} />
                     <div className="min-w-0 flex-1">
                       <b className="block text-[14.5px]">{rotulo}</b>
                       <p className="text-[12.5px] text-muted-foreground">{texto}</p>
@@ -806,9 +805,7 @@ function NovoLotePage() {
               {canais.includes("whatsapp") && (
                 <Card>
                   <div className="flex items-center gap-3.5">
-                    <div className="grid h-[46px] w-[46px] place-items-center rounded-xl bg-secondary">
-                      <IconeIlustrativo icon={MessageCircle} size={28} />
-                    </div>
+                    <TileMarca marca="whatsapp" size={46} />
                     <div>
                       <h2 className="text-[16px] font-bold">Template de WhatsApp</h2>
                       <p className="text-[12.5px] text-muted-foreground">
@@ -883,9 +880,7 @@ function NovoLotePage() {
               {canais.includes("email") && (
                 <Card>
                   <div className="flex items-center gap-3.5">
-                    <div className="grid h-[46px] w-[46px] place-items-center rounded-xl bg-secondary">
-                      <IconeIlustrativo icon={Mail} size={28} />
-                    </div>
+                    <IconeIlustrativo icon={Mail} size={46} />
                     <div>
                       <h2 className="text-[16px] font-bold">Template de e-mail</h2>
                       <p className="text-[12.5px] text-muted-foreground">

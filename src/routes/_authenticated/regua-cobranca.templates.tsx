@@ -17,7 +17,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { IconeIlustrativo } from "@/components/icones/icone-colorido";
+import { IconeIlustrativo } from "@/components/icones/icone-hig";
+import { TileMarca } from "@/components/icones/marcas";
 import { Aviso, PreviaEmail, PreviaWhatsapp, SeloRegua, Vazio } from "@/components/regua/ui";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import {
@@ -336,9 +337,7 @@ function TemplatesPage() {
       <div className="grid gap-4 xl:grid-cols-[1.4fr_1fr]">
         <section className="flex flex-col gap-3.5 rounded-xl border bg-card px-5 py-4 shadow-card">
           <div className="flex items-center gap-3.5">
-            <div className="grid h-[46px] w-[46px] place-items-center rounded-xl bg-secondary">
-              <IconeIlustrativo icon={r.canal === "whatsapp" ? MessageCircle : Mail} size={28} />
-            </div>
+            {r.canal === "whatsapp" ? <TileMarca marca="whatsapp" size={46} /> : <IconeIlustrativo icon={Mail} size={46} />}
             <div>
               <h2 className="text-[16px] font-bold">
                 {r.id
