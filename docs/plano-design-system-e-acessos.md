@@ -6,7 +6,7 @@ Mockup aprovado em 17/10/2026: [`docs/mockups/design-system-imobdocerias.html`](
 - **Cores:** `:root` do imobdocerias (tema claro). Tokens de estado recriados na mesma paleta.
 - **Fonte:** Portal_Atendimento, Inter 400–800 + IBM Plex Mono, base 16px. Vem do `@fontsource`, porque a CSP (`font-src 'self'`) bloqueia o Google Fonts.
 - **Logo:** WSA Sistemas IA.
-- **Ícones:** coloridos do Portal_Atendimento (fluent-color + flat-color-icons), embutidos com `addIcon`, sem chamada à API do Iconify.
+- **Ícones:** ~~coloridos do Portal_Atendimento (fluent-color + flat-color-icons)~~ — substituídos em 24/10/2026 pelo padrão /apple-hig-designer (símbolo Lucide em tile colorido). Ver [`plano-login-e-icones-hig.md`](plano-login-e-icones-hig.md).
 - **Menus, Perfis e permissões, Permissões por aplicativo e Integrações:** processo do Portal_Atendimento.
 
 **Regras**
