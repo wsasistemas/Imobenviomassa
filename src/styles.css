@@ -344,14 +344,13 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  /* véu do ImobDesk, mais leve no meio para o boleto continuar nítido */
+  /* véu do ImobDesk: a cena fica atrás e o texto grande na frente, em destaque */
   background: linear-gradient(
     180deg,
-    oklch(0.22 0.05 255 / 0.78) 0%,
-    oklch(0.25 0.06 252 / 0.14) 26%,
-    oklch(0.2 0.05 255 / 0.3) 50%,
-    oklch(0.2 0.05 255 / 0.88) 72%,
-    oklch(0.2 0.05 255 / 0.9) 100%
+    oklch(0.22 0.05 255 / 0.8) 0%,
+    oklch(0.25 0.06 252 / 0.48) 36%,
+    oklch(0.2 0.05 255 / 0.86) 76%,
+    oklch(0.2 0.05 255 / 0.62) 100%
   );
 }
 .mpl-visual > :not(.ent-cena):not(.mpl-scrim) {

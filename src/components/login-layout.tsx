@@ -45,8 +45,8 @@ export function LoginLayout({ children }: { children: ReactNode }) {
           </span>
         </div>
 
-        {/* No ImobDesk o bloco fica no meio; aqui desce para a base para não cobrir o boleto. */}
-        <div className="mpl-pitch mt-auto">
+        {/* Como no ImobDesk: o texto fica no meio, na frente da cena (que fica atrás, sob o véu). */}
+        <div className="mpl-pitch">
           <span className="mpl-tag">Cobranças e documentos em lote</span>
           <h1 className="mpl-titulo">Cobrança e assinatura no cliente certo.</h1>
           <p className="mpl-texto">
